@@ -282,58 +282,6 @@ export default function TopBarManageView() {
             </Button>
           </div>
 
-          {/* Live Website Top Bar Preview Card */}
-          <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-xs space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2 text-xs font-black uppercase tracking-wider text-slate-700">
-                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span>Live Website Top-Bar Ticker Preview</span>
-              </div>
-              <span className="text-[11px] font-semibold text-slate-400">
-                Priority: Lowest Sorting Order (#1 First)
-              </span>
-            </div>
-
-            {activeTopBar ? (
-              <div className="rounded-2xl px-5 py-3 bg-[#064C23] text-white flex flex-col sm:flex-row items-center justify-between gap-3 text-xs shadow-inner">
-                <div className="flex items-center space-x-2.5 truncate max-w-2xl">
-                  <span className="px-2 py-0.5 rounded-md bg-white/20 text-white font-mono text-[10px] font-black uppercase">
-                    #{activeTopBar.sortingOrder}
-                  </span>
-                  <span className="font-bold truncate">{activeTopBar.title}</span>
-                </div>
-
-                {activeTopBar.urlOrCopyText && (
-                  <div className="flex items-center space-x-2 shrink-0">
-                    {isUrl(activeTopBar.urlOrCopyText) ? (
-                      <span className="inline-flex items-center space-x-1 underline font-bold hover:text-emerald-200 cursor-pointer">
-                        <span>Visit Link</span>
-                        <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[10px]" />
-                      </span>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => handleCopyText(activeTopBar.urlOrCopyText, activeTopBar.id)}
-                        className="px-2.5 py-1 rounded-lg bg-white/15 hover:bg-white/25 text-white font-mono text-[11px] font-bold flex items-center space-x-1.5 transition-all cursor-pointer"
-                        title="Click to copy coupon / text"
-                      >
-                        <FontAwesomeIcon
-                          icon={copiedId === activeTopBar.id ? faCheck : faCopy}
-                          className="text-[10px]"
-                        />
-                        <span>{activeTopBar.urlOrCopyText}</span>
-                      </button>
-                    )}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="p-4 bg-slate-50 rounded-2xl text-center text-xs font-bold text-slate-400 border border-dashed border-slate-200">
-                No active announcements in top-bar. Toggle an item to "Active" to display.
-              </div>
-            )}
-          </div>
-
           {/* Search, Filter & Sorting Bar */}
           <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="relative w-full md:w-96">
