@@ -28,15 +28,15 @@ export default function Sidebar({
             : '-translate-x-full lg:translate-x-0 lg:w-[80px] shadow-none'
         }`}
       >
-        {/* Brand Header */}
-        <div className="h-18 flex items-center border-b border-[#d2e8db] px-5 transition-all bg-white/50 backdrop-blur-sm">
+        {/* Brand Header: Exactly h-16 to match the Header component perfectly */}
+        <div className="h-16 shrink-0 flex items-center border-b border-[#cee5d7] px-4 sm:px-5 transition-all bg-white/50 backdrop-blur-sm">
           {isOpen ? (
             /* Expanded Header: Clean Left-Aligned Brand Logo */
             <div className="flex items-center justify-start w-full py-1">
               <img
                 src="/logo.png"
                 alt="Bazario Admin"
-                className="h-10 sm:h-11 w-auto max-w-[200px] object-contain object-left drop-shadow-xs"
+                className="h-9 sm:h-10 w-auto max-w-[190px] object-contain object-left drop-shadow-xs"
                 draggable="false"
               />
             </div>
@@ -44,20 +44,20 @@ export default function Sidebar({
             /* Collapsed Header: Centered Mini Logo Pill */
             <div className="w-full flex items-center justify-center">
               <div
-                className="w-11 h-11 rounded-2xl bg-gradient-to-br from-[#064C23] to-[#0b5d2e] flex items-center justify-center text-white shadow-sm border border-[#064C23]/30 cursor-pointer transition-transform duration-200 hover:scale-105 active:scale-95"
+                className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#064C23] to-[#0b5d2e] flex items-center justify-center text-white shadow-sm border border-[#064C23]/30 cursor-pointer transition-transform duration-200 hover:scale-105 active:scale-95"
                 onClick={onToggle}
                 title="Expand Sidebar"
               >
-                <img src="/logo.png" alt="Bazario" className="h-7 w-auto object-contain" />
+                <img src="/logo.png" alt="Bazario" className="h-6 w-auto object-contain" />
               </div>
             </div>
           )}
         </div>
 
         {/* Navigation Menu */}
-        <nav className="flex-1 py-5 space-y-2 overflow-y-auto px-3.5 scrollbar-thin">
+        <nav className="flex-1 py-4 space-y-1.5 overflow-y-auto px-3 scrollbar-thin">
           {isOpen && (
-            <div className="text-xs font-extrabold text-[#064C23]/75 uppercase tracking-wider px-3 mb-2.5">
+            <div className="text-[11px] font-extrabold text-[#064C23]/75 uppercase tracking-wider px-3 mb-2">
               Main Menu
             </div>
           )}
@@ -70,22 +70,17 @@ export default function Sidebar({
                 type="button"
                 onClick={() => onSelectTab && onSelectTab(item.id || item.name)}
                 title={!isOpen ? item.name : ''}
-                className={`w-full flex items-center rounded-2xl transition-all duration-200 cursor-pointer group relative overflow-hidden ${
+                className={`w-full flex items-center rounded-xl transition-all duration-200 cursor-pointer group relative ${
                   isOpen
-                    ? 'justify-between px-4 py-3 text-[15px]'
-                    : 'justify-center p-3.5 text-lg'
+                    ? 'justify-between px-3.5 py-2.5 text-[15px]'
+                    : 'justify-center p-3 text-lg'
                 } ${
                   isActive
-                    ? 'bg-white text-[#064C23] font-bold shadow-md shadow-[#064C23]/10 border border-[#cbe3d4]'
-                    : 'text-[#215136] font-semibold hover:text-[#064C23] hover:bg-white/60 hover:shadow-2xs'
+                    ? 'bg-[#064C23] text-white font-semibold shadow-md shadow-[#064C23]/25 ring-1 ring-[#064C23]'
+                    : 'text-[#1c4b31] font-medium hover:text-[#064C23] hover:bg-white/70'
                 }`}
               >
-                {/* Active Indicator Bar on Left */}
-                {isActive && (
-                  <span className="absolute left-0 top-2 bottom-2 w-1.5 bg-gradient-to-b from-[#064C23] via-[#0b5e2e] to-[#A44F37] rounded-r-full" />
-                )}
-
-                <div className="flex items-center space-x-3.5">
+                <div className="flex items-center space-x-3.5 min-w-0">
                   {item.icon && (
                     <FontAwesomeIcon
                       icon={item.icon}
@@ -93,21 +88,21 @@ export default function Sidebar({
                         isOpen ? 'w-5 h-5 text-base' : 'w-6 h-6 text-lg'
                       } ${
                         isActive
-                          ? 'text-[#064C23] drop-shadow-2xs'
+                          ? 'text-white'
                           : 'text-[#2b6d4b] group-hover:text-[#064C23]'
                       }`}
                     />
                   )}
-                  {isOpen && <span className="tracking-tight">{item.name}</span>}
+                  {isOpen && <span className="truncate tracking-tight">{item.name}</span>}
                 </div>
 
                 {/* Badge */}
                 {isOpen && item.badge && (
                   <span
-                    className={`px-2.5 py-0.5 text-xs font-bold rounded-full transition-colors ${
+                    className={`px-2 py-0.5 text-xs font-bold rounded-full transition-colors shrink-0 ml-2 ${
                       isActive
-                        ? 'bg-[#064C23]/10 text-[#064C23] border border-[#064C23]/20'
-                        : 'bg-[#064C23]/8 text-[#064C23] border border-[#064C23]/15'
+                        ? 'bg-white/20 text-white border border-white/25'
+                        : 'bg-[#064C23]/10 text-[#064C23] border border-[#064C23]/15'
                     }`}
                   >
                     {item.badge}
@@ -121,7 +116,7 @@ export default function Sidebar({
 
                 {/* Collapsed Tooltip on Hover */}
                 {!isOpen && (
-                  <span className="absolute left-full ml-3.5 px-3.5 py-1.5 bg-slate-900/95 backdrop-blur-xs text-white text-xs font-bold rounded-xl shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 border border-slate-700/50">
+                  <span className="absolute left-full ml-3 px-3 py-1.5 bg-slate-900 text-white text-xs font-bold rounded-lg shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 border border-slate-700/50">
                     {item.name}
                   </span>
                 )}
@@ -132,8 +127,8 @@ export default function Sidebar({
 
         {/* User Info Footer */}
         <div
-          className={`border-t border-[#d2e8db] bg-white/55 backdrop-blur-sm flex items-center transition-all ${
-            isOpen ? 'p-4 space-x-3.5' : 'p-3.5 justify-center'
+          className={`border-t border-[#cee5d7] bg-white/55 backdrop-blur-sm flex items-center transition-all ${
+            isOpen ? 'p-3.5 space-x-3' : 'p-3 justify-center'
           }`}
         >
           <div
