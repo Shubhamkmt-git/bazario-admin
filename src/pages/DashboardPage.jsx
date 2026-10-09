@@ -107,77 +107,120 @@ export default function DashboardPage({ onLogout }) {
     { id: 'settings', name: 'Settings', icon: faGear },
   ]
 
-  // KPI Metrics
+  // KPI Metrics (in Indian Rupees ₹ and system stats)
   const stats = [
     {
-      title: "Today's Revenue",
-      value: '$12,480.50',
+      title: "Today's Gross Sales",
+      value: '₹1,48,250.00',
       change: '+14.8%',
       isPositive: true,
       icon: faWallet,
       iconBg: 'bg-[#f0f9f3] text-[#064C23] border border-[#bae2cb]',
     },
     {
-      title: 'Total Orders',
-      value: '482 Orders',
-      change: '+8.2%',
+      title: 'Active Store Outlets',
+      value: '4 Outlets',
+      change: '3 Open • 1 Closed',
       isPositive: true,
-      icon: faReceipt,
+      icon: faStore,
       iconBg: 'bg-[#fdf6f4] text-[#A44F37] border border-[#f5d5cc]',
     },
     {
-      title: 'Active Customers',
+      title: 'Total Customers',
       value: '1,240',
-      change: '+12.4%',
+      change: '+12.4% this month',
       isPositive: true,
       icon: faUsers,
       iconBg: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
     },
     {
-      title: 'Low Stock Alert',
-      value: '7 Products',
-      change: 'Requires Restock',
-      isPositive: false,
-      icon: faTriangleExclamation,
-      iconBg: 'bg-rose-50 text-rose-600 border border-rose-200',
+      title: 'Admin Staff & Roles',
+      value: '4 Admins',
+      change: '4 Access Roles Active',
+      isPositive: true,
+      icon: faUserTie,
+      iconBg: 'bg-blue-50 text-blue-700 border border-blue-200',
     },
   ]
 
-  // Supermarket Categories
-  const categories = [
-    { name: 'Fresh Fruits & Veggies', sales: '$4,820', items: '142 Items', progress: '85%', color: 'bg-[#064C23]' },
-    { name: 'Dairy & Bakery Goods', sales: '$3,150', items: '98 Items', progress: '65%', color: 'bg-[#A44F37]' },
-    { name: 'Packaged Snacks & Drinks', sales: '$2,890', items: '210 Items', progress: '54%', color: 'bg-emerald-600' },
-    { name: 'Household & Personal Care', sales: '$1,620', items: '86 Items', progress: '38%', color: 'bg-amber-600' },
+  // Top Supermarket Branches Data (in ₹)
+  const storeBranches = [
+    {
+      id: 1,
+      name: 'Bazario Central Superstore #01',
+      location: 'Sector 18, Noida Commercial Hub',
+      dailySales: '₹58,400.00',
+      status: 'Open',
+      phone: '+91 98111 22334',
+    },
+    {
+      id: 2,
+      name: 'Bazario Express Store',
+      location: 'DLF Cyber City, Phase 2, Gurugram',
+      dailySales: '₹42,650.00',
+      status: 'Open',
+      phone: '+91 98222 33445',
+    },
+    {
+      id: 3,
+      name: 'Bazario Supermarket',
+      location: 'Main Market, Green Park, South Delhi',
+      dailySales: '₹34,200.00',
+      status: 'Open',
+      phone: '+91 98333 44556',
+    },
+    {
+      id: 4,
+      name: 'Bazario Daily Outlet',
+      location: 'Block B, Indirapuram, Ghaziabad',
+      dailySales: '₹13,000.00',
+      status: 'Closed',
+      phone: '+91 98444 55667',
+    },
   ]
 
-  // Filtered Orders
-  const filteredOrders = orders.filter((order) => {
-    const matchesStatus = orderFilter === 'all' || order.status.toLowerCase() === orderFilter.toLowerCase()
-    const matchesSearch =
-      order.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.items.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesStatus && matchesSearch
-  })
+  // Recent Registered Customers for Dashboard Overview
+  const [recentCustomers, setRecentCustomers] = useState([
+    {
+      id: 1,
+      name: 'Priya Sharma',
+      email: 'priya.s@example.com',
+      phone: '+91 98234 11223',
+      status: 'Active',
+      totalSpent: '₹14,200.00',
+    },
+    {
+      id: 2,
+      name: 'Rahul Verma',
+      email: 'rahul.v@techmail.com',
+      phone: '+91 97123 44556',
+      status: 'Active',
+      totalSpent: '₹6,800.00',
+    },
+    {
+      id: 3,
+      name: 'Ananya Roy',
+      email: 'ananya.roy@web.in',
+      phone: '+91 98450 67890',
+      status: 'Active',
+      totalSpent: '₹28,900.00',
+    },
+    {
+      id: 4,
+      name: 'Amit Patel',
+      email: 'amit.patel@corphub.com',
+      phone: '+91 99012 33445',
+      status: 'Restricted',
+      totalSpent: '₹3,200.00',
+    },
+  ])
 
-  // Handlers
-  const handleCreateProduct = (e) => {
-    e.preventDefault()
-    if (!newProduct.name || !newProduct.price) {
-      toast.error('Validation Error', 'Please fill in product name and price.')
-      return
-    }
-
-    toast.success('Product Added', `"${newProduct.name}" has been added to Bazario catalog!`)
-    setIsAddProductOpen(false)
-    setNewProduct({ name: '', category: 'Fresh Fruits', sku: '', price: '', stock: '', image: null })
-  }
-
-  const handleDeleteOrder = (orderId) => {
-    setOrders((prev) => prev.filter((o) => o.id !== orderId))
-    setDeleteModal({ isOpen: false, orderId: null })
-    toast.success('Order Deleted', `Order ${orderId} was removed from records.`)
+  const handleToggleCustomerStatus = (customer) => {
+    const newStatus = customer.status === 'Active' ? 'Restricted' : 'Active'
+    setRecentCustomers(
+      recentCustomers.map((c) => (c.id === customer.id ? { ...c, status: newStatus } : c))
+    )
+    toast.info('Status Updated', `${customer.name} is now ${newStatus}.`)
   }
 
   return (
@@ -195,7 +238,7 @@ export default function DashboardPage({ onLogout }) {
 
       {/* Main Layout Area */}
       <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden">
-        {/* Fixed Reusable Header (Never Scrolls) */}
+        {/* Fixed Reusable Header */}
         <Header
           onMenuToggle={() => setSidebarOpen((prev) => !prev)}
           title={
@@ -217,7 +260,7 @@ export default function DashboardPage({ onLogout }) {
           className="shrink-0"
         />
 
-        {/* Scrollable Main Body & Content */}
+        {/* Scrollable Main Content */}
         <div className="flex-1 overflow-y-auto min-h-0 flex flex-col justify-between scrollbar-thin">
           <main className="p-4 sm:p-6 lg:p-8 space-y-6 flex-1 pb-16">
             {activeTab === 'settings' && <SettingsView />}
@@ -230,345 +273,345 @@ export default function DashboardPage({ onLogout }) {
               <>
                 {/* Welcome Banner */}
                 <div className="relative overflow-hidden bg-gradient-to-r from-[#042813] via-[#064C23] to-[#0a5c2d] rounded-3xl p-6 sm:p-8 text-white shadow-lg border border-[#064C23]">
-            <div className="absolute right-0 top-0 translate-x-12 -translate-y-12 w-64 h-64 bg-[#A44F37]/25 rounded-full blur-3xl pointer-events-none" />
-            
-            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div className="space-y-1.5 max-w-2xl">
-                <div className="flex items-center space-x-2">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-[#A44F37] text-white shadow-xs">
-                    <FontAwesomeIcon icon={faStore} className="mr-1 text-[10px]" />
-                    Central Superstore #01
-                  </span>
-                  <span className="text-xs text-emerald-200/80">Live POS Connected</span>
-                </div>
-                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-                  Bazario Store Dashboard
-                </h1>
-                <p className="text-xs sm:text-sm text-emerald-100/85">
-                  Real-time sales velocity, live supermarket orders, inventory management, and store metrics.
-                </p>
-              </div>
-
-              {/* Date Filters & Quick Actions */}
-              <div className="flex flex-wrap items-center gap-2">
-                <div className="bg-black/30 backdrop-blur-md p-1 rounded-xl flex items-center border border-white/15">
-                  {['today', 'week', 'month'].map((period) => (
-                    <button
-                      key={period}
-                      type="button"
-                      onClick={() => {
-                        setDateFilter(period)
-                        toast.info('Date Filter', `Showing data for ${period.toUpperCase()}`)
-                      }}
-                      className={`px-3 py-1 text-xs font-bold rounded-lg uppercase transition-all cursor-pointer ${
-                        dateFilter === period
-                          ? 'bg-white text-[#064C23] shadow-xs'
-                          : 'text-emerald-100/70 hover:text-white'
-                      }`}
-                    >
-                      {period}
-                    </button>
-                  ))}
-                </div>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="bg-white/10 hover:bg-white/20 text-white border-white/20"
-                  icon={<FontAwesomeIcon icon={faDownload} className="text-xs" />}
-                  onClick={() => toast.success('Report Exported', 'Sales summary CSV downloaded.')}
-                >
-                  Export
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          {/* Stats KPI Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-            {stats.map((stat, i) => (
-              <div
-                key={i}
-                className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs hover:shadow-md transition-all duration-200"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                    {stat.title}
-                  </span>
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-base ${stat.iconBg}`}>
-                    <FontAwesomeIcon icon={stat.icon} />
-                  </div>
-                </div>
-
-                <div className="mt-3">
-                  <div className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-                    {stat.value}
-                  </div>
-                  <div className="mt-2 flex items-center text-xs font-semibold">
-                    <span
-                      className={`inline-flex items-center space-x-1 ${
-                        stat.isPositive ? 'text-[#064C23]' : 'text-rose-600'
-                      }`}
-                    >
-                      <FontAwesomeIcon
-                        icon={stat.isPositive ? faArrowTrendUp : faArrowTrendDown}
-                        className="mr-1 text-[11px]"
-                      />
-                      {stat.change}
-                    </span>
-                    <span className="text-slate-400 ml-2 font-normal">vs previous period</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Middle Section: Supermarket Categories & Store Live Activity */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
-            {/* Category Performance */}
-            <div className="lg:col-span-2 bg-white rounded-2xl p-6 border border-slate-200/90 shadow-xs space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <div>
-                  <h2 className="text-base font-bold text-slate-900">Top Selling Categories</h2>
-                  <p className="text-xs text-slate-500">Volume breakdown by supermarket departments</p>
-                </div>
-                <span className="text-xs font-semibold text-[#064C23] bg-[#f0f9f3] px-2.5 py-1 rounded-lg border border-[#bae2cb]">
-                  4 Departments
-                </span>
-              </div>
-
-              <div className="space-y-4 pt-1">
-                {categories.map((cat, idx) => (
-                  <div key={idx} className="space-y-1.5">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-bold text-slate-800">{cat.name}</span>
-                      <div className="space-x-3 text-right">
-                        <span className="text-slate-400">{cat.items}</span>
-                        <span className="font-bold text-slate-900">{cat.sales}</span>
+                  <div className="absolute right-0 top-0 translate-x-12 -translate-y-12 w-64 h-64 bg-[#A44F37]/25 rounded-full blur-3xl pointer-events-none" />
+                  
+                  <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div className="space-y-1.5 max-w-2xl">
+                      <div className="flex items-center space-x-2">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-[#A44F37] text-white shadow-xs">
+                          <FontAwesomeIcon icon={faStore} className="mr-1 text-[10px]" />
+                          Bazario Supermarket Retail
+                        </span>
+                        <span className="text-xs text-emerald-200/80">Active POS & Cloud Sync</span>
                       </div>
+                      <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+                        Admin Overview & Operations
+                      </h1>
+                      <p className="text-xs sm:text-sm text-emerald-100/85">
+                        Centralized control center for store outlets, customer directory, staff role authorizations, and platform parameters.
+                      </p>
                     </div>
-                    <div className="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full rounded-full ${cat.color} transition-all duration-500`}
-                        style={{ width: cat.progress }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
 
-            {/* Quick Live Actions & Inventory Status */}
-            <div className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-xs flex flex-col justify-between space-y-4">
-              <div className="border-b border-slate-100 pb-3">
-                <h2 className="text-base font-bold text-slate-900">Quick Operations</h2>
-                <p className="text-xs text-slate-500">Instant management shortcuts</p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2.5">
-                <button
-                  type="button"
-                  onClick={() => setIsAddProductOpen(true)}
-                  className="p-3 bg-slate-50 hover:bg-[#f0f9f3] border border-slate-200 hover:border-[#064C23] rounded-xl text-left transition-all group cursor-pointer"
-                >
-                  <div className="w-8 h-8 rounded-lg bg-[#064C23]/10 text-[#064C23] flex items-center justify-center text-sm mb-2 group-hover:scale-110 transition-transform">
-                    <FontAwesomeIcon icon={faPlus} />
-                  </div>
-                  <p className="text-xs font-bold text-slate-800">Add Product</p>
-                  <p className="text-[10px] text-slate-400">Inventory intake</p>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => toast.info('POS Terminal', 'Opening Billing POS window...')}
-                  className="p-3 bg-slate-50 hover:bg-[#fdf6f4] border border-slate-200 hover:border-[#A44F37] rounded-xl text-left transition-all group cursor-pointer"
-                >
-                  <div className="w-8 h-8 rounded-lg bg-[#A44F37]/10 text-[#A44F37] flex items-center justify-center text-sm mb-2 group-hover:scale-110 transition-transform">
-                    <FontAwesomeIcon icon={faBasketShopping} />
-                  </div>
-                  <p className="text-xs font-bold text-slate-800">POS Billing</p>
-                  <p className="text-[10px] text-slate-400">Create new sale</p>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => toast.warning('Restock Order', 'Restock requisition drafted for 7 items.')}
-                  className="p-3 bg-slate-50 hover:bg-amber-50 border border-slate-200 hover:border-amber-400 rounded-xl text-left transition-all group cursor-pointer"
-                >
-                  <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center text-sm mb-2 group-hover:scale-110 transition-transform">
-                    <FontAwesomeIcon icon={faBoxesStacked} />
-                  </div>
-                  <p className="text-xs font-bold text-slate-800">Stock Order</p>
-                  <p className="text-[10px] text-slate-400">7 items low</p>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => toast.success('Driver Dispatched', 'Delivery driver assigned to pending orders.')}
-                  className="p-3 bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-400 rounded-xl text-left transition-all group cursor-pointer"
-                >
-                  <div className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm mb-2 group-hover:scale-110 transition-transform">
-                    <FontAwesomeIcon icon={faTruck} />
-                  </div>
-                  <p className="text-xs font-bold text-slate-800">Dispatch</p>
-                  <p className="text-[10px] text-slate-400">Delivery fleet</p>
-                </button>
-              </div>
-
-              {/* Status footer banner */}
-              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 flex items-center justify-between">
-                <span className="flex items-center space-x-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span>Bazario Sync Live</span>
-                </span>
-                <button
-                  type="button"
-                  onClick={() => toast.info('Refreshed', 'Latest transactions loaded.')}
-                  className="text-slate-400 hover:text-slate-700 cursor-pointer"
-                  title="Refresh data"
-                >
-                  <FontAwesomeIcon icon={faRotateRight} />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom Section: Recent Store Orders Table with Filters */}
-          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs overflow-hidden">
-            
-            {/* Table Header Controls */}
-            <div className="p-5 sm:px-6 border-b border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <h2 className="text-lg font-bold text-slate-900">Recent Store Orders</h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Real-time transaction log across cashier counters and online orders
-                </p>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-3">
-                {/* Search in table */}
-                <div className="relative w-48 sm:w-60">
-                  <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
-                    <FontAwesomeIcon icon={faMagnifyingGlass} className="text-xs" />
-                  </span>
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search customer, ID..."
-                    className="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#064C23]/20 focus:border-[#064C23]"
-                  />
-                </div>
-
-                {/* Status Tabs */}
-                <div className="bg-slate-100 p-1 rounded-xl flex items-center space-x-1 text-xs">
-                  {['all', 'completed', 'processing', 'pending'].map((st) => (
-                    <button
-                      key={st}
-                      type="button"
-                      onClick={() => setOrderFilter(st)}
-                      className={`px-3 py-1 rounded-lg font-semibold capitalize transition-all cursor-pointer ${
-                        orderFilter === st
-                          ? 'bg-white text-[#064C23] shadow-xs'
-                          : 'text-slate-500 hover:text-slate-800'
-                      }`}
-                    >
-                      {st}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Table */}
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm text-slate-600">
-                <thead className="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
-                  <tr>
-                    <th className="px-6 py-3.5">Order ID</th>
-                    <th className="px-6 py-3.5">Customer</th>
-                    <th className="px-6 py-3.5">Items Summary</th>
-                    <th className="px-6 py-3.5">Payment</th>
-                    <th className="px-6 py-3.5">Amount</th>
-                    <th className="px-6 py-3.5">Status</th>
-                    <th className="px-6 py-3.5 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200">
-                  {filteredOrders.length > 0 ? (
-                    filteredOrders.map((order) => (
-                      <tr key={order.id} className="hover:bg-slate-50/75 transition-colors">
-                        <td className="px-6 py-4 font-bold text-[#064C23]">
-                          {order.id}
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="font-semibold text-slate-800">{order.customer}</div>
-                          <div className="text-[11px] text-slate-400">{order.email}</div>
-                        </td>
-                        <td className="px-6 py-4 text-xs text-slate-600 max-w-[220px] truncate">
-                          <div>{order.items}</div>
-                          <div className="text-[10px] text-slate-400 mt-0.5">{order.time}</div>
-                        </td>
-                        <td className="px-6 py-4 text-xs text-slate-500">
-                          {order.payment}
-                        </td>
-                        <td className="px-6 py-4 font-bold text-slate-900">
-                          {order.total}
-                        </td>
-                        <td className="px-6 py-4">
-                          <span
-                            className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${
-                              order.status === 'Completed'
-                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                : order.status === 'Processing'
-                                ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                                : 'bg-amber-50 text-amber-700 border border-amber-200'
+                    {/* Date Filters & Export */}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <div className="bg-black/30 backdrop-blur-md p-1 rounded-xl flex items-center border border-white/15">
+                        {['today', 'week', 'month'].map((period) => (
+                          <button
+                            key={period}
+                            type="button"
+                            onClick={() => {
+                              setDateFilter(period)
+                              toast.info('Filter Applied', `Displaying analytics for ${period.toUpperCase()}`)
+                            }}
+                            className={`px-3 py-1 text-xs font-bold rounded-lg uppercase transition-all cursor-pointer ${
+                              dateFilter === period
+                                ? 'bg-white text-[#064C23] shadow-xs'
+                                : 'text-emerald-100/70 hover:text-white'
                             }`}
                           >
-                            {order.status === 'Completed' && (
-                              <FontAwesomeIcon icon={faCircleCheck} className="mr-1 text-[10px]" />
-                            )}
-                            {order.status === 'Processing' && (
-                              <FontAwesomeIcon icon={faClock} className="mr-1 text-[10px]" />
-                            )}
-                            {order.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-right space-x-1 whitespace-nowrap">
-                          <ActionButton
-                            action="view"
-                            onClick={() => setSelectedOrder(order)}
-                          />
-                          <ActionButton
-                            action="edit"
-                            onClick={() => toast.info('Edit Order', `Editing ${order.id}...`)}
-                          />
-                          <ActionButton
-                            action="delete"
-                            onClick={() => setDeleteModal({ isOpen: true, orderId: order.id })}
-                          />
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="7" className="px-6 py-10 text-center text-slate-400 text-xs">
-                        No orders match your filter criteria.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-              </div>
-            </div>
-          </>
-        )}
-      </main>
+                            {period}
+                          </button>
+                        ))}
+                      </div>
 
-      {/* Reusable Footer */}
-      <Footer />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="bg-white/10 hover:bg-white/20 text-white border-white/20"
+                        icon={<FontAwesomeIcon icon={faDownload} className="text-xs" />}
+                        onClick={() => toast.success('Report Exported', 'Store summary PDF & CSV exported successfully!')}
+                      >
+                        Export Summary
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 4 KPI Metrics in Indian Rupees (₹) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                  {stats.map((stat, i) => (
+                    <div
+                      key={i}
+                      className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs hover:shadow-md transition-all duration-200"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                          {stat.title}
+                        </span>
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-base ${stat.iconBg}`}>
+                          <FontAwesomeIcon icon={stat.icon} />
+                        </div>
+                      </div>
+
+                      <div className="mt-3">
+                        <div className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                          {stat.value}
+                        </div>
+                        <div className="mt-2 flex items-center text-xs font-semibold">
+                          <span
+                            className={`inline-flex items-center space-x-1 ${
+                              stat.isPositive ? 'text-[#064C23]' : 'text-rose-600'
+                            }`}
+                          >
+                            <FontAwesomeIcon
+                              icon={stat.isPositive ? faArrowTrendUp : faArrowTrendDown}
+                              className="mr-1 text-[11px]"
+                            />
+                            {stat.change}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Middle Grid: Store Outlets Monitor + Quick Actions */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  
+                  {/* Left (2 Cols): Store Outlets Live Monitor */}
+                  <div className="lg:col-span-2 bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/90 shadow-xs space-y-4">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                      <div>
+                        <h2 className="text-base sm:text-lg font-bold text-slate-900">
+                          Store Outlets & Revenue Breakdown
+                        </h2>
+                        <p className="text-xs text-slate-500">
+                          Live operating status, location area, and estimated daily sales in INR (₹)
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleSelectTab('stores')}
+                        className="text-xs font-bold text-[#064C23] hover:underline cursor-pointer hidden sm:block"
+                      >
+                        Manage Stores →
+                      </button>
+                    </div>
+
+                    <div className="divide-y divide-slate-100">
+                      {storeBranches.map((store) => (
+                        <div
+                          key={store.id}
+                          className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/60 rounded-xl px-2 transition-colors"
+                        >
+                          <div className="flex items-center space-x-3.5">
+                            <div className="w-10 h-10 rounded-2xl bg-[#064C23]/10 text-[#064C23] flex items-center justify-center font-bold text-sm shrink-0">
+                              <FontAwesomeIcon icon={faStore} />
+                            </div>
+                            <div>
+                              <h3 className="text-sm font-bold text-slate-900">{store.name}</h3>
+                              <p className="text-xs text-slate-400">{store.location}</p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center space-x-4 self-end sm:self-auto">
+                            <div className="text-right">
+                              <span className="text-sm font-black text-slate-900 block font-mono">
+                                {store.dailySales}
+                              </span>
+                              <span className="text-[10px] text-slate-400">Daily Volume</span>
+                            </div>
+
+                            <span
+                              className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${
+                                store.status === 'Open'
+                                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                  : 'bg-rose-50 text-rose-600 border border-rose-200'
+                              }`}
+                            >
+                              <span
+                                className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
+                                  store.status === 'Open' ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'
+                                }`}
+                              />
+                              {store.status}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Right (1 Col): Quick Operations & Shortcuts */}
+                  <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/90 shadow-xs flex flex-col justify-between space-y-4">
+                    <div className="border-b border-slate-100 pb-3">
+                      <h2 className="text-base sm:text-lg font-bold text-slate-900">
+                        Quick Shortcuts
+                      </h2>
+                      <p className="text-xs text-slate-500">
+                        Fast navigation to primary management forms
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => handleSelectTab('stores')}
+                        className="p-3.5 bg-slate-50 hover:bg-[#f0f9f3] border border-slate-200 hover:border-[#064C23] rounded-2xl text-left transition-all group cursor-pointer"
+                      >
+                        <div className="w-9 h-9 rounded-xl bg-[#064C23]/10 text-[#064C23] flex items-center justify-center text-sm mb-2 group-hover:scale-110 transition-transform">
+                          <FontAwesomeIcon icon={faStore} />
+                        </div>
+                        <p className="text-xs font-bold text-slate-800">Store Outlets</p>
+                        <p className="text-[10px] text-slate-400">4 Locations</p>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleSelectTab('customers')}
+                        className="p-3.5 bg-slate-50 hover:bg-[#fdf6f4] border border-slate-200 hover:border-[#A44F37] rounded-2xl text-left transition-all group cursor-pointer"
+                      >
+                        <div className="w-9 h-9 rounded-xl bg-[#A44F37]/10 text-[#A44F37] flex items-center justify-center text-sm mb-2 group-hover:scale-110 transition-transform">
+                          <FontAwesomeIcon icon={faUsers} />
+                        </div>
+                        <p className="text-xs font-bold text-slate-800">Customers</p>
+                        <p className="text-[10px] text-slate-400">Directory</p>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleSelectTab('admin-users')}
+                        className="p-3.5 bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-400 rounded-2xl text-left transition-all group cursor-pointer"
+                      >
+                        <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-sm mb-2 group-hover:scale-110 transition-transform">
+                          <FontAwesomeIcon icon={faUserTie} />
+                        </div>
+                        <p className="text-xs font-bold text-slate-800">Admin Staff</p>
+                        <p className="text-[10px] text-slate-400">User accounts</p>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleSelectTab('settings')}
+                        className="p-3.5 bg-slate-50 hover:bg-amber-50 border border-slate-200 hover:border-amber-400 rounded-2xl text-left transition-all group cursor-pointer"
+                      >
+                        <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center text-sm mb-2 group-hover:scale-110 transition-transform">
+                          <FontAwesomeIcon icon={faGear} />
+                        </div>
+                        <p className="text-xs font-bold text-slate-800">App Settings</p>
+                        <p className="text-[10px] text-slate-400">Brand & SEO</p>
+                      </button>
+                    </div>
+
+                    {/* Sync Status Banner */}
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-600 flex items-center justify-between">
+                      <span className="flex items-center space-x-2">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                        <span className="font-medium">Bazario Live Sync Active</span>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => toast.success('Sync Refreshed', 'Database telemetry up to date.')}
+                        className="text-slate-400 hover:text-slate-800 cursor-pointer"
+                        title="Refresh data"
+                      >
+                        <FontAwesomeIcon icon={faRotateRight} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bottom Section: Recent Registered Customers */}
+                <div className="bg-white rounded-3xl border border-slate-200/90 shadow-xs overflow-hidden">
+                  <div className="p-5 sm:px-6 border-b border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <h2 className="text-base sm:text-lg font-bold text-slate-900">
+                        Recent Customer Accounts
+                      </h2>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        Latest registered supermarket shoppers, verified mobile contacts, and status
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleSelectTab('customers')}
+                      className="text-xs font-bold text-[#064C23] hover:underline cursor-pointer self-start sm:self-auto"
+                    >
+                      View All Customers ({recentCustomers.length}) →
+                    </button>
+                  </div>
+
+                  {/* Customer Table with INR (₹) and Toggle Switches */}
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-sm text-slate-600">
+                      <thead className="bg-slate-50/80 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
+                        <tr>
+                          <th className="px-6 py-4 w-16">Index</th>
+                          <th className="px-6 py-4">Customer Name</th>
+                          <th className="px-6 py-4">Mobile Number</th>
+                          <th className="px-6 py-4">Email Address</th>
+                          <th className="px-6 py-4">Lifetime Spend (₹)</th>
+                          <th className="px-6 py-4">Account Status</th>
+                          <th className="px-6 py-4 text-right">Quick Action</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-200">
+                        {recentCustomers.map((customer, index) => (
+                          <tr key={customer.id} className="hover:bg-slate-50/75 transition-colors">
+                            <td className="px-6 py-4 font-bold text-slate-400 font-mono">
+                              #{index + 1}
+                            </td>
+
+                            <td className="px-6 py-4">
+                              <div className="flex items-center space-x-3">
+                                <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-[#064C23] to-[#A44F37] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
+                                  {customer.name
+                                    .split(' ')
+                                    .map((n) => n[0])
+                                    .join('')
+                                    .slice(0, 2)
+                                    .toUpperCase()}
+                                </div>
+                                <span className="font-bold text-slate-900">{customer.name}</span>
+                              </div>
+                            </td>
+
+                            <td className="px-6 py-4 text-xs font-mono font-bold text-slate-700">
+                              {customer.phone}
+                            </td>
+
+                            <td className="px-6 py-4 text-xs text-slate-600">
+                              {customer.email}
+                            </td>
+
+                            <td className="px-6 py-4 font-bold text-slate-900 font-mono">
+                              {customer.totalSpent}
+                            </td>
+
+                            {/* Status Toggle Switch */}
+                            <td className="px-6 py-4">
+                              <ToggleButton
+                                size="sm"
+                                checked={customer.status === 'Active'}
+                                onChange={() => handleToggleCustomerStatus(customer)}
+                                activeColor="#064C23"
+                              />
+                            </td>
+
+                            <td className="px-6 py-4 text-right">
+                              <button
+                                type="button"
+                                onClick={() => handleSelectTab('customers')}
+                                className="text-xs font-bold text-[#064C23] hover:underline cursor-pointer"
+                              >
+                                View Profile
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </>
+            )}
+          </main>
+
+          {/* Reusable Footer */}
+          <Footer />
+        </div>
+      </div>
     </div>
-  </div>
   )
 }
