@@ -9,8 +9,7 @@ import {
   faTrashCan,
   faFloppyDisk,
   faEye,
-  faIndianRupeeSign,
-  faClock
+  faUserTie
 } from '@fortawesome/free-solid-svg-icons'
 import {
   Button,
@@ -25,9 +24,11 @@ import { useToast } from '../../context/ToastContext'
 const INITIAL_JOBS = [
   {
     id: 1,
+    sortingOrder: 1,
     title: 'Store Operations Manager',
     subtitle: 'Retail Operations & Branch Leadership',
     type: 'Full Time',
+    experience: '3 - 5 Years',
     location: 'Central Superstore, Noida (Sec 18)',
     status: 'Active',
     salary: '₹45,000 - ₹60,000 / mo',
@@ -35,9 +36,11 @@ const INITIAL_JOBS = [
   },
   {
     id: 2,
+    sortingOrder: 2,
     title: 'POS Cashier & Billing Executive',
     subtitle: 'Front Desk & Cash Management',
     type: 'Full Time',
+    experience: '1 - 2 Years',
     location: 'DLF Cyber City Outlet, Gurugram',
     status: 'Active',
     salary: '₹18,000 - ₹24,000 / mo',
@@ -45,9 +48,11 @@ const INITIAL_JOBS = [
   },
   {
     id: 3,
+    sortingOrder: 3,
     title: 'Fresh Procurement Lead',
     subtitle: 'Farm Produce & Sourcing Quality',
     type: 'Full Time',
+    experience: '4+ Years',
     location: 'Delhi Central Hub',
     status: 'Active',
     salary: '₹50,000 - ₹70,000 / mo',
@@ -55,9 +60,11 @@ const INITIAL_JOBS = [
   },
   {
     id: 4,
+    sortingOrder: 4,
     title: 'Express Delivery Partner',
     subtitle: '20-Minute Doorstep Fleet',
     type: 'Part Time',
+    experience: 'Freshers Welcome',
     location: 'Multiple Outlets (Delhi NCR)',
     status: 'Active',
     salary: '₹20,000 - ₹30,000 / mo',
@@ -65,9 +72,11 @@ const INITIAL_JOBS = [
   },
   {
     id: 5,
+    sortingOrder: 5,
     title: 'Inventory & Stock Supervisor',
     subtitle: 'Warehouse & Shelf Replenishment',
     type: 'Full Time',
+    experience: '2 - 3 Years',
     location: 'Indirapuram Branch, Ghaziabad',
     status: 'Inactive',
     salary: '₹25,000 - ₹32,000 / mo',
@@ -98,11 +107,13 @@ export default function CareerManageView() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [jobToDelete, setJobToDelete] = useState(null)
 
-  // Form State (Inputs: job title, suubtitle, type, location, status, sallary, description)
+  // Form State (Inputs: sortingOrder, title, subtitle, type, experience, location, status, salary, description)
   const [formData, setFormData] = useState({
+    sortingOrder: 1,
     title: '',
     subtitle: '',
     type: 'Full Time',
+    experience: '',
     location: '',
     status: 'Active',
     salary: '',
@@ -117,10 +128,13 @@ export default function CareerManageView() {
   // Open Add Modal
   const handleOpenAdd = () => {
     setEditingJob(null)
+    const nextOrder = jobs.length > 0 ? Math.max(...jobs.map((j) => Number(j.sortingOrder) || 0)) + 1 : 1
     setFormData({
+      sortingOrder: nextOrder,
       title: '',
       subtitle: '',
       type: 'Full Time',
+      experience: '',
       location: '',
       status: 'Active',
       salary: '',
@@ -133,9 +147,11 @@ export default function CareerManageView() {
   const handleOpenEdit = (job) => {
     setEditingJob(job)
     setFormData({
+      sortingOrder: job.sortingOrder || 1,
       title: job.title || '',
       subtitle: job.subtitle || '',
       type: job.type || 'Full Time',
+      experience: job.experience || '',
       location: job.location || '',
       status: job.status || 'Active',
       salary: job.salary || '',
@@ -167,16 +183,27 @@ export default function CareerManageView() {
       return
     }
 
+    const orderNum = parseInt(formData.sortingOrder, 10) || 1
+
     if (editingJob) {
       const updated = jobs.map((j) =>
-        j.id === editingJob.id ? { ...j, ...formData } : j
+        j.id === editingJob.id
+          ? {
+              ...j,
+              ...formData,
+              sortingOrder: orderNum,
+              title: formData.title.trim()
+            }
+          : j
       )
       saveToStorage(updated)
       toast.success('Career Updated', `"${formData.title}" details updated.`)
     } else {
       const newJob = {
         id: Date.now(),
-        ...formData
+        ...formData,
+        sortingOrder: orderNum,
+        title: formData.title.trim()
       }
       saveToStorage([...jobs, newJob])
       toast.success('Career Published', `"${formData.title}" added to career openings.`)
@@ -194,17 +221,20 @@ export default function CareerManageView() {
     toast.success('Career Deleted', 'The job vacancy has been permanently removed.')
   }
 
-  // Filtered list
-  const filteredJobs = jobs.filter((job) => {
-    const q = searchQuery.toLowerCase()
-    return (
-      job.title?.toLowerCase().includes(q) ||
-      job.subtitle?.toLowerCase().includes(q) ||
-      job.location?.toLowerCase().includes(q) ||
-      job.type?.toLowerCase().includes(q) ||
-      job.salary?.toLowerCase().includes(q)
-    )
-  })
+  // Filtered and sorted list
+  const filteredJobs = jobs
+    .filter((job) => {
+      const q = searchQuery.toLowerCase()
+      return (
+        job.title?.toLowerCase().includes(q) ||
+        job.subtitle?.toLowerCase().includes(q) ||
+        job.location?.toLowerCase().includes(q) ||
+        job.type?.toLowerCase().includes(q) ||
+        job.experience?.toLowerCase().includes(q) ||
+        job.salary?.toLowerCase().includes(q)
+      )
+    })
+    .sort((a, b) => (Number(a.sortingOrder) || 0) - (Number(b.sortingOrder) || 0))
 
   return (
     <div className="space-y-6 w-full pb-20">
@@ -224,7 +254,7 @@ export default function CareerManageView() {
               </span>
             </div>
             <p className="text-xs sm:text-sm text-slate-500">
-              Manage website career listings, job roles, locations, salaries, and employment types.
+              Manage website career listings, sorting order, job roles, experience, locations, and salaries.
             </p>
           </div>
         </div>
@@ -245,7 +275,7 @@ export default function CareerManageView() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search job title, subtitle, location, or type..."
+            placeholder="Search job title, subtitle, location, experience..."
             className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 placeholder-slate-400 focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 outline-none transition-all"
           />
           <FontAwesomeIcon
@@ -261,9 +291,9 @@ export default function CareerManageView() {
           <table className="w-full text-left text-sm text-slate-600">
             <thead className="bg-slate-50/80 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
               <tr>
-                <th className="px-6 py-4 w-16">Index</th>
+                <th className="px-6 py-4 w-28 text-center">Sorting Order</th>
                 <th className="px-6 py-4 min-w-[240px]">Job Title & Subtitle</th>
-                <th className="px-6 py-4">Type</th>
+                <th className="px-6 py-4">Type & Exp</th>
                 <th className="px-6 py-4">Location</th>
                 <th className="px-6 py-4">Sallary</th>
                 <th className="px-6 py-4 w-28">Status</th>
@@ -272,10 +302,12 @@ export default function CareerManageView() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredJobs.length > 0 ? (
-                filteredJobs.map((job, index) => (
+                filteredJobs.map((job) => (
                   <tr key={job.id} className="hover:bg-slate-50/75 transition-colors">
-                    <td className="px-6 py-4 font-bold text-slate-400 font-mono">
-                      #{index + 1}
+                    <td className="px-6 py-4 text-center">
+                      <span className="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-slate-100 font-mono font-black text-xs text-[#064C23] border border-slate-200 shadow-2xs">
+                        #{job.sortingOrder || 1}
+                      </span>
                     </td>
 
                     <td className="px-6 py-4">
@@ -292,9 +324,16 @@ export default function CareerManageView() {
                     </td>
 
                     <td className="px-6 py-4">
-                      <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
-                        {job.type}
-                      </span>
+                      <div className="space-y-1">
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200 inline-block">
+                          {job.type}
+                        </span>
+                        {job.experience && (
+                          <span className="text-[11px] text-slate-500 font-semibold block">
+                            Exp: {job.experience}
+                          </span>
+                        )}
+                      </div>
                     </td>
 
                     <td className="px-6 py-4 text-xs font-medium text-slate-700">
@@ -354,7 +393,7 @@ export default function CareerManageView() {
       </div>
 
       {/* ==========================================================
-          ADD / EDIT MODAL (INPUTS: JOB TITLE, SUUBTITLE, TYPE, LOCATION, STATUS, SALLARY, DESCRIPTION)
+          ADD / EDIT MODAL
           ========================================================== */}
       <Modal
         isOpen={modalOpen}
@@ -363,7 +402,35 @@ export default function CareerManageView() {
         size="lg"
       >
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Row 1: Job Title & Subtitle */}
+          {/* Row 1: Sorting Order & Status Dropdown */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <InputField
+              label="SORTING ORDER"
+              type="number"
+              min="1"
+              step="1"
+              value={formData.sortingOrder}
+              onChange={(e) => setFormData({ ...formData, sortingOrder: e.target.value })}
+              placeholder="e.g. 1"
+              required
+            />
+
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                STATUS
+              </label>
+              <select
+                value={formData.status}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 outline-none focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 transition-all cursor-pointer"
+              >
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Row 2: Job Title & Subtitle */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <InputField
               label="JOB TITLE"
@@ -380,7 +447,7 @@ export default function CareerManageView() {
             />
           </div>
 
-          {/* Row 2: Type, Location, Status, Sallary */}
+          {/* Row 3: Type, Experience, Location, Sallary */}
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
@@ -400,25 +467,20 @@ export default function CareerManageView() {
 
             <div>
               <InputField
+                label="EXPERIENCE"
+                value={formData.experience}
+                onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
+                placeholder="e.g. 2 - 4 Years"
+              />
+            </div>
+
+            <div>
+              <InputField
                 label="LOCATION"
                 value={formData.location}
                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                 placeholder="e.g. Sector 18, Noida"
               />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                STATUS
-              </label>
-              <select
-                value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 outline-none focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 transition-all cursor-pointer"
-              >
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
-              </select>
             </div>
 
             <div>
@@ -431,7 +493,7 @@ export default function CareerManageView() {
             </div>
           </div>
 
-          {/* Row 3: Description */}
+          {/* Row 4: Description */}
           <div className="space-y-1.5">
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
               DESCRIPTION
@@ -450,7 +512,7 @@ export default function CareerManageView() {
             <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" icon={<FontAwesomeIcon icon={faFloppyDisk} className="text-xs" />}>
+            <Button type="submit" variant="primary" icon={<FontAwesomeIcon icon={faFloppyDisk} className="text-xs" />} >
               {editingJob ? 'Save Changes' : 'Publish Job'}
             </Button>
           </div>
@@ -488,8 +550,18 @@ export default function CareerManageView() {
 
             <div className="grid grid-cols-2 gap-3">
               <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-0.5">
+                <span className="text-[11px] font-bold text-slate-500 uppercase">Sorting Order</span>
+                <p className="text-sm font-black font-mono text-[#064C23]">#{viewingJob.sortingOrder || 1}</p>
+              </div>
+
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-0.5">
                 <span className="text-[11px] font-bold text-slate-500 uppercase">Type</span>
                 <p className="text-xs font-bold text-slate-800">{viewingJob.type}</p>
+              </div>
+
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-0.5">
+                <span className="text-[11px] font-bold text-slate-500 uppercase">Experience</span>
+                <p className="text-xs font-bold text-slate-800">{viewingJob.experience || 'Not specified'}</p>
               </div>
 
               <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-0.5">
