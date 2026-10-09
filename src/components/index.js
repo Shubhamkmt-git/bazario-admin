@@ -57,6 +57,11 @@ export { default as StaffListView } from './staffManage/StaffListView'
 export { default as AddStaffView } from './staffManage/AddStaffView'
 export { default as EditStaffView } from './staffManage/EditStaffView'
 export { default as StaffDetailsView } from './staffManage/StaffDetailsView'
+export { default as ManageOffersView } from './manageOffers/ManageOffersView'
+export { default as OffersListView } from './manageOffers/OffersListView'
+export { default as AddOfferView } from './manageOffers/AddOfferView'
+export { default as EditOfferView } from './manageOffers/EditOfferView'
+export { default as OfferDetailsView } from './manageOffers/OfferDetailsView'
 
 // Brand Logo
 export { default as BazarioLogo } from './BazarioLogo'

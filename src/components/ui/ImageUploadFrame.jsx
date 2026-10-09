@@ -30,10 +30,10 @@ export default function ImageUploadFrame({
     '5:1': 'aspect-[5/1] w-full max-w-full min-h-[110px]',
     '5/1': 'aspect-[5/1] w-full max-w-full min-h-[110px]',
     'webBanner': 'aspect-[5/1] w-full max-w-full min-h-[110px]',
-    '1.5:1': 'aspect-[1.5/1] w-full max-w-[280px] min-h-[140px]',
-    '1.5/1': 'aspect-[1.5/1] w-full max-w-[280px] min-h-[140px]',
-    '3/2': 'aspect-[3/2] w-full max-w-[280px] min-h-[140px]',
-    'mobileBanner': 'aspect-[1.5/1] w-full max-w-[280px] min-h-[140px]',
+    '1.5:1': 'aspect-[1.5/1] w-full',
+    '1.5/1': 'aspect-[1.5/1] w-full',
+    '3/2': 'aspect-[3/2] w-full',
+    'mobileBanner': 'aspect-[1.5/1] w-full',
     auto: 'min-h-[180px]',
   }
 

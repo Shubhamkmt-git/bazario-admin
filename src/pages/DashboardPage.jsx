@@ -29,7 +29,8 @@ import {
   HeroBannerManageView,
   DeliveryStaffManageView,
   ProductManageView,
-  StaffManageView
+  StaffManageView,
+  ManageOffersView
 } from '../components'
 import { useToast } from '../context/ToastContext'
 import {
@@ -66,7 +67,8 @@ import {
   faTableCellsLarge,
   faTags,
   faImages,
-  faUserGroup
+  faUserGroup,
+  faPercent
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
@@ -110,6 +112,14 @@ export default function DashboardPage({ onLogout }) {
     ) {
       return 'staff-manage'
     }
+    if (
+      baseTab === 'manage-offers' ||
+      baseTab === 'offers-manage' ||
+      baseTab === 'offers' ||
+      baseTab === 'offer'
+    ) {
+      return 'manage-offers'
+    }
     const validTabs = [
       'dashboard',
       'stores',
@@ -120,6 +130,7 @@ export default function DashboardPage({ onLogout }) {
       'product-categories',
       'product-category',
       'hero-banner-manage',
+      'manage-offers',
       'web-hero-banner',
       'hero-banners',
       'admin-users',
@@ -163,6 +174,7 @@ export default function DashboardPage({ onLogout }) {
     { id: 'products', name: 'Products', icon: faBoxesStacked },
     { id: 'product-categories', name: 'Product Category', icon: faTags },
     { id: 'hero-banner-manage', name: 'Hero Banner Manage', icon: faImages },
+    { id: 'manage-offers', name: 'Manage Offers', icon: faPercent },
     {
       id: 'admin-manager',
       name: 'Admin Manager',
@@ -355,6 +367,8 @@ export default function DashboardPage({ onLogout }) {
               ? 'Home Page Section Heading Manage'
               : activeTab === 'web-hero-banner' || activeTab === 'hero-banner-manage'
               ? 'Hero Banner Manage'
+              : activeTab === 'manage-offers'
+              ? 'Manage Offers'
               : 'Dashboard'
           }
           onLogout={onLogout}
@@ -384,6 +398,7 @@ export default function DashboardPage({ onLogout }) {
             {(activeTab === 'web-hero-banner' || activeTab === 'hero-banner-manage') && (
               <HeroBannerManageView />
             )}
+            {activeTab === 'manage-offers' && <ManageOffersView />}
             {activeTab === 'dashboard' && (
               <>
                 {/* Welcome Banner */}
