@@ -20,16 +20,16 @@ export default function Sidebar({
         />
       )}
 
-      {/* Sidebar Aside: Minimal Smooth Light Brand Gradient */}
+      {/* Sidebar Aside: Minimal Smooth Light Brand Gradient with Crisp Outer Border */}
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-50 bg-gradient-to-b from-[#f2f8f4] via-[#e9f4ed] to-[#dfeee4] text-slate-800 flex flex-col border-r border-[#cee5d7] transition-all duration-300 ease-in-out shrink-0 select-none ${
+        className={`fixed lg:static inset-y-0 left-0 z-50 bg-gradient-to-b from-[#f2f8f4] via-[#e9f4ed] to-[#dfeee4] text-slate-800 flex flex-col border-r border-[#bfe0cd] transition-all duration-300 ease-in-out shrink-0 select-none ${
           isOpen
             ? 'w-72 translate-x-0 shadow-xl lg:shadow-none'
             : '-translate-x-full lg:translate-x-0 lg:w-[80px] shadow-none'
         }`}
       >
         {/* Brand Header: Matches Header height h-16 (64px) seamlessly */}
-        <div className="h-16 shrink-0 flex items-center border-b border-[#cee5d7] px-4 sm:px-5 transition-all bg-white/50 backdrop-blur-sm">
+        <div className="h-16 shrink-0 flex items-center border-b border-[#bfe0cd] px-4 sm:px-5 transition-all bg-white/50 backdrop-blur-sm">
           {isOpen ? (
             /* Expanded Header: Clean Left-Aligned Brand Logo */
             <div className="flex items-center justify-start w-full py-1">
@@ -76,8 +76,8 @@ export default function Sidebar({
                     : 'justify-center p-3 text-lg'
                 } ${
                   isActive
-                    ? 'bg-gradient-to-r from-[#A44F37] to-[#b8563b] text-white font-semibold shadow-md shadow-[#A44F37]/25 ring-1 ring-[#A44F37]/30'
-                    : 'text-[#1c4b31] font-medium hover:text-[#064C23] hover:bg-white/70'
+                    ? 'bg-gradient-to-r from-[#A44F37] to-[#b8563b] text-white font-semibold shadow-md shadow-[#A44F37]/25 border border-[#A44F37]'
+                    : 'text-[#1c4b31] font-medium border border-transparent hover:border-[#bfe0cd] hover:text-[#064C23] hover:bg-white/70'
                 }`}
               >
                 <div className="flex items-center space-x-3.5 min-w-0">
@@ -127,7 +127,7 @@ export default function Sidebar({
 
         {/* User Info Footer */}
         <div
-          className={`border-t border-[#cee5d7] bg-white/55 backdrop-blur-sm flex items-center transition-all ${
+          className={`border-t border-[#bfe0cd] bg-white/55 backdrop-blur-sm flex items-center transition-all ${
             isOpen ? 'p-3.5 space-x-3' : 'p-3 justify-center'
           }`}
         >
