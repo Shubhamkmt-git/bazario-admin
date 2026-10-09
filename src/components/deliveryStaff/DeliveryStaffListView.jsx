@@ -1,14 +1,11 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faTruck,
   faPlus,
   faSearch,
   faPhone,
-  faEnvelope,
-  faStore,
-  faFilter,
-  faRotateRight
+  faEnvelope
 } from '@fortawesome/free-solid-svg-icons'
 import {
   Button,
@@ -26,16 +23,6 @@ export default function DeliveryStaffListView({
 }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all') // 'all' | 'Active' | 'Inactive'
-  const [storeFilter, setStoreFilter] = useState('all')
-
-  // Extract unique stores for dropdown filter
-  const storeOptions = useMemo(() => {
-    const set = new Set()
-    staffMembers.forEach((staff) => {
-      if (staff.belongToStore) set.add(staff.belongToStore)
-    })
-    return Array.from(set)
-  }, [staffMembers])
 
   // Filter logic
   const filteredStaff = staffMembers.filter((staff) => {
@@ -45,13 +32,10 @@ export default function DeliveryStaffListView({
       staff.name?.toLowerCase().includes(q) ||
       (staff.mobileNumber && staff.mobileNumber.toLowerCase().includes(q)) ||
       (staff.email && staff.email.toLowerCase().includes(q)) ||
-      (staff.belongToStore && staff.belongToStore.toLowerCase().includes(q)) ||
       (staff.riderId && staff.riderId.toLowerCase().includes(q))
 
     const matchesStatus = statusFilter === 'all' ? true : staff.status === statusFilter
-    const matchesStore = storeFilter === 'all' ? true : staff.belongToStore === storeFilter
-
-    return matchesSearch && matchesStatus && matchesStore
+    return matchesSearch && matchesStatus
   })
 
   return (
@@ -75,7 +59,7 @@ export default function DeliveryStaffListView({
               </span>
             </div>
             <p className="text-xs sm:text-sm text-slate-500">
-              Manage delivery riders, outlet store assignments, contact details, and dispatch status.
+              Manage delivery riders, driver contact details, and dispatch status.
             </p>
           </div>
         </div>
@@ -91,76 +75,39 @@ export default function DeliveryStaffListView({
       </div>
 
       {/* Search & Filter Bar */}
-      <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-xs flex flex-col lg:flex-row items-center justify-between gap-4">
+      <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-xs flex flex-col sm:flex-row items-center justify-between gap-4">
         {/* Search Input */}
-        <div className="relative w-full lg:w-96">
+        <div className="relative w-full sm:w-80">
           <FontAwesomeIcon
             icon={faSearch}
             className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"
           />
           <input
             type="text"
-            placeholder="Search by rider name, store, phone, ID..."
+            placeholder="Search by name, phone, or email..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-[#064C23] focus:ring-2 focus:ring-[#064C23]/10 transition-all"
           />
         </div>
 
-        {/* Filter Group: Store & Status */}
-        <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto justify-end">
-          {/* Store Filter Dropdown */}
-          <div className="flex items-center space-x-1.5 bg-slate-50 px-2 py-1 rounded-xl border border-slate-200 text-xs">
-            <FontAwesomeIcon icon={faStore} className="text-[#064C23] text-xs ml-1" />
-            <span className="font-bold text-slate-500 uppercase text-[10px]">Store:</span>
-            <select
-              value={storeFilter}
-              onChange={(e) => setStoreFilter(e.target.value)}
-              className="bg-transparent border-none text-xs font-bold text-slate-800 outline-none cursor-pointer py-1 pr-1"
-            >
-              <option value="all">All Stores</option>
-              {storeOptions.map((st) => (
-                <option key={st} value={st}>
-                  {st}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Status Filter Pills */}
-          <div className="flex items-center space-x-1 bg-slate-50 p-1 rounded-xl border border-slate-200 text-xs">
-            <span className="px-2 font-bold text-slate-400 uppercase text-[10px]">Status:</span>
-            {['all', 'Active', 'Inactive'].map((st) => (
-              <button
-                key={st}
-                type="button"
-                onClick={() => setStatusFilter(st)}
-                className={`px-2.5 py-1 rounded-lg font-bold text-xs transition-all cursor-pointer ${
-                  statusFilter === st
-                    ? 'bg-white text-[#064C23] shadow-xs border border-slate-200'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                {st === 'all' ? 'All' : st}
-              </button>
-            ))}
-          </div>
-
-          {/* Reset Filters button if any active */}
-          {(searchQuery || statusFilter !== 'all' || storeFilter !== 'all') && (
+        {/* Status Filter Pills */}
+        <div className="flex items-center space-x-1 bg-slate-50 p-1 rounded-xl border border-slate-200 text-xs self-start sm:self-auto">
+          <span className="px-2 font-bold text-slate-400 uppercase text-[10px]">Status:</span>
+          {['all', 'Active', 'Inactive'].map((st) => (
             <button
+              key={st}
               type="button"
-              onClick={() => {
-                setSearchQuery('')
-                setStatusFilter('all')
-                setStoreFilter('all')
-              }}
-              className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold transition-colors"
-              title="Reset Filters"
+              onClick={() => setStatusFilter(st)}
+              className={`px-2.5 py-1 rounded-lg font-bold text-xs transition-all cursor-pointer ${
+                statusFilter === st
+                  ? 'bg-white text-[#064C23] shadow-xs border border-slate-200'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
             >
-              <FontAwesomeIcon icon={faRotateRight} />
+              {st === 'all' ? 'All' : st}
             </button>
-          )}
+          ))}
         </div>
       </div>
 
@@ -172,7 +119,6 @@ export default function DeliveryStaffListView({
               <tr>
                 <th className="px-6 py-4 w-16 text-center">#</th>
                 <th className="px-6 py-4">Delivery Staff</th>
-                <th className="px-6 py-4">Belong to Store</th>
                 <th className="px-6 py-4">Mobile Number</th>
                 <th className="px-6 py-4">Email Address</th>
                 <th className="px-6 py-4 text-center">Status</th>
@@ -217,16 +163,6 @@ export default function DeliveryStaffListView({
                             {staff.riderId || `BAZ-DRV-0${staff.id}`}
                           </span>
                         </div>
-                      </div>
-                    </td>
-
-                    {/* Belong to Store */}
-                    <td className="px-6 py-4">
-                      <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-xl bg-[#064C23]/10 text-[#064C23] font-bold text-xs max-w-[200px] truncate">
-                        <FontAwesomeIcon icon={faStore} className="text-xs shrink-0" />
-                        <span className="truncate">
-                          {staff.belongToStore || 'Bazario Central Superstore #01'}
-                        </span>
                       </div>
                     </td>
 
@@ -285,7 +221,7 @@ export default function DeliveryStaffListView({
                 ))
               ) : (
                 <tr>
-                  <td colSpan={7} className="text-center py-12 text-slate-400 text-xs">
+                  <td colSpan={6} className="text-center py-12 text-slate-400 text-xs">
                     No delivery personnel match your filter criteria.
                   </td>
                 </tr>
