@@ -14,6 +14,7 @@ import {
 import { useToast } from '../../../context/ToastContext'
 import Button from '../../ui/Button'
 import BackButton from '../../ui/BackButton'
+import ToggleButton from '../../ui/ToggleButton'
 
 export default function PermissionDetailsView({
   permission,
@@ -71,20 +72,18 @@ export default function PermissionDetailsView({
         </div>
 
         {/* Quick Action Buttons */}
-        <div className="flex items-center space-x-2 self-end sm:self-auto">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onToggleStatus(permission)}
-            icon={
-              <FontAwesomeIcon
-                icon={permission.status === 'Active' ? faCircleXmark : faCircleCheck}
-                className="text-xs"
-              />
-            }
-          >
-            Mark as {permission.status === 'Active' ? 'Inactive' : 'Active'}
-          </Button>
+        <div className="flex items-center space-x-3 self-end sm:self-auto">
+          <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-2xl border border-slate-200">
+            <span className="text-xs font-bold text-slate-600">
+              {permission.status === 'Active' ? 'Active' : 'Inactive'}
+            </span>
+            <ToggleButton
+              size="sm"
+              checked={permission.status === 'Active'}
+              onChange={() => onToggleStatus(permission)}
+              activeColor="#064C23"
+            />
+          </div>
           <Button
             variant="primary"
             size="sm"

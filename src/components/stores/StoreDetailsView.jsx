@@ -18,6 +18,7 @@ import {
 import { useToast } from '../../context/ToastContext'
 import Button from '../ui/Button'
 import BackButton from '../ui/BackButton'
+import ToggleButton from '../ui/ToggleButton'
 
 // Utility to open Google Maps safely in new tab
 const openGoogleMaps = (googleUrl, coordinates, title = '') => {
@@ -93,20 +94,18 @@ export default function StoreDetailsView({
         </div>
 
         {/* Quick Action Buttons */}
-        <div className="flex items-center space-x-2 self-end sm:self-auto">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onToggleStatus(store)}
-            icon={
-              <FontAwesomeIcon
-                icon={store.status === 'Open' ? faDoorClosed : faDoorOpen}
-                className="text-xs"
-              />
-            }
-          >
-            Mark as {store.status === 'Open' ? 'Closed' : 'Open'}
-          </Button>
+        <div className="flex items-center space-x-3 self-end sm:self-auto">
+          <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-2xl border border-slate-200">
+            <span className="text-xs font-bold text-slate-600">
+              {store.status === 'Open' ? 'Store Open' : 'Store Closed'}
+            </span>
+            <ToggleButton
+              size="sm"
+              checked={store.status === 'Open'}
+              onChange={() => onToggleStatus(store)}
+              activeColor="#064C23"
+            />
+          </div>
           <Button
             variant="primary"
             size="sm"
