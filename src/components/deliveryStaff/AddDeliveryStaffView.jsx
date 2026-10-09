@@ -129,35 +129,6 @@ export default function AddDeliveryStaffView({ onBack, onSave }) {
               value={formData.image}
               onChange={(url) => setFormData({ ...formData, image: url })}
             />
-
-            {/* Status & Assigned Store Preview Card */}
-            <div className="p-3.5 rounded-xl bg-white border border-slate-200 space-y-2">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-500 font-medium">Duty Status</span>
-                <span
-                  className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-black ${
-                    formData.status === 'Active'
-                      ? 'bg-emerald-100 text-emerald-800'
-                      : 'bg-slate-100 text-slate-600'
-                  }`}
-                >
-                  <span
-                    className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
-                      formData.status === 'Active' ? 'bg-emerald-500' : 'bg-slate-400'
-                    }`}
-                  />
-                  {formData.status === 'Active' ? 'Available' : 'Off Duty'}
-                </span>
-              </div>
-
-              <div className="pt-2 border-t border-slate-100 text-xs">
-                <span className="text-slate-400 font-medium block text-[11px]">Assigned Store</span>
-                <span className="font-bold text-[#064C23] flex items-center mt-0.5 truncate">
-                  <FontAwesomeIcon icon={faStore} className="mr-1.5 text-xs text-[#064C23]" />
-                  {formData.belongToStore || 'Not Assigned'}
-                </span>
-              </div>
-            </div>
           </div>
 
           {/* Right Column (8 cols): Name, Mobile, Email, Belong to Store, Status */}
@@ -237,14 +208,6 @@ export default function AddDeliveryStaffView({ onBack, onSave }) {
                 </select>
                 <p className="text-[11px] text-slate-400 mt-1">Delivery availability and dispatch status</p>
               </div>
-            </div>
-
-            {/* Dispatch Note */}
-            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-xs text-slate-600 flex items-start space-x-2.5">
-              <FontAwesomeIcon icon={faTruck} className="text-[#064C23] mt-0.5 text-xs shrink-0" />
-              <p className="text-[11px] text-slate-500 leading-relaxed">
-                Rider orders will be routed strictly from orders dispatched by <strong className="text-slate-800">{formData.belongToStore || 'the assigned store'}</strong>.
-              </p>
             </div>
           </div>
         </div>
