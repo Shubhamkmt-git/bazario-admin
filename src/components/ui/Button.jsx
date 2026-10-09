@@ -15,21 +15,22 @@ export default function Button({
   className = '',
   ...props
 }) {
-  const baseStyles = "inline-flex items-center justify-center font-medium rounded-xl transition-all duration-150 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100 cursor-pointer select-none focus:outline-none focus:ring-2 focus:ring-offset-1"
+  const baseStyles = "inline-flex items-center justify-center font-bold tracking-tight rounded-xl transition-all duration-150 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed disabled:active:scale-100 cursor-pointer select-none focus:outline-none focus:ring-2 focus:ring-offset-1 shrink-0"
 
   const sizeStyles = {
-    sm: "px-3 py-1.5 text-xs space-x-1.5",
-    md: "px-4 py-2.5 text-sm space-x-2",
+    xs: "px-2.5 py-1 text-xs space-x-1",
+    sm: "px-3.5 py-2 text-xs space-x-1.5",
+    md: "px-5 py-2.5 text-sm space-x-2",
     lg: "px-6 py-3 text-base space-x-2.5",
   }
 
   const variantStyles = {
-    primary: "bg-[#064C23] hover:bg-[#095f2d] text-white shadow-sm hover:shadow-md focus:ring-[#064C23]/30",
-    secondary: "bg-[#A44F37] hover:bg-[#8e412c] text-white shadow-sm hover:shadow-md focus:ring-[#A44F37]/30",
-    cancel: "bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-900 focus:ring-slate-300",
-    danger: "bg-rose-600 hover:bg-rose-700 text-white shadow-sm hover:shadow-md focus:ring-rose-500/30",
-    outline: "border border-slate-300 hover:border-slate-400 bg-white hover:bg-slate-50 text-slate-700 focus:ring-slate-300",
-    ghost: "bg-transparent hover:bg-slate-100 text-slate-600 hover:text-slate-900 focus:ring-slate-200",
+    primary: "bg-[#064C23] hover:bg-[#085a2b] text-white shadow-xs hover:shadow-sm border border-[#064C23] focus:ring-[#064C23]/30",
+    secondary: "bg-[#A44F37] hover:bg-[#8e412c] text-white shadow-xs hover:shadow-sm border border-[#A44F37] focus:ring-[#A44F37]/30",
+    cancel: "bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 border border-slate-200 hover:border-slate-300 shadow-2xs focus:ring-slate-300",
+    danger: "bg-rose-600 hover:bg-rose-700 text-white shadow-xs hover:shadow-sm border border-rose-600 focus:ring-rose-500/30",
+    outline: "border border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50 text-slate-700 hover:text-slate-900 shadow-2xs focus:ring-slate-300",
+    ghost: "bg-transparent hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-transparent focus:ring-slate-200",
   }
 
   return (
