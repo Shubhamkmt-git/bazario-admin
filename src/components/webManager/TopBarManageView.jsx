@@ -392,23 +392,12 @@ export default function TopBarManageView() {
 
                         {/* Status */}
                         <td className="px-6 py-4">
-                          <div className="flex items-center space-x-2">
-                            <ToggleButton
-                              size="sm"
-                              checked={item.status === 'Active'}
-                              onChange={() => handleToggleStatus(item)}
-                              activeColor="#064C23"
-                            />
-                            <span
-                              className={`text-xs font-bold px-2 py-0.5 rounded-md ${
-                                item.status === 'Active'
-                                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                  : 'bg-slate-100 text-slate-600 border border-slate-200'
-                              }`}
-                            >
-                              {item.status}
-                            </span>
-                          </div>
+                          <ToggleButton
+                            size="sm"
+                            checked={item.status === 'Active'}
+                            onChange={() => handleToggleStatus(item)}
+                            activeColor="#064C23"
+                          />
                         </td>
 
                         {/* Actions */}
