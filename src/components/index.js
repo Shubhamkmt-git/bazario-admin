@@ -18,6 +18,7 @@ export { default as Toast } from './ui/Toast'
 // Route View Components
 export { default as OrdersView } from './orders/OrdersView'
 export { default as ProductsView } from './products/ProductsView'
+export { default as ProductCategoriesView } from './products/ProductCategoriesView'
 export { default as StoresView } from './stores/StoresView'
 export { default as CustomersView } from './customers/CustomersView'
 export { default as SettingsView } from './settings/SettingsView'

@@ -24,7 +24,8 @@ import {
   TopBarManageView,
   CtaManageView,
   CareerManageView,
-  HomePageSectionManageView
+  HomePageSectionManageView,
+  ProductCategoriesView
 } from '../components'
 import { useToast } from '../context/ToastContext'
 import {
@@ -58,7 +59,8 @@ import {
   faWindowMaximize,
   faBullhorn,
   faBriefcase,
-  faTableCellsLarge
+  faTableCellsLarge,
+  faTags
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
@@ -75,6 +77,8 @@ export default function DashboardPage({ onLogout }) {
       'dashboard',
       'stores',
       'customers',
+      'product-categories',
+      'product-category',
       'admin-users',
       'admin-roles',
       'admin-permissions',
@@ -111,6 +115,7 @@ export default function DashboardPage({ onLogout }) {
     { id: 'dashboard', name: 'Dashboard', icon: faChartLine },
     { id: 'stores', name: 'Stores', icon: faStore },
     { id: 'customers', name: 'Customers', icon: faUsers },
+    { id: 'product-categories', name: 'Product Category', icon: faTags },
     {
       id: 'admin-manager',
       name: 'Admin Manager',
@@ -277,6 +282,8 @@ export default function DashboardPage({ onLogout }) {
               ? 'Store Locations & Outlets'
               : activeTab === 'customers'
               ? 'Customers'
+              : activeTab === 'product-categories' || activeTab === 'product-category'
+              ? 'Product Category'
               : activeTab === 'admin-users'
               ? 'Admin Users'
               : activeTab === 'admin-roles'
@@ -305,6 +312,9 @@ export default function DashboardPage({ onLogout }) {
             {activeTab === 'settings' && <SettingsView />}
             {activeTab === 'stores' && <StoresView />}
             {activeTab === 'customers' && <CustomersView />}
+            {(activeTab === 'product-categories' || activeTab === 'product-category') && (
+              <ProductCategoriesView />
+            )}
             {activeTab === 'admin-users' && <AdminUsersView />}
             {activeTab === 'admin-roles' && <AdminRolesView />}
             {activeTab === 'admin-permissions' && <AdminPermissionsView />}
