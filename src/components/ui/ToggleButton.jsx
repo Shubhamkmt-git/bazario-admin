@@ -1,25 +1,35 @@
 import React from 'react'
 
 export default function ToggleButton({
-  checked = false,
+  checked,
+  enabled,
+  value,
   onChange,
   label = '',
   description = '',
   disabled = false,
   size = 'md', // 'sm' | 'md' | 'lg'
   color = 'primary', // 'primary' | 'secondary'
+  activeColor = '',
   className = '',
 }) {
+  const isChecked =
+    checked !== undefined
+      ? Boolean(checked)
+      : enabled !== undefined
+      ? Boolean(enabled)
+      : Boolean(value)
+
   const sizeStyles = {
     sm: {
-      track: 'w-8 h-4',
-      thumb: 'w-3 h-3',
+      track: 'w-9 h-5',
+      thumb: 'w-3.5 h-3.5',
       translate: 'translate-x-4',
     },
     md: {
-      track: 'w-11 h-6',
+      track: 'w-12 h-6',
       thumb: 'w-5 h-5',
-      translate: 'translate-x-5',
+      translate: 'translate-x-6',
     },
     lg: {
       track: 'w-14 h-7',
@@ -35,25 +45,42 @@ export default function ToggleButton({
 
   const currentSize = sizeStyles[size] || sizeStyles.md
 
+  const handleToggle = (e) => {
+    e.stopPropagation()
+    if (!disabled && onChange) {
+      onChange(!isChecked)
+    }
+  }
+
   return (
-    <label className={`inline-flex items-center space-x-3 cursor-pointer select-none ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}>
-      <div className="relative">
+    <label
+      onClick={handleToggle}
+      className={`inline-flex items-center space-x-3 cursor-pointer select-none group ${
+        disabled ? 'opacity-50 cursor-not-allowed' : ''
+      } ${className}`}
+    >
+      <div className="relative inline-block">
         <input
           type="checkbox"
-          checked={checked}
-          onChange={(e) => !disabled && onChange && onChange(e.target.checked)}
+          checked={isChecked}
+          onChange={() => {}}
           disabled={disabled}
           className="sr-only"
         />
         <div
           className={`${currentSize.track} rounded-full transition-colors duration-200 ease-in-out ${
-            checked ? (activeColorStyles[color] || activeColorStyles.primary) : 'bg-slate-300'
+            isChecked
+              ? activeColor
+                ? ''
+                : activeColorStyles[color] || activeColorStyles.primary
+              : 'bg-slate-300 group-hover:bg-slate-350'
           }`}
+          style={isChecked && activeColor ? { backgroundColor: activeColor } : {}}
         />
         <div
-          className={`absolute left-0.5 top-0.5 bg-white rounded-full shadow-md transform transition-transform duration-200 ease-in-out ${currentSize.thumb} ${
-            checked ? currentSize.translate : 'translate-x-0'
-          }`}
+          className={`absolute left-0.5 top-0.5 bg-white rounded-full shadow-md transform transition-transform duration-200 ease-in-out ${
+            currentSize.thumb
+          } ${isChecked ? currentSize.translate : 'translate-x-0'}`}
         />
       </div>
 

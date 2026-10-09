@@ -427,27 +427,57 @@ export default function StoresView() {
             </div>
 
             {/* Group 5: Operating Status Toggle */}
-            <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
+            {/* Group 5: Operating Status Toggle Card */}
+            <div
+              onClick={() =>
+                setFormData((prev) => ({
+                  ...prev,
+                  status: prev.status === 'Open' ? 'Closed' : 'Open',
+                }))
+              }
+              className={`p-4 sm:p-5 rounded-2xl border transition-all duration-200 cursor-pointer select-none flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
+                formData.status === 'Open'
+                  ? 'bg-[#f0f9f3] border-[#bae2cb] hover:border-[#064C23]'
+                  : 'bg-slate-50 border-slate-200 hover:border-slate-300'
+              }`}
+            >
+              <div className="space-y-1">
                 <div className="flex items-center space-x-2">
-                  <span className="text-sm font-bold text-slate-800">Store Live Operating Status</span>
+                  <span className="text-sm font-bold text-slate-900">Store Live Operating Status</span>
                   <span
-                    className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold ${
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold transition-colors ${
                       formData.status === 'Open'
-                        ? 'bg-emerald-100 text-emerald-800'
-                        : 'bg-rose-100 text-rose-800'
+                        ? 'bg-[#064C23] text-white shadow-2xs'
+                        : 'bg-rose-100 text-rose-700'
                     }`}
                   >
+                    <FontAwesomeIcon
+                      icon={formData.status === 'Open' ? faDoorOpen : faDoorClosed}
+                      className="mr-1 text-[10px]"
+                    />
                     {formData.status}
                   </span>
                 </div>
-                <p className="text-xs text-slate-500 mt-1">
-                  Controls whether this outlet accepts orders on the app and web.
+                <p className="text-xs text-slate-500">
+                  {formData.status === 'Open' ? (
+                    <span>
+                      Store is <strong className="text-[#064C23]">Open</strong>: Customers can place online delivery orders and visit this branch.
+                    </span>
+                  ) : (
+                    <span>
+                      Store is <strong className="text-rose-600">Closed</strong>: Outlet is currently offline or under maintenance.
+                    </span>
+                  )}
                 </p>
               </div>
               <ToggleButton
-                enabled={formData.status === 'Open'}
-                onChange={(enabled) => setFormData({ ...formData, status: enabled ? 'Open' : 'Closed' })}
+                checked={formData.status === 'Open'}
+                onChange={(isChecked) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    status: isChecked ? 'Open' : 'Closed',
+                  }))
+                }
                 activeColor="#064C23"
               />
             </div>
