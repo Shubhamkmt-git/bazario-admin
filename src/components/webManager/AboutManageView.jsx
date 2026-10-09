@@ -10,7 +10,6 @@ import {
   faTrashCan,
   faCheck,
   faMagnifyingGlass,
-  faXmark,
   faLeaf,
   faTruckFast,
   faShieldHalved,
@@ -49,8 +48,6 @@ import {
   faRecycle,
   faBuilding,
   faGlobe,
-  faSun,
-  faSnowflake,
   faShieldHeart,
   faHandshake,
   faCircleCheck,
@@ -64,9 +61,7 @@ import {
   faLemon,
   faWheatAwn,
   faBreadSlice,
-  faJar,
-  faUserTie,
-  faLock
+  faJar
 } from '@fortawesome/free-solid-svg-icons'
 import {
   Button,
@@ -136,7 +131,9 @@ const FONTAWESOME_ICONS = [
 ]
 
 const getFontAwesomeIcon = (iconId) => {
-  const match = FONTAWESOME_ICONS.find((item) => item.id === iconId || item.id === `fa${iconId.charAt(0).toUpperCase() + iconId.slice(1)}`)
+  const match = FONTAWESOME_ICONS.find(
+    (item) => item.id === iconId || item.id === `fa${iconId?.replace?.(/^fa/, '')}`
+  )
   return match ? match.icon : faLeaf
 }
 
@@ -229,13 +226,13 @@ const INITIAL_FORM = {
 }
 
 const STEPS = [
-  { id: 1, name: 'Hero Banner' },
-  { id: 2, name: 'States (4)' },
-  { id: 3, name: 'Section 1' },
-  { id: 4, name: 'Section 2' },
-  { id: 5, name: 'Section 3' },
-  { id: 6, name: 'Section 4' },
-  { id: 7, name: 'About CTA' }
+  { id: 1, name: 'Hero Banner', short: 'Hero' },
+  { id: 2, name: 'States (4)', short: 'States' },
+  { id: 3, name: 'Section One', short: 'Sec 1' },
+  { id: 4, name: 'Section 2', short: 'Sec 2' },
+  { id: 5, name: 'Section 3', short: 'Sec 3' },
+  { id: 6, name: 'Section 4', short: 'Sec 4' },
+  { id: 7, name: 'About CTA', short: 'CTA' }
 ]
 
 export default function AboutManageView() {
@@ -274,18 +271,18 @@ export default function AboutManageView() {
       localStorage.setItem('bazario_web_about_form', JSON.stringify(formData))
       setTimeout(() => {
         setSaving(false)
-        toast.success('About Form Saved', 'All section inputs saved successfully.')
+        toast.success('About Form Saved', 'All 7 section configurations updated successfully.')
       }, 300)
     } catch {
       setSaving(false)
-      toast.error('Save Failed', 'Could not save settings.')
+      toast.error('Save Failed', 'Could not save form settings.')
     }
   }
 
   const handleReset = () => {
     setFormData(INITIAL_FORM)
     localStorage.setItem('bazario_web_about_form', JSON.stringify(INITIAL_FORM))
-    toast.info('Form Reset', 'Restored initial clean form values.')
+    toast.info('Form Reset', 'Restored default form values.')
   }
 
   // Gallery dynamic add/remove
@@ -297,11 +294,13 @@ export default function AboutManageView() {
       subtitle: ''
     }
     updateSection('section3', 'gallery', [...formData.section3.gallery, newItem])
+    toast.success('Gallery Item Added', 'New image slot added.')
   }
 
   const removeGalleryItem = (id) => {
     const updated = formData.section3.gallery.filter((g) => g.id !== id)
     updateSection('section3', 'gallery', updated)
+    toast.info('Item Removed', 'Gallery item deleted.')
   }
 
   const updateGalleryItem = (id, field, val) => {
@@ -325,7 +324,7 @@ export default function AboutManageView() {
     updated[index] = { ...updated[index], icon: iconId }
     updateSection(section, 'cards', updated)
     setIconModalOpen(false)
-    toast.success('Icon Selected', `FontAwesome icon updated.`)
+    toast.success('Icon Updated', `Selected FontAwesome icon.`)
   }
 
   const filteredIcons = FONTAWESOME_ICONS.filter((item) =>
@@ -335,33 +334,38 @@ export default function AboutManageView() {
   )
 
   return (
-    <div className="space-y-6 pb-16 max-w-6xl mx-auto">
-      {/* Header Banner */}
-      <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="space-y-6 pb-20 max-w-6xl mx-auto">
+      {/* Top Header Card */}
+      <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center space-x-3.5">
-          <div className="w-11 h-11 rounded-2xl bg-[#064C23]/10 text-[#064C23] flex items-center justify-center text-lg shrink-0">
+          <div className="w-12 h-12 rounded-2xl bg-[#064C23]/10 text-[#064C23] flex items-center justify-center text-xl shrink-0">
             <FontAwesomeIcon icon={faCircleInfo} />
           </div>
           <div>
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900">About Page Manage</h1>
-            <p className="text-xs text-slate-500">
-              Configure hero banner, states, mission/vision, value cards, gallery, and CTA.
+            <div className="flex items-center space-x-2">
+              <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">About Page Manager</h1>
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                Live Storefront
+              </span>
+            </div>
+            <p className="text-xs sm:text-sm text-slate-500">
+              Stepped form to manage hero banner, states, mission/vision, values, gallery, commitments, and CTA.
             </p>
           </div>
         </div>
 
         <div className="flex items-center space-x-2.5 self-end sm:self-auto">
-          <Button type="button" variant="outline" size="sm" onClick={handleReset} icon={<FontAwesomeIcon icon={faRotateLeft} />}>
+          <Button type="button" variant="outline" size="md" onClick={handleReset} icon={<FontAwesomeIcon icon={faRotateLeft} className="text-xs" />}>
             Reset
           </Button>
-          <Button type="button" variant="primary" size="sm" onClick={handleSave} loading={saving} icon={<FontAwesomeIcon icon={faFloppyDisk} />}>
+          <Button type="button" variant="primary" size="md" onClick={handleSave} loading={saving} icon={<FontAwesomeIcon icon={faFloppyDisk} className="text-xs" />}>
             Save All
           </Button>
         </div>
       </div>
 
-      {/* Step Navigation Tabs */}
-      <div className="bg-white rounded-2xl p-2 border border-slate-200/90 shadow-xs flex items-center overflow-x-auto no-scrollbar gap-1.5">
+      {/* Stepper Navigation Bar */}
+      <div className="bg-white rounded-2xl p-2 border border-slate-200 shadow-xs flex items-center overflow-x-auto no-scrollbar gap-1.5">
         {STEPS.map((step) => {
           const isCurrent = activeStep === step.id
           return (
@@ -369,10 +373,10 @@ export default function AboutManageView() {
               key={step.id}
               type="button"
               onClick={() => setActiveStep(step.id)}
-              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center space-x-2 ${
+              className={`flex-1 min-w-[120px] px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center justify-center space-x-2 ${
                 isCurrent
                   ? 'bg-[#064C23] text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  : 'bg-slate-50 text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-transparent'
               }`}
             >
               <span className={`w-5 h-5 rounded-md flex items-center justify-center text-[11px] font-black ${
@@ -386,21 +390,22 @@ export default function AboutManageView() {
         })}
       </div>
 
-      {/* Form Container */}
-      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-xs overflow-hidden">
+      {/* Form Card Layout */}
+      <div className="bg-white rounded-3xl border border-slate-200 shadow-xs divide-y divide-slate-100 overflow-hidden">
         
         {/* ==========================================================
             STEP 1: HERO BANNER
             ========================================================== */}
         {activeStep === 1 && (
           <div className="p-6 sm:p-8 space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
               <div>
-                <h2 className="text-base font-black text-slate-900">Hero Banner</h2>
-                <p className="text-xs text-slate-500">Banner image, titles line 1 & 2, and subtitle</p>
+                <span className="text-[11px] font-bold text-[#064C23] uppercase tracking-wider">Step 1 of 7</span>
+                <h2 className="text-lg font-black text-slate-900">Hero Banner</h2>
+                <p className="text-xs text-slate-500">Configure top hero banner image, title lines, and opening story subtitle.</p>
               </div>
               <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold">
-                <span className="text-slate-600">Status:</span>
+                <span className="text-slate-700">Section Status:</span>
                 <ToggleButton
                   size="sm"
                   checked={formData.hero.status}
@@ -410,11 +415,11 @@ export default function AboutManageView() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="md:col-span-2 space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 space-y-4">
                 <InputField
                   label="BANNER TITLE LINE 1"
-                  placeholder="Enter banner title line 1"
+                  placeholder="e.g. Bill Halka, Dil Halka"
                   value={formData.hero.titleLine1}
                   onChange={(e) => updateSection('hero', 'titleLine1', e.target.value)}
                   required
@@ -422,7 +427,7 @@ export default function AboutManageView() {
 
                 <InputField
                   label="TITLE LINE 2"
-                  placeholder="Enter title line 2"
+                  placeholder="e.g. Fresh Grocery & Daily Essentials"
                   value={formData.hero.titleLine2}
                   onChange={(e) => updateSection('hero', 'titleLine2', e.target.value)}
                   required
@@ -433,11 +438,11 @@ export default function AboutManageView() {
                     SUBTITLE
                   </label>
                   <textarea
-                    rows={3}
-                    placeholder="Enter hero subtitle"
+                    rows={4}
+                    placeholder="Enter hero subtitle..."
                     value={formData.hero.subtitle}
                     onChange={(e) => updateSection('hero', 'subtitle', e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 outline-none focus:bg-white focus:border-[#064C23]"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 outline-none focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 transition-all"
                   />
                 </div>
               </div>
@@ -458,17 +463,18 @@ export default function AboutManageView() {
         )}
 
         {/* ==========================================================
-            STEP 2: STATES (4)
+            STEP 2: STATES (4 CARDS)
             ========================================================== */}
         {activeStep === 2 && (
           <div className="p-6 sm:p-8 space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
               <div>
-                <h2 className="text-base font-black text-slate-900">States (4 Cards)</h2>
-                <p className="text-xs text-slate-500">Prefix, suffix, label and description for 4 state cards</p>
+                <span className="text-[11px] font-bold text-[#064C23] uppercase tracking-wider">Step 2 of 7</span>
+                <h2 className="text-lg font-black text-slate-900">States (4 Cards)</h2>
+                <p className="text-xs text-slate-500">Configure numerical highlights, prefixes, suffixes, labels, and descriptions.</p>
               </div>
               <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold">
-                <span className="text-slate-600">Status:</span>
+                <span className="text-slate-700">Section Status:</span>
                 <ToggleButton
                   size="sm"
                   checked={formData.states.status}
@@ -487,8 +493,13 @@ export default function AboutManageView() {
                 }
 
                 return (
-                  <div key={idx} className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-3">
-                    <div className="text-xs font-black text-[#064C23]">Card #{idx + 1}</div>
+                  <div key={idx} className="p-5 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-3 flex flex-col justify-between">
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+                      <span className="w-6 h-6 rounded-lg bg-[#064C23] text-white text-xs font-black flex items-center justify-center">
+                        #{idx + 1}
+                      </span>
+                      <span className="text-xs font-bold text-slate-500">Card {idx + 1}</span>
+                    </div>
                     
                     <div className="grid grid-cols-2 gap-2">
                       <InputField
@@ -519,7 +530,7 @@ export default function AboutManageView() {
                       </label>
                       <textarea
                         rows={2}
-                        placeholder="Description text"
+                        placeholder="Description summary..."
                         value={card.description}
                         onChange={(e) => updateCard('description', e.target.value)}
                         className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-800 outline-none focus:border-[#064C23]"
@@ -537,13 +548,14 @@ export default function AboutManageView() {
             ========================================================== */}
         {activeStep === 3 && (
           <div className="p-6 sm:p-8 space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
               <div>
-                <h2 className="text-base font-black text-slate-900">Section One</h2>
-                <p className="text-xs text-slate-500">Label, title, mission card, and vision card</p>
+                <span className="text-[11px] font-bold text-[#064C23] uppercase tracking-wider">Step 3 of 7</span>
+                <h2 className="text-lg font-black text-slate-900">Section One</h2>
+                <p className="text-xs text-slate-500">Label, title, mission card, and vision card.</p>
               </div>
               <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold">
-                <span className="text-slate-600">Status:</span>
+                <span className="text-slate-700">Section Status:</span>
                 <ToggleButton
                   size="sm"
                   checked={formData.section1.status}
@@ -571,8 +583,14 @@ export default function AboutManageView() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
               {/* Mission Card */}
-              <div className="p-5 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-3.5">
-                <h3 className="text-xs font-black uppercase tracking-wider text-[#064C23]">Mission Card</h3>
+              <div className="p-6 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-4">
+                <div className="flex items-center space-x-2 pb-2 border-b border-slate-200">
+                  <div className="w-7 h-7 rounded-lg bg-[#064C23] text-white flex items-center justify-center text-xs font-bold">
+                    M
+                  </div>
+                  <h3 className="text-sm font-black text-slate-900">Mission Card</h3>
+                </div>
+
                 <InputField
                   label="LABLE"
                   placeholder="e.g. OUR MISSION"
@@ -592,7 +610,7 @@ export default function AboutManageView() {
                   }}
                   required
                 />
-                <div className="space-y-1">
+                <div className="space-y-1.5">
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
                     SUUBTITLE
                   </label>
@@ -610,8 +628,14 @@ export default function AboutManageView() {
               </div>
 
               {/* Vission Card */}
-              <div className="p-5 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-3.5">
-                <h3 className="text-xs font-black uppercase tracking-wider text-[#A44F37]">Vission Card</h3>
+              <div className="p-6 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-4">
+                <div className="flex items-center space-x-2 pb-2 border-b border-slate-200">
+                  <div className="w-7 h-7 rounded-lg bg-[#A44F37] text-white flex items-center justify-center text-xs font-bold">
+                    V
+                  </div>
+                  <h3 className="text-sm font-black text-slate-900">Vission Card</h3>
+                </div>
+
                 <InputField
                   label="LABLE"
                   placeholder="e.g. OUR VISION"
@@ -631,7 +655,7 @@ export default function AboutManageView() {
                   }}
                   required
                 />
-                <div className="space-y-1">
+                <div className="space-y-1.5">
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
                     SUUBTITLE
                   </label>
@@ -652,17 +676,18 @@ export default function AboutManageView() {
         )}
 
         {/* ==========================================================
-            STEP 4: SECTION 2 (4 CARDS: ICON SELECT, LABLE, TITLE, SUBTITLE, BASE LINE)
+            STEP 4: SECTION 2 (4 CARDS: ICON, LABLE, TITLE, SUBTITLE, BASE LINE)
             ========================================================== */}
         {activeStep === 4 && (
           <div className="p-6 sm:p-8 space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
               <div>
-                <h2 className="text-base font-black text-slate-900">Section 2</h2>
-                <p className="text-xs text-slate-500">Lable, title, and 4 cards with visual FontAwesome icon selection</p>
+                <span className="text-[11px] font-bold text-[#064C23] uppercase tracking-wider">Step 4 of 7</span>
+                <h2 className="text-lg font-black text-slate-900">Section 2</h2>
+                <p className="text-xs text-slate-500">Lable, title, and 4 cards with visual FontAwesome icon selection.</p>
               </div>
               <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold">
-                <span className="text-slate-600">Status:</span>
+                <span className="text-slate-700">Section Status:</span>
                 <ToggleButton
                   size="sm"
                   checked={formData.section2.status}
@@ -697,8 +722,7 @@ export default function AboutManageView() {
                 }
 
                 return (
-                  <div key={idx} className="p-5 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-3.5">
-                    {/* Visual Icon Header */}
+                  <div key={idx} className="p-6 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-3.5">
                     <div className="flex items-center justify-between pb-2 border-b border-slate-200">
                       <span className="text-xs font-black text-[#064C23]">Card #{idx + 1}</span>
                       
@@ -707,7 +731,6 @@ export default function AboutManageView() {
                         type="button"
                         onClick={() => handleOpenIconPicker('section2', idx)}
                         className="flex items-center space-x-2 px-3 py-1.5 bg-white hover:bg-[#f0f9f3] border border-slate-200 hover:border-[#064C23] rounded-xl text-xs font-bold cursor-pointer transition-all shadow-2xs group"
-                        title="Click to change icon from FontAwesome library"
                       >
                         <div className="w-6 h-6 rounded-lg bg-[#064C23]/10 text-[#064C23] group-hover:bg-[#064C23] group-hover:text-white flex items-center justify-center text-xs transition-colors">
                           <FontAwesomeIcon icon={getFontAwesomeIcon(card.icon)} />
@@ -762,13 +785,14 @@ export default function AboutManageView() {
             ========================================================== */}
         {activeStep === 5 && (
           <div className="p-6 sm:p-8 space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
               <div>
-                <h2 className="text-base font-black text-slate-900">Section 3</h2>
-                <p className="text-xs text-slate-500">Lable, title, description, and gallery images (multiple can add/remove)</p>
+                <span className="text-[11px] font-bold text-[#064C23] uppercase tracking-wider">Step 5 of 7</span>
+                <h2 className="text-lg font-black text-slate-900">Section 3</h2>
+                <p className="text-xs text-slate-500">Lable, title, description, and dynamic gallery images.</p>
               </div>
               <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold">
-                <span className="text-slate-600">Status:</span>
+                <span className="text-slate-700">Section Status:</span>
                 <ToggleButton
                   size="sm"
                   checked={formData.section3.status}
@@ -799,7 +823,7 @@ export default function AboutManageView() {
                 DESCRIPTION
               </label>
               <textarea
-                rows={2}
+                rows={3}
                 placeholder="Enter description..."
                 value={formData.section3.description}
                 onChange={(e) => updateSection('section3', 'description', e.target.value)}
@@ -820,7 +844,7 @@ export default function AboutManageView() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {formData.section3.gallery.map((item, idx) => (
-                  <div key={item.id} className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-3 relative">
+                  <div key={item.id} className="p-5 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-3 relative">
                     <div className="flex items-center justify-between pb-1 border-b border-slate-200">
                       <span className="text-xs font-black text-[#064C23]">Image #{idx + 1}</span>
                       {formData.section3.gallery.length > 1 && (
@@ -867,13 +891,14 @@ export default function AboutManageView() {
             ========================================================== */}
         {activeStep === 6 && (
           <div className="p-6 sm:p-8 space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
               <div>
-                <h2 className="text-base font-black text-slate-900">Section 4</h2>
-                <p className="text-xs text-slate-500">Lable, title, and 3 cards manage (title, subtitle, icon, lable, baseline)</p>
+                <span className="text-[11px] font-bold text-[#064C23] uppercase tracking-wider">Step 6 of 7</span>
+                <h2 className="text-lg font-black text-slate-900">Section 4</h2>
+                <p className="text-xs text-slate-500">Lable, title, and 3 cards manage (title, subtitle, icon, lable, baseline).</p>
               </div>
               <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold">
-                <span className="text-slate-600">Status:</span>
+                <span className="text-slate-700">Section Status:</span>
                 <ToggleButton
                   size="sm"
                   checked={formData.section4.status}
@@ -908,7 +933,7 @@ export default function AboutManageView() {
                 }
 
                 return (
-                  <div key={idx} className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-3">
+                  <div key={idx} className="p-5 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-3.5 flex flex-col justify-between">
                     <div className="flex items-center justify-between pb-2 border-b border-slate-200">
                       <span className="text-xs font-black text-[#064C23]">Card #{idx + 1}</span>
                       
@@ -917,7 +942,6 @@ export default function AboutManageView() {
                         type="button"
                         onClick={() => handleOpenIconPicker('section4', idx)}
                         className="flex items-center space-x-2 px-2.5 py-1 bg-white hover:bg-[#f0f9f3] border border-slate-200 hover:border-[#064C23] rounded-xl text-xs font-bold cursor-pointer transition-all shadow-2xs group"
-                        title="Click to select FontAwesome icon"
                       >
                         <div className="w-5 h-5 rounded-md bg-[#064C23]/10 text-[#064C23] group-hover:bg-[#064C23] group-hover:text-white flex items-center justify-center text-xs transition-colors">
                           <FontAwesomeIcon icon={getFontAwesomeIcon(card.icon)} />
@@ -946,7 +970,7 @@ export default function AboutManageView() {
                         SUBTITLE
                       </label>
                       <textarea
-                        rows={2}
+                        rows={3}
                         placeholder="Enter card subtitle..."
                         value={card.subtitle}
                         onChange={(e) => updateCard('subtitle', e.target.value)}
@@ -972,13 +996,14 @@ export default function AboutManageView() {
             ========================================================== */}
         {activeStep === 7 && (
           <div className="p-6 sm:p-8 space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
               <div>
-                <h2 className="text-base font-black text-slate-900">About CTA Manage</h2>
-                <p className="text-xs text-slate-500">Lable, title, subtitle, primary button label & url, secondary button label & url</p>
+                <span className="text-[11px] font-bold text-[#064C23] uppercase tracking-wider">Step 7 of 7</span>
+                <h2 className="text-lg font-black text-slate-900">About CTA Manage</h2>
+                <p className="text-xs text-slate-500">Lable, title, subtitle, primary and secondary button links.</p>
               </div>
               <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold">
-                <span className="text-slate-600">Status:</span>
+                <span className="text-slate-700">Section Status:</span>
                 <ToggleButton
                   size="sm"
                   checked={formData.cta.status}
@@ -1009,17 +1034,17 @@ export default function AboutManageView() {
                   SUBTITLE
                 </label>
                 <textarea
-                  rows={2}
+                  rows={3}
                   placeholder="Enter subtitle..."
                   value={formData.cta.subtitle}
                   onChange={(e) => updateSection('cta', 'subtitle', e.target.value)}
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 outline-none focus:bg-white focus:border-[#064C23]"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 outline-none focus:bg-white focus:border-[#064C23]"
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                <div className="p-4 bg-emerald-50/70 border border-emerald-200 rounded-2xl space-y-3">
-                  <span className="text-xs font-black text-[#064C23] uppercase">Primary Button</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 pt-2">
+                <div className="p-5 bg-emerald-50/70 border border-emerald-200 rounded-2xl space-y-3">
+                  <span className="text-xs font-black text-[#064C23] uppercase block">Primary Button</span>
                   <InputField
                     label="PRIMAARY BUTTON LABLE"
                     placeholder="e.g. Find Nearest Store"
@@ -1036,8 +1061,8 @@ export default function AboutManageView() {
                   />
                 </div>
 
-                <div className="p-4 bg-amber-50/70 border border-amber-200 rounded-2xl space-y-3">
-                  <span className="text-xs font-black text-[#A44F37] uppercase">Secondary Button</span>
+                <div className="p-5 bg-amber-50/70 border border-amber-200 rounded-2xl space-y-3">
+                  <span className="text-xs font-black text-[#A44F37] uppercase block">Secondary Button</span>
                   <InputField
                     label="SECONDAARY BUTTON LABLE"
                     placeholder="e.g. Download App"
@@ -1057,29 +1082,31 @@ export default function AboutManageView() {
         )}
 
         {/* Stepper Footer Controls */}
-        <div className="p-4 sm:px-8 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
-          {activeStep > 1 ? (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setActiveStep((prev) => prev - 1)}
-              icon={<FontAwesomeIcon icon={faArrowLeft} />}
-            >
-              Previous
-            </Button>
-          ) : (
-            <span className="text-xs font-bold text-slate-400">Step 1 of 7</span>
-          )}
+        <div className="p-5 sm:px-8 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+          <div>
+            {activeStep > 1 ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="md"
+                onClick={() => setActiveStep((prev) => prev - 1)}
+                icon={<FontAwesomeIcon icon={faArrowLeft} className="text-xs" />}
+              >
+                Previous
+              </Button>
+            ) : (
+              <span className="text-xs font-bold text-slate-400">Step 1 of 7</span>
+            )}
+          </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-3">
             <Button
               type="button"
               variant="outline"
-              size="sm"
+              size="md"
               onClick={handleSave}
               loading={saving}
-              icon={<FontAwesomeIcon icon={faFloppyDisk} />}
+              icon={<FontAwesomeIcon icon={faFloppyDisk} className="text-xs" />}
             >
               Save Form
             </Button>
@@ -1088,19 +1115,20 @@ export default function AboutManageView() {
               <Button
                 type="button"
                 variant="primary"
-                size="sm"
+                size="md"
                 onClick={() => setActiveStep((prev) => prev + 1)}
+                icon={<FontAwesomeIcon icon={faArrowRight} className="text-xs ml-1" />}
               >
-                Next Step →
+                Next Step ({STEPS[activeStep]?.name})
               </Button>
             ) : (
               <Button
                 type="button"
                 variant="primary"
-                size="sm"
+                size="md"
                 onClick={handleSave}
                 loading={saving}
-                icon={<FontAwesomeIcon icon={faCheck} />}
+                icon={<FontAwesomeIcon icon={faCheck} className="text-xs mr-1" />}
               >
                 Save All
               </Button>
@@ -1123,7 +1151,7 @@ export default function AboutManageView() {
           <div className="relative">
             <input
               type="text"
-              placeholder="Search all free FontAwesome icons (e.g. food, leaf, truck, star, store, price)..."
+              placeholder="Search icons (e.g. food, leaf, truck, star, store, price)..."
               value={iconSearchQuery}
               onChange={(e) => setIconSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 outline-none focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10"
