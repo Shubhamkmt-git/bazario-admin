@@ -128,7 +128,7 @@ export default function App() {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full bg-[#064C23] hover:bg-[#043b1b] text-white font-bold py-3.5 px-4 rounded-xl text-sm transition-all duration-150 shadow-md hover:shadow-lg active:scale-[0.99] flex items-center justify-center space-x-2 disabled:opacity-80 disabled:cursor-not-allowed cursor-pointer"
+                    className="w-full bg-[#064C23] hover:bg-[#095f2d] active:bg-[#043b1b] text-white font-bold py-3.5 px-4 rounded-xl text-sm transition-all duration-200 shadow-md shadow-[#064C23]/25 hover:shadow-xl hover:shadow-[#064C23]/40 hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99] flex items-center justify-center space-x-2 disabled:opacity-80 disabled:cursor-not-allowed cursor-pointer"
                   >
                     {isLoading ? (
                       <>
