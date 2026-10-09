@@ -97,13 +97,6 @@ export default function App() {
                     Redirecting to Dashboard...
                   </span>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleReset}
-                  className="mt-4 inline-block text-xs font-semibold text-[#A44F37] hover:text-[#7e3b29] underline cursor-pointer"
-                >
-                  Sign in with another account
-                </button>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
