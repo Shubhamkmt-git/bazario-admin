@@ -166,7 +166,7 @@ export default function AddUserView({ onBack, onSave }) {
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 pt-1">
               {/* Profile Avatar Frame */}
               <div className="flex flex-col items-center space-y-2 shrink-0">
-                <div className="w-28 h-28 relative rounded-3xl border-2 border-dashed border-slate-300 hover:border-[#064C23] bg-slate-50/80 overflow-hidden flex flex-col items-center justify-center transition-all group shadow-2xs">
+                <div className="w-36 h-36 sm:w-40 sm:h-40 relative rounded-3xl border-2 border-dashed border-slate-300 hover:border-[#064C23] bg-slate-50/90 overflow-hidden flex flex-col items-center justify-center transition-all group shadow-xs">
                   <input
                     type="file"
                     accept="image/*"
@@ -188,10 +188,10 @@ export default function AddUserView({ onBack, onSave }) {
                         alt="Avatar"
                         className="w-full h-full object-cover"
                       />
-                      <div className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-2">
+                      <div className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-3">
                         <label
                           htmlFor="avatar-upload-add"
-                          className="w-8 h-8 rounded-full bg-white text-slate-800 flex items-center justify-center text-xs shadow-md cursor-pointer hover:scale-110 transition-transform"
+                          className="w-9 h-9 rounded-full bg-white text-slate-800 flex items-center justify-center text-sm shadow-md cursor-pointer hover:scale-110 transition-transform"
                           title="Change Photo"
                         >
                           <FontAwesomeIcon icon={faRotateRight} />
@@ -202,7 +202,7 @@ export default function AddUserView({ onBack, onSave }) {
                             ev.stopPropagation()
                             handleChange('avatar', null)
                           }}
-                          className="w-8 h-8 rounded-full bg-rose-600 text-white flex items-center justify-center text-xs shadow-md cursor-pointer hover:scale-110 transition-transform"
+                          className="w-9 h-9 rounded-full bg-rose-600 text-white flex items-center justify-center text-sm shadow-md cursor-pointer hover:scale-110 transition-transform"
                           title="Remove Photo"
                         >
                           <FontAwesomeIcon icon={faTrashCan} />
@@ -212,17 +212,18 @@ export default function AddUserView({ onBack, onSave }) {
                   ) : (
                     <label
                       htmlFor="avatar-upload-add"
-                      className="w-full h-full flex flex-col items-center justify-center p-2 text-center cursor-pointer select-none"
+                      className="w-full h-full flex flex-col items-center justify-center p-3 text-center cursor-pointer select-none"
                     >
-                      <div className="w-9 h-9 rounded-2xl bg-[#064C23]/10 text-[#064C23] flex items-center justify-center text-sm mb-1 group-hover:scale-110 transition-transform">
+                      <div className="w-12 h-12 rounded-2xl bg-[#064C23]/10 text-[#064C23] flex items-center justify-center text-lg mb-2 group-hover:scale-110 transition-transform shadow-2xs">
                         <FontAwesomeIcon icon={faCamera} />
                       </div>
-                      <span className="text-[11px] font-bold text-slate-600">Upload</span>
+                      <span className="text-xs font-bold text-slate-700">Upload Photo</span>
+                      <span className="text-[10px] text-slate-400 mt-0.5">PNG, JPG up to 5MB</span>
                     </label>
                   )}
                 </div>
                 <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                  Profile Photo
+                  Admin Photo
                 </span>
               </div>
 
