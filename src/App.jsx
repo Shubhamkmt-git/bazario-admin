@@ -51,7 +51,7 @@ export default function App() {
             {/* Heading */}
             <div className="mb-7">
               <h1 className="text-[28px] sm:text-[32px] font-extrabold text-[#111827] tracking-tight leading-tight">
-                Store Login
+                Admin Login
               </h1>
             </div>
 
