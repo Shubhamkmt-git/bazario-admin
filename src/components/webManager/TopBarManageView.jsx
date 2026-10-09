@@ -561,7 +561,6 @@ export default function TopBarManageView() {
                   placeholder="e.g. 1"
                   value={formData.sortingOrder}
                   onChange={(e) => setFormData({ ...formData, sortingOrder: e.target.value })}
-                  helperText="Lower numbers appear first in the ticker sequence"
                   required
                 />
               </div>
@@ -579,9 +578,6 @@ export default function TopBarManageView() {
                   <option value="Active">Active</option>
                   <option value="Inactive">Inactive</option>
                 </select>
-                <p className="mt-1 text-[11px] text-slate-400">
-                  Select whether this announcement is active on the website
-                </p>
               </div>
             </div>
 
@@ -592,7 +588,6 @@ export default function TopBarManageView() {
                 placeholder="e.g. ⚡ Super Savings: Flat ₹150 OFF on orders above ₹999 with code BAZARIO150"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                helperText="Primary announcement message or offer banner shown to customers"
                 required
               />
             </div>
@@ -604,7 +599,6 @@ export default function TopBarManageView() {
                 placeholder="e.g. https://bazario.in/deals or PROMOCODE150"
                 value={formData.urlOrCopyText}
                 onChange={(e) => setFormData({ ...formData, urlOrCopyText: e.target.value })}
-                helperText="Provide a destination URL (link) or a promo coupon code that users can copy"
               />
             </div>
 
