@@ -14,12 +14,16 @@ import {
   faMapLocationDot,
   faCopy,
   faPenToSquare,
-  faTrashCan
+  faTrashCan,
+  faCircleCheck,
+  faCompass,
+  faArrowLeft,
+  faBuildingColumns
 } from '@fortawesome/free-solid-svg-icons'
 import { useToast } from '../../context/ToastContext'
 import Button from '../ui/Button'
+import BackButton from '../ui/BackButton'
 import ActionButton from '../ui/ActionButton'
-import Modal from '../ui/Modal'
 import AlertModal from '../ui/AlertModal'
 import InputField from '../ui/InputField'
 import ToggleButton from '../ui/ToggleButton'
@@ -77,6 +81,8 @@ const INITIAL_STORES = [
 
 export default function StoresView() {
   const toast = useToast()
+  
+  // Storage state
   const [stores, setStores] = useState(() => {
     try {
       const saved = localStorage.getItem(STORES_STORAGE_KEY)
@@ -86,16 +92,18 @@ export default function StoresView() {
     }
   })
 
+  // Full-width page view state: 'list' | 'add' | 'edit' | 'view'
+  const [viewMode, setViewMode] = useState('list')
+  const [selectedStore, setSelectedStore] = useState(null)
+
+  // Filters state (for list view)
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
 
-  // Modals state
-  const [isFormModalOpen, setIsFormModalOpen] = useState(false)
-  const [editingStore, setEditingStore] = useState(null)
-  const [viewingStore, setViewingStore] = useState(null)
+  // Delete modal state
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, store: null })
 
-  // Form state
+  // Form state (used for add and edit full-width pages)
   const [formData, setFormData] = useState({
     title: '',
     subtitle: '',
@@ -126,8 +134,14 @@ export default function StoresView() {
     return matchesStatus && matchesSearch
   })
 
-  const handleOpenAddModal = () => {
-    setEditingStore(null)
+  // Navigation handlers
+  const handleGoToList = () => {
+    setViewMode('list')
+    setSelectedStore(null)
+  }
+
+  const handleOpenAdd = () => {
+    setSelectedStore(null)
     setFormData({
       title: '',
       subtitle: '',
@@ -138,14 +152,14 @@ export default function StoresView() {
       phone: '',
       operatingHours: '7:00 AM - 11:00 PM',
     })
-    setIsFormModalOpen(true)
+    setViewMode('add')
   }
 
-  const handleOpenEditModal = (store) => {
-    setEditingStore(store)
+  const handleOpenEdit = (store) => {
+    setSelectedStore(store)
     setFormData({
-      title: store.title,
-      subtitle: store.subtitle,
+      title: store.title || '',
+      subtitle: store.subtitle || '',
       image: store.image || '/supermart-bg.jpg',
       coordinates: store.coordinates || '',
       googleUrl: store.googleUrl || '',
@@ -153,60 +167,533 @@ export default function StoresView() {
       phone: store.phone || '',
       operatingHours: store.operatingHours || '7:00 AM - 11:00 PM',
     })
-    setIsFormModalOpen(true)
+    setViewMode('edit')
+  }
+
+  const handleOpenView = (store) => {
+    setSelectedStore(store)
+    setViewMode('view')
   }
 
   const handleFormSubmit = (e) => {
     e.preventDefault()
-    if (!formData.title) {
-      toast.error('Validation Error', 'Please provide a store title.')
+    if (!formData.title.trim()) {
+      toast.error('Validation Error', 'Please enter a store title/name.')
       return
     }
 
-    if (editingStore) {
-      // Update
-      const updated = stores.map((s) =>
-        s.id === editingStore.id
+    if (viewMode === 'edit' && selectedStore) {
+      // Update existing store
+      const updatedList = stores.map((s) =>
+        s.id === selectedStore.id
           ? {
               ...s,
               ...formData,
             }
           : s
       )
-      setStores(updated)
-      toast.success('Store Updated', `"${formData.title}" details updated.`)
+      setStores(updatedList)
+      setSelectedStore({ ...selectedStore, ...formData })
+      toast.success('Store Updated', `"${formData.title}" details updated successfully!`)
+      setViewMode('list')
     } else {
-      // Create new
+      // Create new store
       const newStore = {
         id: Date.now(),
         ...formData,
       }
       setStores([newStore, ...stores])
-      toast.success('Store Added', `"${formData.title}" has been listed.`)
+      toast.success('Store Added', `"${formData.title}" has been listed successfully!`)
+      setViewMode('list')
     }
-
-    setIsFormModalOpen(false)
   }
 
   const handleDeleteStore = (storeId, storeTitle) => {
     setStores((prev) => prev.filter((s) => s.id !== storeId))
     setDeleteModal({ isOpen: false, store: null })
-    toast.success('Store Removed', `"${storeTitle}" was deleted from listings.`)
+    if (selectedStore && selectedStore.id === storeId) {
+      setViewMode('list')
+      setSelectedStore(null)
+    }
+    toast.success('Store Removed', `"${storeTitle}" has been deleted from store listings.`)
   }
 
   const handleToggleStatus = (store) => {
     const newStatus = store.status === 'Open' ? 'Closed' : 'Open'
-    const updated = stores.map((s) => (s.id === store.id ? { ...s, status: newStatus } : s))
-    setStores(updated)
+    const updatedList = stores.map((s) => (s.id === store.id ? { ...s, status: newStatus } : s))
+    setStores(updatedList)
+    if (selectedStore && selectedStore.id === store.id) {
+      setSelectedStore({ ...selectedStore, status: newStatus })
+    }
     toast.info('Status Changed', `"${store.title}" is now marked as ${newStatus}.`)
   }
 
   const handleCopyCoordinates = (coords) => {
     if (!coords) return
     navigator.clipboard.writeText(coords)
-    toast.success('Copied', `Coordinates ${coords} copied to clipboard!`)
+    toast.success('Copied to Clipboard', `Coordinates "${coords}" copied!`)
   }
 
+  /* ==========================================================================
+     FULL-WIDTH PAGE 1: ADD / EDIT STORE FORM PAGE
+     ========================================================================== */
+  if (viewMode === 'add' || viewMode === 'edit') {
+    const isEdit = viewMode === 'edit'
+    return (
+      <div className="w-full space-y-6 pb-20">
+        {/* Full-width Top Action Bar with Back Button */}
+        <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center space-x-4">
+            <BackButton
+              label="Back to Stores"
+              onClick={handleGoToList}
+              variant="bordered"
+            />
+            <div className="h-6 w-px bg-slate-200 hidden sm:block" />
+            <div>
+              <div className="flex items-center space-x-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#064C23]">
+                  {isEdit ? 'Store Management' : 'New Outlet Setup'}
+                </span>
+              </div>
+              <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                {isEdit ? `Edit Store: ${selectedStore?.title}` : 'Add New Store Location'}
+              </h1>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2 self-end sm:self-auto">
+            <Button
+              variant="cancel"
+              size="sm"
+              onClick={handleGoToList}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={handleFormSubmit}
+            >
+              {isEdit ? 'Save Changes' : 'Publish Store'}
+            </Button>
+          </div>
+        </div>
+
+        {/* Full-width Form Master Card */}
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-xs">
+          <form onSubmit={handleFormSubmit} className="space-y-6">
+            
+            {/* Section 1: Basic Information */}
+            <div className="space-y-4">
+              <div className="border-b border-slate-100 pb-3">
+                <h3 className="text-base font-bold text-slate-900 flex items-center space-x-2">
+                  <span className="w-2 h-2 rounded-full bg-[#064C23]" />
+                  <span>General Store Details</span>
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Enter the primary branding, title, and descriptive subtitle for this supermarket outlet.
+                </p>
+              </div>
+
+              <FormRow cols={1}>
+                <InputField
+                  label="Store Title / Outlet Name"
+                  required
+                  placeholder="e.g. Bazario Central Superstore #01"
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  helperText="Primary name displayed on mobile app and customer receipt headers."
+                />
+              </FormRow>
+
+              <FormRow cols={1}>
+                <InputField
+                  label="Store Subtitle / Area & Branch Description"
+                  placeholder="e.g. Flagship Mega Mart & Fresh Produce Hub, Sector 18"
+                  value={formData.subtitle}
+                  onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
+                  helperText="Secondary tagline, shopping mall location, or landmark info."
+                />
+              </FormRow>
+            </div>
+
+            {/* Section 2: Location & GPS Mapping */}
+            <div className="space-y-4 pt-4 border-t border-slate-100">
+              <div className="border-b border-slate-100 pb-3">
+                <h3 className="text-base font-bold text-slate-900 flex items-center space-x-2">
+                  <span className="w-2 h-2 rounded-full bg-[#A44F37]" />
+                  <span>Geo Location & Map Pinning</span>
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Provide exact GPS coordinates and Google Maps URL for customer navigation and driver dispatch.
+                </p>
+              </div>
+
+              <FormRow cols={2}>
+                <InputField
+                  label="GPS Coordinates (Lat, Long)"
+                  icon={<FontAwesomeIcon icon={faLocationDot} className="text-xs text-[#064C23]" />}
+                  placeholder="e.g. 28.5708, 77.3261"
+                  value={formData.coordinates}
+                  onChange={(e) => setFormData({ ...formData, coordinates: e.target.value })}
+                  helperText="Latitude, Longitude separated by comma (e.g. 28.5708, 77.3261)"
+                />
+
+                <InputField
+                  label="Google Maps Location URL"
+                  icon={<FontAwesomeIcon icon={faMapLocationDot} className="text-xs text-[#A44F37]" />}
+                  placeholder="e.g. https://maps.google.com/?q=28.5708,77.3261"
+                  value={formData.googleUrl}
+                  onChange={(e) => setFormData({ ...formData, googleUrl: e.target.value })}
+                  helperText="Direct Google Maps sharing link or pin URL"
+                />
+              </FormRow>
+            </div>
+
+            {/* Section 3: Contact & Hours */}
+            <div className="space-y-4 pt-4 border-t border-slate-100">
+              <div className="border-b border-slate-100 pb-3">
+                <h3 className="text-base font-bold text-slate-900 flex items-center space-x-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-600" />
+                  <span>Contact & Operating Hours</span>
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Supermarket customer helpline and daily operational opening/closing schedule.
+                </p>
+              </div>
+
+              <FormRow cols={2}>
+                <InputField
+                  label="Store Contact Phone"
+                  icon={<FontAwesomeIcon icon={faPhone} className="text-xs text-slate-400" />}
+                  placeholder="e.g. +91 98111 22334"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  helperText="Store branch manager or customer support phone"
+                />
+
+                <InputField
+                  label="Operating Hours"
+                  icon={<FontAwesomeIcon icon={faClock} className="text-xs text-slate-400" />}
+                  placeholder="e.g. 7:00 AM - 11:00 PM"
+                  value={formData.operatingHours}
+                  onChange={(e) => setFormData({ ...formData, operatingHours: e.target.value })}
+                  helperText="Store working hours shown to customers"
+                />
+              </FormRow>
+            </div>
+
+            {/* Section 4: Store Front Image */}
+            <div className="space-y-4 pt-4 border-t border-slate-100">
+              <div className="border-b border-slate-100 pb-3">
+                <h3 className="text-base font-bold text-slate-900 flex items-center space-x-2">
+                  <span className="w-2 h-2 rounded-full bg-indigo-600" />
+                  <span>Store Front Photo / Banner</span>
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Upload an attractive high-resolution photograph of the outlet facade or interior.
+                </p>
+              </div>
+
+              <ImageUploadFrame
+                label="Store Photo"
+                aspectRatio="banner"
+                value={formData.image}
+                onChange={(img) => setFormData({ ...formData, image: img })}
+              />
+            </div>
+
+            {/* Section 5: Operating Status Toggle */}
+            <div className="p-5 rounded-2xl bg-gradient-to-r from-slate-50 to-[#f0f9f3]/40 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm font-bold text-slate-800">Store Live Operating Status</span>
+                  <span
+                    className={`inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold ${
+                      formData.status === 'Open'
+                        ? 'bg-emerald-100 text-emerald-800'
+                        : 'bg-rose-100 text-rose-800'
+                    }`}
+                  >
+                    {formData.status}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 mt-1">
+                  When marked as <span className="font-bold text-emerald-700">Open</span>, customers can place online delivery orders and visit the store.
+                </p>
+              </div>
+              <ToggleButton
+                enabled={formData.status === 'Open'}
+                onChange={(enabled) => setFormData({ ...formData, status: enabled ? 'Open' : 'Closed' })}
+                activeColor="#064C23"
+              />
+            </div>
+
+            {/* Form Action Controls */}
+            <FormActions align="right">
+              <Button
+                type="button"
+                variant="cancel"
+                onClick={handleGoToList}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" variant="primary">
+                {isEdit ? 'Save Changes' : 'Publish Store'}
+              </Button>
+            </FormActions>
+          </form>
+        </div>
+      </div>
+    )
+  }
+
+  /* ==========================================================================
+     FULL-WIDTH PAGE 2: VIEW STORE DETAILS PAGE
+     ========================================================================== */
+  if (viewMode === 'view' && selectedStore) {
+    return (
+      <div className="w-full space-y-6 pb-20">
+        {/* Full-width Top Action Bar */}
+        <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center space-x-4">
+            <BackButton
+              label="Back to Stores"
+              onClick={handleGoToList}
+              variant="bordered"
+            />
+            <div className="h-6 w-px bg-slate-200 hidden sm:block" />
+            <div>
+              <div className="flex items-center space-x-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#064C23]">
+                  Store Details
+                </span>
+                <span
+                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                    selectedStore.status === 'Open'
+                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                      : 'bg-rose-50 text-rose-600 border border-rose-200'
+                  }`}
+                >
+                  <FontAwesomeIcon
+                    icon={selectedStore.status === 'Open' ? faDoorOpen : faDoorClosed}
+                    className="mr-1 text-[10px]"
+                  />
+                  {selectedStore.status}
+                </span>
+              </div>
+              <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                {selectedStore.title}
+              </h1>
+            </div>
+          </div>
+
+          {/* Quick Action Buttons */}
+          <div className="flex items-center space-x-2 self-end sm:self-auto">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleToggleStatus(selectedStore)}
+              icon={
+                <FontAwesomeIcon
+                  icon={selectedStore.status === 'Open' ? faDoorClosed : faDoorOpen}
+                  className="text-xs"
+                />
+              }
+            >
+              Mark as {selectedStore.status === 'Open' ? 'Closed' : 'Open'}
+            </Button>
+            <Button
+              variant="primary"
+              size="sm"
+              onClick={() => handleOpenEdit(selectedStore)}
+              icon={<FontAwesomeIcon icon={faPenToSquare} className="text-xs" />}
+            >
+              Edit Store
+            </Button>
+            <Button
+              variant="cancel"
+              size="sm"
+              className="text-rose-600 hover:bg-rose-50 border-rose-200"
+              onClick={() => setDeleteModal({ isOpen: true, store: selectedStore })}
+              icon={<FontAwesomeIcon icon={faTrashCan} className="text-xs" />}
+            >
+              Delete
+            </Button>
+          </div>
+        </div>
+
+        {/* Full-width Details Showcase Card */}
+        <div className="bg-white rounded-3xl border border-slate-200/90 shadow-xs overflow-hidden">
+          {/* Top Banner Image with Live Overlay */}
+          <div className="relative h-64 sm:h-80 w-full overflow-hidden bg-slate-900">
+            <img
+              src={selectedStore.image || '/supermart-bg.jpg'}
+              alt={selectedStore.title}
+              className="w-full h-full object-cover opacity-90"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+            
+            <div className="absolute bottom-6 left-6 right-6 flex flex-col md:flex-row md:items-end justify-between gap-4 text-white">
+              <div className="space-y-1 max-w-2xl">
+                <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-[#A44F37] text-white shadow-xs mb-1">
+                  <FontAwesomeIcon icon={faStore} className="mr-1.5 text-[11px]" />
+                  Bazario Verified Supermarket
+                </span>
+                <h2 className="text-2xl sm:text-3xl font-black">{selectedStore.title}</h2>
+                <p className="text-sm text-slate-200">{selectedStore.subtitle}</p>
+              </div>
+
+              {selectedStore.googleUrl && (
+                <a
+                  href={selectedStore.googleUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center space-x-2 px-4 py-2.5 bg-white hover:bg-slate-100 text-[#064C23] rounded-2xl text-xs font-extrabold transition-all shadow-lg self-start md:self-auto shrink-0 group"
+                >
+                  <FontAwesomeIcon icon={faMapLocationDot} className="text-sm" />
+                  <span>Navigate via Google Maps</span>
+                  <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[10px] group-hover:translate-x-0.5 transition-transform" />
+                </a>
+              )}
+            </div>
+          </div>
+
+          {/* Grid Overview of Store Metadata */}
+          <div className="p-6 sm:p-8 space-y-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              
+              {/* Card 1: GPS Coordinates */}
+              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase text-slate-400">GPS Coordinates</span>
+                  <button
+                    type="button"
+                    onClick={() => handleCopyCoordinates(selectedStore.coordinates)}
+                    className="text-xs text-[#064C23] hover:underline font-bold cursor-pointer inline-flex items-center space-x-1"
+                    title="Copy coordinates"
+                  >
+                    <FontAwesomeIcon icon={faCopy} className="text-[10px]" />
+                    <span>Copy</span>
+                  </button>
+                </div>
+                <p className="font-mono text-base font-bold text-slate-900">
+                  {selectedStore.coordinates || 'Not configured'}
+                </p>
+                <p className="text-[11px] text-slate-500">Precise map coordinates</p>
+              </div>
+
+              {/* Card 2: Contact Phone */}
+              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase text-slate-400">Store Contact</span>
+                  <FontAwesomeIcon icon={faPhone} className="text-slate-400 text-xs" />
+                </div>
+                <p className="text-base font-bold text-slate-900">
+                  {selectedStore.phone || 'Not available'}
+                </p>
+                <p className="text-[11px] text-slate-500">Helpline / counter phone</p>
+              </div>
+
+              {/* Card 3: Operating Hours */}
+              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase text-slate-400">Opening Hours</span>
+                  <FontAwesomeIcon icon={faClock} className="text-slate-400 text-xs" />
+                </div>
+                <p className="text-base font-bold text-slate-900">
+                  {selectedStore.operatingHours || '7:00 AM - 11:00 PM'}
+                </p>
+                <p className="text-[11px] text-slate-500">Daily business schedule</p>
+              </div>
+
+              {/* Card 4: Operating Status */}
+              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase text-slate-400">Live Status</span>
+                  <FontAwesomeIcon
+                    icon={selectedStore.status === 'Open' ? faDoorOpen : faDoorClosed}
+                    className={selectedStore.status === 'Open' ? 'text-emerald-600' : 'text-rose-600'}
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span
+                    className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-black ${
+                      selectedStore.status === 'Open'
+                        ? 'bg-emerald-100 text-emerald-800'
+                        : 'bg-rose-100 text-rose-800'
+                    }`}
+                  >
+                    {selectedStore.status === 'Open' ? 'Open for Orders' : 'Store Closed'}
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500">Customer POS & Online status</p>
+              </div>
+            </div>
+
+            {/* Google Maps Location Preview Card */}
+            <div className="p-6 rounded-2xl bg-gradient-to-br from-slate-50 via-[#f0f9f3]/30 to-slate-50 border border-slate-200 space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h4 className="text-base font-bold text-slate-900 flex items-center space-x-2">
+                    <FontAwesomeIcon icon={faCompass} className="text-[#064C23]" />
+                    <span>Google Maps Direct Link</span>
+                  </h4>
+                  <p className="text-xs text-slate-500">
+                    Direct hyperlink mapped to this physical retail store for directions and driver dispatch.
+                  </p>
+                </div>
+                {selectedStore.googleUrl && (
+                  <a
+                    href={selectedStore.googleUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center space-x-1.5 px-4 py-2 bg-[#064C23] hover:bg-[#08632f] text-white rounded-xl text-xs font-bold transition-all shadow-xs shrink-0 self-start sm:self-auto"
+                  >
+                    <span>Open in Google Maps</span>
+                    <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[10px]" />
+                  </a>
+                )}
+              </div>
+
+              <div className="p-3.5 bg-white rounded-xl border border-slate-200 font-mono text-xs text-slate-700 break-all select-all flex items-center justify-between gap-3">
+                <span className="truncate">{selectedStore.googleUrl || 'No Google Maps URL configured.'}</span>
+                {selectedStore.googleUrl && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(selectedStore.googleUrl)
+                      toast.success('Copied URL', 'Google Maps link copied to clipboard!')
+                    }}
+                    className="text-xs font-bold text-[#064C23] hover:underline shrink-0 cursor-pointer"
+                  >
+                    Copy Link
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Delete Confirmation Modal */}
+        <AlertModal
+          isOpen={deleteModal.isOpen}
+          onClose={() => setDeleteModal({ isOpen: false, store: null })}
+          onConfirm={() => handleDeleteStore(deleteModal.store?.id, deleteModal.store?.title)}
+          type="danger"
+          title="Delete Store Location"
+          description={`Are you sure you want to delete "${deleteModal.store?.title}"? All associated store mapping data will be permanently removed.`}
+          confirmText="Yes, Delete Store"
+          cancelText="Cancel"
+        />
+      </div>
+    )
+  }
+
+  /* ==========================================================================
+     FULL-WIDTH PAGE 0: STORES LIST / INDEX DIRECTORY (DEFAULT)
+     ========================================================================== */
   return (
     <div className="w-full space-y-6 pb-20">
       {/* Top Header Card */}
@@ -229,7 +716,7 @@ export default function StoresView() {
           <Button
             variant="primary"
             size="md"
-            onClick={handleOpenAddModal}
+            onClick={handleOpenAdd}
             icon={<FontAwesomeIcon icon={faPlus} className="text-xs" />}
           >
             Add New Store
@@ -310,9 +797,13 @@ export default function StoresView() {
                           className="w-11 h-11 rounded-xl object-cover border border-slate-200 shadow-2xs shrink-0"
                         />
                         <div className="min-w-0">
-                          <span className="font-bold text-slate-900 text-sm block leading-snug">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenView(store)}
+                            className="font-bold text-slate-900 text-sm block leading-snug hover:text-[#064C23] text-left cursor-pointer transition-colors"
+                          >
                             {store.title}
-                          </span>
+                          </button>
                           <span className="text-xs text-slate-400 flex items-center mt-0.5">
                             <FontAwesomeIcon icon={faPhone} className="mr-1 text-[10px]" />
                             {store.phone || 'N/A'}
@@ -387,19 +878,22 @@ export default function StoresView() {
                       </button>
                     </td>
 
-                    {/* Actions */}
+                    {/* Actions: Full-width Page Switchers */}
                     <td className="px-6 py-4 text-right space-x-1.5 whitespace-nowrap">
                       <ActionButton
                         action="view"
-                        onClick={() => setViewingStore(store)}
+                        onClick={() => handleOpenView(store)}
+                        title="View Full Page"
                       />
                       <ActionButton
                         action="edit"
-                        onClick={() => handleOpenEditModal(store)}
+                        onClick={() => handleOpenEdit(store)}
+                        title="Edit Full Page"
                       />
                       <ActionButton
                         action="delete"
                         onClick={() => setDeleteModal({ isOpen: true, store })}
+                        title="Delete Store"
                       />
                     </td>
                   </tr>
@@ -407,7 +901,7 @@ export default function StoresView() {
               ) : (
                 <tr>
                   <td colSpan="7" className="px-6 py-12 text-center text-slate-400 text-xs">
-                    No stores found matching your criteria.
+                    No stores found matching your search.
                   </td>
                 </tr>
               )}
@@ -416,183 +910,7 @@ export default function StoresView() {
         </div>
       </div>
 
-      {/* MODAL 1: Add / Edit Store Form Modal */}
-      <Modal
-        isOpen={isFormModalOpen}
-        onClose={() => setIsFormModalOpen(false)}
-        title={editingStore ? `Edit Store - ${editingStore.title}` : 'Add New Store Location'}
-        size="lg"
-      >
-        <form onSubmit={handleFormSubmit} className="space-y-4">
-          <FormRow cols={1}>
-            <InputField
-              label="Store Title / Name"
-              required
-              placeholder="e.g. Bazario Central Superstore #01"
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            />
-          </FormRow>
-
-          <FormRow cols={1}>
-            <InputField
-              label="Store Subtitle / Area Description"
-              placeholder="e.g. Flagship Mega Mart & Fresh Produce Hub, Sector 18"
-              value={formData.subtitle}
-              onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
-            />
-          </FormRow>
-
-          <FormRow cols={2}>
-            <InputField
-              label="GPS Coordinates (Lat, Long)"
-              icon={<FontAwesomeIcon icon={faLocationDot} className="text-xs" />}
-              placeholder="e.g. 28.5708, 77.3261"
-              value={formData.coordinates}
-              onChange={(e) => setFormData({ ...formData, coordinates: e.target.value })}
-              helperText="Latitude, Longitude for map pins"
-            />
-
-            <InputField
-              label="Google Maps Location URL"
-              icon={<FontAwesomeIcon icon={faMapLocationDot} className="text-xs" />}
-              placeholder="e.g. https://maps.google.com/?q=28.5708,77.3261"
-              value={formData.googleUrl}
-              onChange={(e) => setFormData({ ...formData, googleUrl: e.target.value })}
-              helperText="Full Google Maps link for directions"
-            />
-          </FormRow>
-
-          <FormRow cols={2}>
-            <InputField
-              label="Store Contact Phone"
-              icon={<FontAwesomeIcon icon={faPhone} className="text-xs" />}
-              placeholder="e.g. +91 98111 22334"
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-            />
-
-            <InputField
-              label="Operating Hours"
-              icon={<FontAwesomeIcon icon={faClock} className="text-xs" />}
-              placeholder="e.g. 7:00 AM - 11:00 PM"
-              value={formData.operatingHours}
-              onChange={(e) => setFormData({ ...formData, operatingHours: e.target.value })}
-            />
-          </FormRow>
-
-          {/* Store Image Upload Frame */}
-          <ImageUploadFrame
-            label="Store Front Photo / Banner"
-            aspectRatio="banner"
-            value={formData.image}
-            onChange={(img) => setFormData({ ...formData, image: img })}
-          />
-
-          {/* Operating Status Toggle */}
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
-            <div>
-              <h4 className="text-sm font-bold text-slate-800">Store Operating Status</h4>
-              <p className="text-xs text-slate-500">
-                Mark store as currently <span className="font-bold text-emerald-700">Open</span> for customer orders or <span className="font-bold text-rose-600">Closed</span>.
-              </p>
-            </div>
-            <ToggleButton
-              enabled={formData.status === 'Open'}
-              onChange={(enabled) => setFormData({ ...formData, status: enabled ? 'Open' : 'Closed' })}
-              activeColor="#064C23"
-            />
-          </div>
-
-          <FormActions align="right">
-            <Button
-              type="button"
-              variant="cancel"
-              onClick={() => setIsFormModalOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" variant="primary">
-              {editingStore ? 'Save Changes' : 'Add Store'}
-            </Button>
-          </FormActions>
-        </form>
-      </Modal>
-
-      {/* MODAL 2: View Store Details Modal */}
-      {viewingStore && (
-        <Modal
-          isOpen={Boolean(viewingStore)}
-          onClose={() => setViewingStore(null)}
-          title={viewingStore.title}
-          size="md"
-        >
-          <div className="space-y-4">
-            <div className="relative aspect-video rounded-2xl overflow-hidden border border-slate-200 shadow-xs">
-              <img
-                src={viewingStore.image || '/supermart-bg.jpg'}
-                alt={viewingStore.title}
-                className="w-full h-full object-cover"
-              />
-              <span
-                className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold shadow-md ${
-                  viewingStore.status === 'Open'
-                    ? 'bg-emerald-600 text-white'
-                    : 'bg-rose-600 text-white'
-                }`}
-              >
-                {viewingStore.status}
-              </span>
-            </div>
-
-            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2.5 text-xs">
-              <div>
-                <p className="text-slate-400 uppercase font-bold text-[10px]">Subtitle / Area Description</p>
-                <p className="text-sm font-semibold text-slate-800">{viewingStore.subtitle}</p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 pt-1 border-t border-slate-200">
-                <div>
-                  <p className="text-slate-400 font-bold text-[10px]">GPS Coordinates</p>
-                  <p className="font-mono font-bold text-slate-700">{viewingStore.coordinates || 'N/A'}</p>
-                </div>
-                <div>
-                  <p className="text-slate-400 font-bold text-[10px]">Store Phone</p>
-                  <p className="font-semibold text-slate-700">{viewingStore.phone || 'N/A'}</p>
-                </div>
-              </div>
-
-              <div className="pt-1 border-t border-slate-200">
-                <p className="text-slate-400 font-bold text-[10px]">Operating Hours</p>
-                <p className="font-semibold text-slate-700">{viewingStore.operatingHours || '7:00 AM - 11:00 PM'}</p>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between pt-2">
-              {viewingStore.googleUrl ? (
-                <a
-                  href={viewingStore.googleUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center space-x-1.5 px-4 py-2 bg-[#064C23] hover:bg-[#096330] text-white rounded-xl text-xs font-bold transition-all shadow-sm"
-                >
-                  <FontAwesomeIcon icon={faMapLocationDot} />
-                  <span>Open in Google Maps</span>
-                  <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[10px]" />
-                </a>
-              ) : (
-                <div />
-              )}
-
-              <Button variant="secondary" size="sm" onClick={() => setViewingStore(null)}>
-                Close
-              </Button>
-            </div>
-          </div>
-        </Modal>
-      )}
-
-      {/* MODAL 3: Delete Store Modal */}
+      {/* Delete Confirmation Alert Modal */}
       <AlertModal
         isOpen={deleteModal.isOpen}
         onClose={() => setDeleteModal({ isOpen: false, store: null })}
