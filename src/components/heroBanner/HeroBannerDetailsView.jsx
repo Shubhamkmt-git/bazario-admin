@@ -167,22 +167,55 @@ export default function HeroBannerDetailsView({ banner, onBack, onEdit }) {
           </div>
 
           <div className="max-w-xs">
-            {banner.mobileImage ? (
-              <div className="w-full aspect-[1.5/1] rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 shadow-xs">
-                <img
-                  src={banner.mobileImage}
-                  alt={`${banner.title} mobile banner`}
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ) : (
-              <div className="w-full aspect-[1.5/1] rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center text-slate-400 text-xs font-medium">
-                No mobile banner uploaded
-              </div>
-            )}
+        {/* SEO Metadata Card */}
+        <div className="space-y-3 pt-4 border-t border-slate-100">
+          <div className="flex items-center space-x-2">
+            <FontAwesomeIcon icon={faDesktop} className="text-[#064C23] text-sm" />
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+              SEO & Meta Information
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">
+                Meta Title
+              </span>
+              <p className="text-xs font-bold text-slate-800">
+                {banner.metaTitle || '—'}
+              </p>
+            </div>
+
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">
+                Image Alt Text
+              </span>
+              <p className="text-xs font-bold text-slate-800">
+                {banner.altText || '—'}
+              </p>
+            </div>
+
+            <div className="sm:col-span-2">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">
+                Meta Keywords
+              </span>
+              <p className="text-xs font-medium text-slate-700">
+                {banner.metaKeywords || '—'}
+              </p>
+            </div>
+
+            <div className="sm:col-span-2">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">
+                Meta Description
+              </span>
+              <p className="text-xs font-medium text-slate-700 leading-relaxed">
+                {banner.metaDescription || '—'}
+              </p>
+            </div>
           </div>
         </div>
       </div>
     </div>
   )
 }
+

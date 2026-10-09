@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faFloppyDisk, faDesktop, faMobileScreen } from '@fortawesome/free-solid-svg-icons'
+import { faFloppyDisk, faDesktop, faMobileScreen, faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons'
 import {
   Button,
   InputField,
@@ -18,7 +18,11 @@ export default function AddHeroBannerView({ onBack, onSave, bannersCount = 0 }) 
     webImage: '',
     mobileImage: '',
     sortingOrder: bannersCount + 1,
-    status: 'Active'
+    status: 'Active',
+    metaTitle: '',
+    altText: '',
+    metaKeywords: '',
+    metaDescription: ''
   })
 
   const handleSubmit = (e) => {
@@ -48,7 +52,7 @@ export default function AddHeroBannerView({ onBack, onSave, bannersCount = 0 }) 
               Create Hero Banner
             </h1>
             <p className="text-xs sm:text-sm text-slate-500">
-              Configure homepage hero banner title, redirection link, desktop web image (5:1), mobile image (1.5:1), sorting order, and status.
+              Configure homepage hero banner title, redirection link, desktop web image (5:1), mobile image (1.5:1), sorting order, status, and SEO meta tags.
             </p>
           </div>
         </div>
@@ -121,7 +125,7 @@ export default function AddHeroBannerView({ onBack, onSave, bannersCount = 0 }) 
           </div>
         </div>
 
-        {/* Row 2: Banner Images (Web 5:1 and Mobile 1.5:1) */}
+        {/* Row 3: Banner Images (Web 5:1 and Mobile 1.5:1) */}
         <div className="pt-4 border-t border-slate-100 space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* Left: Web Banner (5:1) */}
@@ -158,6 +162,58 @@ export default function AddHeroBannerView({ onBack, onSave, bannersCount = 0 }) 
           </div>
         </div>
 
+        {/* Row 4: Search Engine Optimization (SEO) */}
+        <div className="pt-4 border-t border-slate-100 space-y-4">
+          <div className="flex items-center space-x-2 border-b border-slate-100 pb-2">
+            <FontAwesomeIcon icon={faMagnifyingGlass} className="text-[#064C23] text-xs" />
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
+              SEO & Search Meta Tags
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <InputField
+              label="META TITLE (SEO)"
+              placeholder="e.g. Fresh Grocery Mega Deals | Bazario Supermarket"
+              value={formData.metaTitle}
+              onChange={(e) => setFormData({ ...formData, metaTitle: e.target.value })}
+              helperText="Recommended max 60 characters for search engine snippets"
+            />
+
+            <InputField
+              label="IMAGE ALT TEXT (SEO & ACCESSIBILITY)"
+              placeholder="e.g. Fresh organic fruits and vegetables weekend sale"
+              value={formData.altText}
+              onChange={(e) => setFormData({ ...formData, altText: e.target.value })}
+              helperText="Descriptive alt text for Google Image search and accessibility"
+            />
+          </div>
+
+          <InputField
+            label="META KEYWORDS / TAGS"
+            placeholder="e.g. supermarket discount, grocery offers, organic vegetables, dry fruits sale"
+            value={formData.metaKeywords}
+            onChange={(e) => setFormData({ ...formData, metaKeywords: e.target.value })}
+            helperText="Comma separated keywords for search optimization"
+          />
+
+          <div className="space-y-1.5">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+              META DESCRIPTION (SEO)
+            </label>
+            <textarea
+              rows={3}
+              placeholder="Brief promotional summary displayed on Google search results (120-160 characters)..."
+              value={formData.metaDescription}
+              onChange={(e) => setFormData({ ...formData, metaDescription: e.target.value })}
+              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 outline-none focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 transition-all leading-relaxed"
+            />
+            <p className="text-[11px] text-slate-400">
+              Search engine summary snippet (Recommended 120-160 characters)
+            </p>
+          </div>
+        </div>
+
         {/* Form Action Buttons */}
         <div className="pt-4 border-t border-slate-100 flex items-center justify-end space-x-3">
           <Button type="button" variant="outline" size="md" onClick={onBack}>
@@ -176,3 +232,4 @@ export default function AddHeroBannerView({ onBack, onSave, bannersCount = 0 }) 
     </div>
   )
 }
+
