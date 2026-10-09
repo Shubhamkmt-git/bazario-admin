@@ -110,25 +110,25 @@ export default function HeroBannerManageView() {
 
   // Navigation handlers with route update
   const handleGoToList = () => {
-    window.location.hash = '#/web-hero-banner'
+    window.location.hash = '#/hero-banner-manage'
     setViewMode('list')
     setSelectedBanner(null)
   }
 
   const handleOpenAdd = () => {
-    window.location.hash = '#/web-hero-banner/add'
+    window.location.hash = '#/hero-banner-manage/add'
     setSelectedBanner(null)
     setViewMode('add')
   }
 
   const handleOpenEdit = (banner) => {
-    window.location.hash = `#/web-hero-banner/edit/${banner.id}`
+    window.location.hash = `#/hero-banner-manage/edit/${banner.id}`
     setSelectedBanner(banner)
     setViewMode('edit')
   }
 
   const handleOpenView = (banner) => {
-    window.location.hash = `#/web-hero-banner/view/${banner.id}`
+    window.location.hash = `#/hero-banner-manage/view/${banner.id}`
     setSelectedBanner(banner)
     setViewMode('view')
   }

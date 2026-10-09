@@ -76,13 +76,23 @@ export default function DashboardPage({ onLogout }) {
     const baseTab = rawHash.split('/')[0]
     if (baseTab === 'admin-manager') return 'admin-users'
     if (baseTab === 'web-manager') return 'web-about'
-    if (baseTab === 'hero-banner-manage' || baseTab === 'hero-banners' || baseTab === 'hero-banner') return 'web-hero-banner'
+    if (
+      baseTab === 'hero-banner-manage' ||
+      baseTab === 'web-hero-banner' ||
+      baseTab === 'hero-banners' ||
+      baseTab === 'hero-banner'
+    ) {
+      return 'hero-banner-manage'
+    }
     const validTabs = [
       'dashboard',
       'stores',
       'customers',
       'product-categories',
       'product-category',
+      'hero-banner-manage',
+      'web-hero-banner',
+      'hero-banners',
       'admin-users',
       'admin-roles',
       'admin-permissions',
@@ -91,9 +101,6 @@ export default function DashboardPage({ onLogout }) {
       'web-cta',
       'web-career',
       'web-homepage',
-      'web-hero-banner',
-      'hero-banner-manage',
-      'hero-banners',
       'settings',
     ]
     return validTabs.includes(baseTab) ? baseTab : 'dashboard'
@@ -123,6 +130,7 @@ export default function DashboardPage({ onLogout }) {
     { id: 'stores', name: 'Stores', icon: faStore },
     { id: 'customers', name: 'Customers', icon: faUsers },
     { id: 'product-categories', name: 'Product Category', icon: faTags },
+    { id: 'hero-banner-manage', name: 'Hero Banner Manage', icon: faImages },
     {
       id: 'admin-manager',
       name: 'Admin Manager',
@@ -143,7 +151,6 @@ export default function DashboardPage({ onLogout }) {
         { id: 'web-cta', name: 'CTA Manage', icon: faBullhorn },
         { id: 'web-career', name: 'Career Manage', icon: faBriefcase },
         { id: 'web-homepage', name: 'Home Page Section Heading Manage', icon: faTableCellsLarge },
-        { id: 'web-hero-banner', name: 'Hero Banner Manage', icon: faImages },
       ],
     },
     { id: 'settings', name: 'Settings', icon: faGear },
