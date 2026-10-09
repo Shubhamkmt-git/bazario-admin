@@ -28,7 +28,7 @@ export default function Sidebar({
             : '-translate-x-full lg:translate-x-0 lg:w-[80px] shadow-none'
         }`}
       >
-        {/* Brand Header: Exactly h-16 to match the Header component perfectly */}
+        {/* Brand Header: Matches Header height h-16 (64px) seamlessly */}
         <div className="h-16 shrink-0 flex items-center border-b border-[#cee5d7] px-4 sm:px-5 transition-all bg-white/50 backdrop-blur-sm">
           {isOpen ? (
             /* Expanded Header: Clean Left-Aligned Brand Logo */
@@ -44,7 +44,7 @@ export default function Sidebar({
             /* Collapsed Header: Centered Mini Logo Pill */
             <div className="w-full flex items-center justify-center">
               <div
-                className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#064C23] to-[#0b5d2e] flex items-center justify-center text-white shadow-sm border border-[#064C23]/30 cursor-pointer transition-transform duration-200 hover:scale-105 active:scale-95"
+                className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#064C23] to-[#A44F37] flex items-center justify-center text-white shadow-sm border border-[#064C23]/30 cursor-pointer transition-transform duration-200 hover:scale-105 active:scale-95"
                 onClick={onToggle}
                 title="Expand Sidebar"
               >
@@ -76,7 +76,7 @@ export default function Sidebar({
                     : 'justify-center p-3 text-lg'
                 } ${
                   isActive
-                    ? 'bg-[#064C23] text-white font-semibold shadow-md shadow-[#064C23]/25 ring-1 ring-[#064C23]'
+                    ? 'bg-gradient-to-r from-[#A44F37] to-[#b8563b] text-white font-semibold shadow-md shadow-[#A44F37]/25 ring-1 ring-[#A44F37]/30'
                     : 'text-[#1c4b31] font-medium hover:text-[#064C23] hover:bg-white/70'
                 }`}
               >
@@ -101,7 +101,7 @@ export default function Sidebar({
                   <span
                     className={`px-2 py-0.5 text-xs font-bold rounded-full transition-colors shrink-0 ml-2 ${
                       isActive
-                        ? 'bg-white/20 text-white border border-white/25'
+                        ? 'bg-white/25 text-white border border-white/30'
                         : 'bg-[#064C23]/10 text-[#064C23] border border-[#064C23]/15'
                     }`}
                   >
@@ -132,7 +132,7 @@ export default function Sidebar({
           }`}
         >
           <div
-            className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#064C23] to-[#0f6b36] text-white flex items-center justify-center font-bold text-sm shadow-sm shrink-0 cursor-pointer transition-transform hover:scale-105"
+            className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#A44F37] to-[#064C23] text-white flex items-center justify-center font-bold text-sm shadow-sm shrink-0 cursor-pointer transition-transform hover:scale-105"
             title={!isOpen ? `${user.name} (${user.email})` : ''}
           >
             {user.avatar || 'BA'}
