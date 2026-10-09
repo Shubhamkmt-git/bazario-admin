@@ -541,6 +541,8 @@ export default function SettingsView() {
                 placeholder="https://bazario.com/sitemap.xml"
                 value={settings.sitemapUrl}
                 onChange={(e) => handleChange('sitemapUrl', e.target.value)}
+                helperText="Submitted automatically to Google Search Console"
+              />
             </div>
           </div>
         </div>
