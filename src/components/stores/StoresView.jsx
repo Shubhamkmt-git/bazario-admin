@@ -16,9 +16,9 @@ import {
   faPenToSquare,
   faTrashCan,
   faSort,
-  faHashtag,
   faCompass,
-  faCircleCheck
+  faCircleCheck,
+  faArrowLeft
 } from '@fortawesome/free-solid-svg-icons'
 import { useToast } from '../../context/ToastContext'
 import Button from '../ui/Button'
@@ -82,6 +82,23 @@ const INITIAL_STORES = [
     operatingHours: '7:00 AM - 10:00 PM (Under Maintenance)',
   },
 ]
+
+// Utility to open Google Maps safely in new tab
+const openGoogleMaps = (googleUrl, coordinates, title = '') => {
+  let targetUrl = googleUrl ? googleUrl.trim() : ''
+  if (!targetUrl && coordinates) {
+    targetUrl = `https://maps.google.com/?q=${encodeURIComponent(coordinates.trim())}`
+  } else if (!targetUrl && title) {
+    targetUrl = `https://maps.google.com/?q=${encodeURIComponent(title.trim())}`
+  }
+
+  if (targetUrl) {
+    const finalUrl = targetUrl.startsWith('http://') || targetUrl.startsWith('https://')
+      ? targetUrl
+      : `https://${targetUrl}`
+    window.open(finalUrl, '_blank', 'noopener,noreferrer')
+  }
+}
 
 export default function StoresView() {
   const toast = useToast()
@@ -250,7 +267,7 @@ export default function StoresView() {
   }
 
   /* ==========================================================================
-     FULL-WIDTH PAGE 1: ADD / EDIT STORE FORM (MINIMAL & CLEAN LAYOUT)
+     FULL-WIDTH PAGE 1: ADD / EDIT STORE FORM (CLEAN, MINIMAL, NO BADGES)
      ========================================================================== */
   if (viewMode === 'add' || viewMode === 'edit') {
     const isEdit = viewMode === 'edit'
@@ -270,7 +287,7 @@ export default function StoresView() {
                 {isEdit ? 'Store Editor' : 'New Store Setup'}
               </span>
               <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                {isEdit ? `Edit ${selectedStore?.title}` : 'Add New Store Location'}
+                {isEdit ? `Edit: ${selectedStore?.title}` : 'Add New Store Location'}
               </h1>
             </div>
           </div>
@@ -293,18 +310,15 @@ export default function StoresView() {
           </div>
         </div>
 
-        {/* Minimal Clean Form Card */}
+        {/* Minimal Clean Form Master Card */}
         <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-xs">
           <form onSubmit={handleFormSubmit} className="space-y-6">
             
             {/* Group 1: Store Branding & Sorting */}
             <div className="space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+              <div className="border-b border-slate-100 pb-2.5">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
                   Basic Store Identity
-                </span>
-                <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                  Step 1
                 </span>
               </div>
 
@@ -345,44 +359,93 @@ export default function StoresView() {
 
             {/* Group 2: Location & Mapping */}
             <div className="space-y-4 pt-4 border-t border-slate-100">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+              <div className="border-b border-slate-100 pb-2.5">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
                   Geo Coordinates & Navigation
                 </span>
-                <span className="text-[11px] font-semibold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200">
-                  Step 2
-                </span>
               </div>
 
-              <FormRow cols={2}>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 <InputField
                   label="GPS Coordinates (Lat, Long)"
                   icon={<FontAwesomeIcon icon={faLocationDot} className="text-xs text-[#064C23]" />}
                   placeholder="e.g. 28.5708, 77.3261"
                   value={formData.coordinates}
-                  onChange={(e) => setFormData({ ...formData, coordinates: e.target.value })}
-                  helperText="Latitude, Longitude coordinates"
+                  onChange={(e) => {
+                    const coords = e.target.value
+                    setFormData((prev) => ({
+                      ...prev,
+                      coordinates: coords,
+                      googleUrl:
+                        !prev.googleUrl || prev.googleUrl.startsWith('https://maps.google.com/?q=')
+                          ? coords
+                            ? `https://maps.google.com/?q=${encodeURIComponent(coords.trim())}`
+                            : ''
+                          : prev.googleUrl,
+                    }))
+                  }}
+                  helperText="Latitude, Longitude coordinates (e.g. 28.5708, 77.3261)"
                 />
 
-                <InputField
-                  label="Google Maps Location URL"
-                  icon={<FontAwesomeIcon icon={faMapLocationDot} className="text-xs text-[#A44F37]" />}
-                  placeholder="e.g. https://maps.google.com/?q=28.5708,77.3261"
-                  value={formData.googleUrl}
-                  onChange={(e) => setFormData({ ...formData, googleUrl: e.target.value })}
-                  helperText="Google Maps share link for directions"
-                />
-              </FormRow>
+                {/* Google Maps URL Field with Working Action Button */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-slate-600">
+                      Google Maps Location URL
+                    </label>
+                    {(formData.googleUrl || formData.coordinates) && (
+                      <button
+                        type="button"
+                        onClick={() => openGoogleMaps(formData.googleUrl, formData.coordinates, formData.title)}
+                        className="inline-flex items-center space-x-1 text-xs font-bold text-[#064C23] hover:text-[#096330] hover:underline cursor-pointer"
+                      >
+                        <FontAwesomeIcon icon={faCompass} className="text-[11px]" />
+                        <span>Test Link</span>
+                        <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[9px]" />
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="relative flex items-center">
+                    <span className="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-[#A44F37]">
+                      <FontAwesomeIcon icon={faMapLocationDot} className="text-xs" />
+                    </span>
+                    <input
+                      type="text"
+                      placeholder="e.g. https://maps.google.com/?q=28.5708,77.3261"
+                      value={formData.googleUrl}
+                      onChange={(e) => setFormData({ ...formData, googleUrl: e.target.value })}
+                      className="w-full pl-9 pr-24 py-2.5 text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#064C23]/20 focus:border-[#064C23] transition-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!formData.googleUrl && !formData.coordinates && !formData.title) {
+                          toast.warning('No Location Entered', 'Please enter GPS coordinates or a Google Maps URL first.')
+                          return
+                        }
+                        openGoogleMaps(formData.googleUrl, formData.coordinates, formData.title)
+                      }}
+                      className="absolute right-1.5 px-3 py-1.5 bg-[#064C23] hover:bg-[#095f2d] text-white rounded-lg text-xs font-bold flex items-center space-x-1.5 transition-all cursor-pointer shadow-2xs active:scale-95"
+                      title="Open in Google Maps"
+                    >
+                      <FontAwesomeIcon icon={faMapLocationDot} className="text-[11px]" />
+                      <span>Maps</span>
+                      <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[9px]" />
+                    </button>
+                  </div>
+                  <p className="text-[11px] text-slate-400">
+                    Google Maps URL for customer directions & driver dispatch
+                  </p>
+                </div>
+              </div>
             </div>
 
             {/* Group 3: Contact & Hours */}
             <div className="space-y-4 pt-4 border-t border-slate-100">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+              <div className="border-b border-slate-100 pb-2.5">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
                   Store Contact & Operating Hours
-                </span>
-                <span className="text-[11px] font-semibold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
-                  Step 3
                 </span>
               </div>
 
@@ -409,12 +472,9 @@ export default function StoresView() {
 
             {/* Group 4: Store Photo */}
             <div className="space-y-4 pt-4 border-t border-slate-100">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+              <div className="border-b border-slate-100 pb-2.5">
                 <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
                   Store Facade Photo
-                </span>
-                <span className="text-[11px] font-semibold text-purple-700 bg-purple-50 px-2.5 py-0.5 rounded-full border border-purple-200">
-                  Step 4
                 </span>
               </div>
 
@@ -426,7 +486,6 @@ export default function StoresView() {
               />
             </div>
 
-            {/* Group 5: Operating Status Toggle */}
             {/* Group 5: Operating Status Toggle Card */}
             <div
               onClick={() =>
@@ -606,18 +665,15 @@ export default function StoresView() {
                 <p className="text-sm text-slate-200">{selectedStore.subtitle}</p>
               </div>
 
-              {selectedStore.googleUrl && (
-                <a
-                  href={selectedStore.googleUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center space-x-2 px-4 py-2.5 bg-white hover:bg-slate-100 text-[#064C23] rounded-2xl text-xs font-extrabold transition-all shadow-lg self-start md:self-auto shrink-0 group"
-                >
-                  <FontAwesomeIcon icon={faMapLocationDot} className="text-sm" />
-                  <span>Navigate via Google Maps</span>
-                  <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[10px] group-hover:translate-x-0.5 transition-transform" />
-                </a>
-              )}
+              <button
+                type="button"
+                onClick={() => openGoogleMaps(selectedStore.googleUrl, selectedStore.coordinates, selectedStore.title)}
+                className="inline-flex items-center space-x-2 px-4 py-2.5 bg-white hover:bg-slate-100 text-[#064C23] rounded-2xl text-xs font-extrabold transition-all shadow-lg self-start md:self-auto shrink-0 cursor-pointer group active:scale-95"
+              >
+                <FontAwesomeIcon icon={faMapLocationDot} className="text-sm text-[#A44F37]" />
+                <span>Navigate via Google Maps</span>
+                <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[10px] group-hover:translate-x-0.5 transition-transform" />
+              </button>
             </div>
           </div>
 
@@ -694,33 +750,32 @@ export default function StoresView() {
                     Hyperlink for customer directions and rider delivery navigation.
                   </p>
                 </div>
-                {selectedStore.googleUrl && (
-                  <a
-                    href={selectedStore.googleUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 bg-[#064C23] hover:bg-[#08632f] text-white rounded-xl text-xs font-bold transition-all shadow-xs shrink-0 self-start sm:self-auto"
-                  >
-                    <span>Open in Maps</span>
-                    <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[10px]" />
-                  </a>
-                )}
+                <button
+                  type="button"
+                  onClick={() => openGoogleMaps(selectedStore.googleUrl, selectedStore.coordinates, selectedStore.title)}
+                  className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 bg-[#064C23] hover:bg-[#08632f] text-white rounded-xl text-xs font-bold transition-all shadow-xs shrink-0 self-start sm:self-auto cursor-pointer active:scale-95"
+                >
+                  <FontAwesomeIcon icon={faMapLocationDot} className="text-xs" />
+                  <span>Open in Maps</span>
+                  <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[10px]" />
+                </button>
               </div>
 
               <div className="p-3 bg-white rounded-xl border border-slate-200 font-mono text-xs text-slate-700 break-all select-all flex items-center justify-between gap-3">
-                <span className="truncate">{selectedStore.googleUrl || 'No Google Maps URL configured.'}</span>
-                {selectedStore.googleUrl && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      navigator.clipboard.writeText(selectedStore.googleUrl)
+                <span className="truncate">{selectedStore.googleUrl || `https://maps.google.com/?q=${encodeURIComponent(selectedStore.coordinates || selectedStore.title)}`}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const link = selectedStore.googleUrl || (selectedStore.coordinates ? `https://maps.google.com/?q=${encodeURIComponent(selectedStore.coordinates)}` : '')
+                    if (link) {
+                      navigator.clipboard.writeText(link)
                       toast.success('Copied URL', 'Google Maps link copied to clipboard!')
-                    }}
-                    className="text-xs font-bold text-[#064C23] hover:underline shrink-0 cursor-pointer"
-                  >
-                    Copy Link
-                  </button>
-                )}
+                    }
+                  }}
+                  className="text-xs font-bold text-[#064C23] hover:underline shrink-0 cursor-pointer"
+                >
+                  Copy Link
+                </button>
               </div>
             </div>
           </div>
@@ -895,25 +950,20 @@ export default function StoresView() {
                       )}
                     </td>
 
-                    {/* Google Maps URL Link */}
+                    {/* Google Maps Button */}
                     <td className="px-6 py-4">
-                      {store.googleUrl ? (
-                        <a
-                          href={store.googleUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-[#f0f9f3] hover:bg-[#e2f3e8] text-[#064C23] border border-[#bae2cb] rounded-xl text-xs font-bold transition-all shadow-2xs group"
-                        >
-                          <FontAwesomeIcon icon={faMapLocationDot} />
-                          <span>View Map</span>
-                          <FontAwesomeIcon
-                            icon={faArrowUpRightFromSquare}
-                            className="text-[10px] group-hover:translate-x-0.5 transition-transform"
-                          />
-                        </a>
-                      ) : (
-                        <span className="text-xs text-slate-400">No URL</span>
-                      )}
+                      <button
+                        type="button"
+                        onClick={() => openGoogleMaps(store.googleUrl, store.coordinates, store.title)}
+                        className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-[#f0f9f3] hover:bg-[#e2f3e8] text-[#064C23] border border-[#bae2cb] rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer group active:scale-95"
+                      >
+                        <FontAwesomeIcon icon={faMapLocationDot} className="text-xs text-[#A44F37]" />
+                        <span>View Map</span>
+                        <FontAwesomeIcon
+                          icon={faArrowUpRightFromSquare}
+                          className="text-[10px] group-hover:translate-x-0.5 transition-transform"
+                        />
+                      </button>
                     </td>
 
                     {/* Status Badge Toggle */}
