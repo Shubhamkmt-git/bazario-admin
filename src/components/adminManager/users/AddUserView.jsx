@@ -9,7 +9,6 @@ import {
   faLock,
   faCircleCheck,
   faCircleXmark,
-  faCamera,
 } from '@fortawesome/free-solid-svg-icons'
 import { useToast } from '../../../context/ToastContext'
 import Button from '../../ui/Button'
@@ -29,7 +28,6 @@ const DEFAULT_ROLES = [
 export default function AddUserView({ onBack, onSave }) {
   const toast = useToast()
 
-  // Load available roles from localStorage if present
   const [availableRoles, setAvailableRoles] = useState(DEFAULT_ROLES)
 
   useEffect(() => {
@@ -43,7 +41,7 @@ export default function AddUserView({ onBack, onSave }) {
         }
       }
     } catch {
-      // fallback to default
+      // fallback
     }
   }, [])
 
@@ -92,7 +90,7 @@ export default function AddUserView({ onBack, onSave }) {
   const handleSubmit = (e) => {
     if (e && e.preventDefault) e.preventDefault()
     if (!validate()) {
-      toast.error('Validation Failed', 'Please fix the errors in the form before saving.')
+      toast.error('Validation Failed', 'Please fill in all required fields.')
       return
     }
 
@@ -151,166 +149,126 @@ export default function AddUserView({ onBack, onSave }) {
         </div>
       </div>
 
-      {/* Form Container */}
+      {/* Clean Minimal Form Card */}
       <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-xs">
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-6">
           
-          {/* Section 1: Profile Image Instant Preview */}
-          <div className="space-y-4">
-            <div className="border-b border-slate-100 pb-2.5">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                1. Profile Photo Frame
-              </span>
-            </div>
-
-            <div className="flex flex-col sm:flex-row sm:items-start gap-6">
-              <div className="w-full sm:w-64">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            {/* Left Column: Profile Photo Frame */}
+            <div className="lg:col-span-4 flex flex-col items-center sm:items-start space-y-2">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                Profile Photo
+              </label>
+              <div className="w-full max-w-[220px]">
                 <ImageUploadFrame
-                  label="Admin Profile Picture"
-                  description="PNG, JPG, WEBP up to 5MB"
+                  label=""
+                  description="Upload JPG, PNG (Max 5MB)"
                   aspectRatio="square"
                   value={formData.avatar}
                   onChange={(img) => handleChange('avatar', img)}
                 />
               </div>
+            </div>
 
-              <div className="flex-1 space-y-3 pt-2">
-                <h3 className="text-sm font-bold text-slate-900 flex items-center space-x-2">
-                  <FontAwesomeIcon icon={faCamera} className="text-[#064C23]" />
-                  <span>Instant Avatar Preview</span>
-                </h3>
-                <p className="text-xs text-slate-500 leading-relaxed">
-                  Upload a clear profile headshot for this administrator. This photo will be visible in top navbar headers, order dispatch audit logs, and permission activity logs.
-                </p>
-                <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 text-xs text-slate-600 space-y-1">
-                  <p className="font-semibold text-slate-700">Supported Dimensions:</p>
-                  <p className="text-slate-500">• 1:1 Square aspect ratio recommended (minimum 300x300px)</p>
-                  <p className="text-slate-500">• Drag & drop supported with instant preview & live replacement</p>
-                </div>
+            {/* Right Column: Account & Profile Inputs */}
+            <div className="lg:col-span-8 space-y-5">
+              
+              {/* Row 1: Name & Father's Name */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <InputField
+                  label="Admin Full Name"
+                  required
+                  icon={<FontAwesomeIcon icon={faUser} className="text-xs" />}
+                  placeholder="e.g. Shubham Kumar"
+                  value={formData.name}
+                  onChange={(e) => handleChange('name', e.target.value)}
+                  error={errors.name}
+                />
+
+                <InputField
+                  label="Father's Name"
+                  required
+                  icon={<FontAwesomeIcon icon={faIdCard} className="text-xs" />}
+                  placeholder="e.g. Rajesh Kumar"
+                  value={formData.fathersName}
+                  onChange={(e) => handleChange('fathersName', e.target.value)}
+                  error={errors.fathersName}
+                />
               </div>
-            </div>
-          </div>
 
-          {/* Section 2: Personal & Identity Info */}
-          <div className="space-y-4">
-            <div className="border-b border-slate-100 pb-2.5">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                2. Personal & Identity Details
-              </span>
-            </div>
+              {/* Row 2: Contact Number & Email */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <InputField
+                  label="Contact Number"
+                  type="tel"
+                  required
+                  icon={<FontAwesomeIcon icon={faPhone} className="text-xs" />}
+                  placeholder="e.g. +91 98111 00221"
+                  value={formData.phone}
+                  onChange={(e) => handleChange('phone', e.target.value)}
+                  error={errors.phone}
+                />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {/* Full Name */}
-              <InputField
-                label="Admin Full Name"
-                required
-                icon={<FontAwesomeIcon icon={faUser} className="text-xs" />}
-                placeholder="e.g. Shubham Kumar"
-                value={formData.name}
-                onChange={(e) => handleChange('name', e.target.value)}
-                error={errors.name}
-                helperText="Official full legal name"
-              />
+                <InputField
+                  label="Email Address"
+                  type="email"
+                  required
+                  icon={<FontAwesomeIcon icon={faEnvelope} className="text-xs" />}
+                  placeholder="e.g. shubham@bazario.com"
+                  value={formData.email}
+                  onChange={(e) => handleChange('email', e.target.value)}
+                  error={errors.email}
+                />
+              </div>
 
-              {/* Father's Name */}
-              <InputField
-                label="Father's Name"
-                required
-                icon={<FontAwesomeIcon icon={faIdCard} className="text-xs" />}
-                placeholder="e.g. Rajesh Kumar"
-                value={formData.fathersName}
-                onChange={(e) => handleChange('fathersName', e.target.value)}
-                error={errors.fathersName}
-                helperText="Parent / Guardian identification for verification"
-              />
+              {/* Row 3: Password & Role */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <InputField
+                  label="Password"
+                  type="password"
+                  required
+                  icon={<FontAwesomeIcon icon={faLock} className="text-xs" />}
+                  placeholder="••••••••••••"
+                  value={formData.password}
+                  onChange={(e) => handleChange('password', e.target.value)}
+                  error={errors.password}
+                  helperText="Minimum 6 characters with eye toggle"
+                />
 
-              {/* Email Address */}
-              <InputField
-                label="Email Address"
-                type="email"
-                required
-                icon={<FontAwesomeIcon icon={faEnvelope} className="text-xs" />}
-                placeholder="e.g. shubham@bazario.com"
-                value={formData.email}
-                onChange={(e) => handleChange('email', e.target.value)}
-                error={errors.email}
-                helperText="Primary email used for portal authentication"
-              />
-
-              {/* Contact Number */}
-              <InputField
-                label="Contact Number"
-                type="tel"
-                required
-                icon={<FontAwesomeIcon icon={faPhone} className="text-xs" />}
-                placeholder="e.g. +91 98111 00221"
-                value={formData.phone}
-                onChange={(e) => handleChange('phone', e.target.value)}
-                error={errors.phone}
-                helperText="Active mobile phone number for 2FA and notifications"
-              />
-            </div>
-          </div>
-
-          {/* Section 3: Credentials & Role Assignment */}
-          <div className="space-y-4">
-            <div className="border-b border-slate-100 pb-2.5">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                3. Credentials & Assigned Role
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {/* Password */}
-              <InputField
-                label="Account Password"
-                type="password"
-                required
-                icon={<FontAwesomeIcon icon={faLock} className="text-xs" />}
-                placeholder="••••••••••••"
-                value={formData.password}
-                onChange={(e) => handleChange('password', e.target.value)}
-                error={errors.password}
-                helperText="Password with built-in show/hide eye toggle (min. 6 characters)"
-              />
-
-              {/* Select Role */}
-              <div className="w-full">
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                  Select Role <span className="text-rose-500">*</span>
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                    <FontAwesomeIcon icon={faShieldHalved} className="text-xs text-[#064C23]" />
+                <div className="w-full">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Select Role <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                      <FontAwesomeIcon icon={faShieldHalved} className="text-xs text-[#064C23]" />
+                    </div>
+                    <select
+                      value={formData.role}
+                      onChange={(e) => handleChange('role', e.target.value)}
+                      className={`w-full py-2.5 pl-10 pr-8 text-sm bg-slate-50 border rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:bg-white transition-all cursor-pointer ${
+                        errors.role
+                          ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20'
+                          : 'border-slate-200 focus:border-[#064C23] focus:ring-[#064C23]/20'
+                      }`}
+                    >
+                      {availableRoles.map((role) => (
+                        <option key={role} value={role}>
+                          {role}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                  <select
-                    value={formData.role}
-                    onChange={(e) => handleChange('role', e.target.value)}
-                    className={`w-full py-2.5 pl-10 pr-8 text-sm bg-slate-50 border rounded-xl text-slate-800 focus:outline-none focus:ring-2 focus:bg-white transition-all cursor-pointer ${
-                      errors.role
-                        ? 'border-rose-400 focus:border-rose-500 focus:ring-rose-500/20'
-                        : 'border-slate-200 focus:border-[#064C23] focus:ring-[#064C23]/20'
-                    }`}
-                  >
-                    {availableRoles.map((role) => (
-                      <option key={role} value={role}>
-                        {role}
-                      </option>
-                    ))}
-                  </select>
+                  {errors.role && (
+                    <p className="mt-1.5 text-xs text-rose-600 font-medium">{errors.role}</p>
+                  )}
                 </div>
-                {errors.role ? (
-                  <p className="mt-1.5 text-xs text-rose-600 font-medium">{errors.role}</p>
-                ) : (
-                  <p className="mt-1.5 text-xs text-slate-400">
-                    Specifies module permissions and capabilities granted to this user
-                  </p>
-                )}
               </div>
             </div>
           </div>
 
-          {/* Section 4: Account Status Toggle Card */}
+          {/* Status Toggle Card */}
           <div
             onClick={() =>
               setFormData((prev) => ({
@@ -348,7 +306,7 @@ export default function AddUserView({ onBack, onSave }) {
                   </span>
                 ) : (
                   <span>
-                    Account is <strong className="text-slate-600">Inactive</strong>: User login is temporarily suspended and access is blocked.
+                    Account is <strong className="text-slate-600">Inactive</strong>: User login is temporarily suspended.
                   </span>
                 )}
               </p>
