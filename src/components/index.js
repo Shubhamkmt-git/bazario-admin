@@ -17,7 +17,12 @@ export { default as Toast } from './ui/Toast'
 
 // Route View Components
 export { default as OrdersView } from './orders/OrdersView'
-export { default as ProductsView } from './products/ProductsView'
+export { default as ProductsView } from './products/ProductManageView'
+export { default as ProductManageView } from './products/ProductManageView'
+export { default as ProductListView } from './products/ProductListView'
+export { default as AddProductView } from './products/AddProductView'
+export { default as EditProductView } from './products/EditProductView'
+export { default as ProductDetailsView } from './products/ProductDetailsView'
 export { default as ProductCategoriesView } from './categories/ProductCategoriesView'
 export { default as CategoryListView } from './categories/CategoryListView'
 export { default as AddCategoryView } from './categories/AddCategoryView'

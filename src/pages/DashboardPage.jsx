@@ -27,7 +27,8 @@ import {
   HomePageSectionManageView,
   ProductCategoriesView,
   HeroBannerManageView,
-  DeliveryStaffManageView
+  DeliveryStaffManageView,
+  ProductManageView
 } from '../components'
 import { useToast } from '../context/ToastContext'
 import {
@@ -92,11 +93,19 @@ export default function DashboardPage({ onLogout }) {
     ) {
       return 'delivery-staff'
     }
+    if (
+      baseTab === 'products' ||
+      baseTab === 'product-manage' ||
+      baseTab === 'product'
+    ) {
+      return 'products'
+    }
     const validTabs = [
       'dashboard',
       'stores',
       'customers',
       'delivery-staff',
+      'products',
       'product-categories',
       'product-category',
       'hero-banner-manage',
@@ -139,6 +148,7 @@ export default function DashboardPage({ onLogout }) {
     { id: 'stores', name: 'Stores', icon: faStore },
     { id: 'customers', name: 'Customers', icon: faUsers },
     { id: 'delivery-staff', name: 'Delivery Staff', icon: faTruck },
+    { id: 'products', name: 'Products', icon: faBoxesStacked },
     { id: 'product-categories', name: 'Product Category', icon: faTags },
     { id: 'hero-banner-manage', name: 'Hero Banner Manage', icon: faImages },
     {
@@ -309,6 +319,8 @@ export default function DashboardPage({ onLogout }) {
               ? 'Customers'
               : activeTab === 'delivery-staff'
               ? 'Delivery Staff'
+              : activeTab === 'products'
+              ? 'Products'
               : activeTab === 'product-categories' || activeTab === 'product-category'
               ? 'Product Category'
               : activeTab === 'admin-users'
@@ -342,6 +354,7 @@ export default function DashboardPage({ onLogout }) {
             {activeTab === 'stores' && <StoresView />}
             {activeTab === 'customers' && <CustomersView />}
             {activeTab === 'delivery-staff' && <DeliveryStaffManageView />}
+            {activeTab === 'products' && <ProductManageView />}
             {(activeTab === 'product-categories' || activeTab === 'product-category') && (
               <ProductCategoriesView />
             )}
