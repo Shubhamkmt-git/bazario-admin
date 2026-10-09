@@ -70,9 +70,10 @@ export default function DashboardPage({ onLogout }) {
 
   // URL Hash Routing Synchronization
   const getTabFromHash = () => {
-    const hash = window.location.hash.replace('#/', '').replace('#', '').trim().toLowerCase()
-    if (hash === 'admin-manager') return 'admin-users'
-    if (hash === 'web-manager') return 'web-about'
+    const rawHash = window.location.hash.replace('#/', '').replace('#', '').trim().toLowerCase()
+    const baseTab = rawHash.split('/')[0]
+    if (baseTab === 'admin-manager') return 'admin-users'
+    if (baseTab === 'web-manager') return 'web-about'
     const validTabs = [
       'dashboard',
       'stores',
@@ -89,7 +90,7 @@ export default function DashboardPage({ onLogout }) {
       'web-homepage',
       'settings',
     ]
-    return validTabs.includes(hash) ? hash : 'dashboard'
+    return validTabs.includes(baseTab) ? baseTab : 'dashboard'
   }
 
   const [activeTab, setActiveTab] = useState(getTabFromHash)

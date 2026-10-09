@@ -127,22 +127,26 @@ export default function ProductCategoriesView() {
       if (hash.startsWith('product-categories') || hash.startsWith('product-category')) {
         const parts = hash.split('/')
         const action = parts[1] // 'add' | 'edit' | 'view'
-        const id = parts[2] ? Number(parts[2]) : null
+        const id = parts[2] ? parts[2] : null
 
         if (action === 'add') {
           setSelectedCategory(null)
           setViewMode('add')
         } else if (action === 'edit' && id) {
-          const found = categories.find((c) => c.id === id)
+          const found = categories.find((c) => String(c.id) === String(id))
           if (found) {
             setSelectedCategory(found)
             setViewMode('edit')
+          } else {
+            setViewMode('list')
           }
         } else if (action === 'view' && id) {
-          const found = categories.find((c) => c.id === id)
+          const found = categories.find((c) => String(c.id) === String(id))
           if (found) {
             setSelectedCategory(found)
             setViewMode('view')
+          } else {
+            setViewMode('list')
           }
         } else if (!action) {
           setViewMode('list')
