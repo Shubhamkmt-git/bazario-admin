@@ -15,10 +15,10 @@ import {
   faCopy,
   faPenToSquare,
   faTrashCan,
-  faCircleCheck,
+  faArrowUpDown,
+  faHashtag,
   faCompass,
-  faArrowLeft,
-  faBuildingColumns
+  faCircleCheck
 } from '@fortawesome/free-solid-svg-icons'
 import { useToast } from '../../context/ToastContext'
 import Button from '../ui/Button'
@@ -35,6 +35,7 @@ const STORES_STORAGE_KEY = 'bazario_stores_data'
 const INITIAL_STORES = [
   {
     id: 1,
+    sortingOrder: 1,
     title: 'Bazario Central Superstore #01',
     subtitle: 'Flagship Mega Mart & Fresh Produce Hub, Sector 18',
     image: '/supermart-bg.jpg',
@@ -46,6 +47,7 @@ const INITIAL_STORES = [
   },
   {
     id: 2,
+    sortingOrder: 2,
     title: 'Bazario Express Store - Cyber City',
     subtitle: '15-Min Quick Commerce & Convenience Branch, Phase 2',
     image: '/supermart-bg.jpg',
@@ -57,6 +59,7 @@ const INITIAL_STORES = [
   },
   {
     id: 3,
+    sortingOrder: 3,
     title: 'Bazario Supermarket - Green Park',
     subtitle: 'Organic Dairy, Bakery & Gourmet Food Center',
     image: '/supermart-bg.jpg',
@@ -68,6 +71,7 @@ const INITIAL_STORES = [
   },
   {
     id: 4,
+    sortingOrder: 4,
     title: 'Bazario Daily Outlet - Indirapuram',
     subtitle: 'Fresh Veggies & Household Essentials Depot, Block B',
     image: '/supermart-bg.jpg',
@@ -82,7 +86,7 @@ const INITIAL_STORES = [
 export default function StoresView() {
   const toast = useToast()
   
-  // Storage state
+  // Stores storage state
   const [stores, setStores] = useState(() => {
     try {
       const saved = localStorage.getItem(STORES_STORAGE_KEY)
@@ -92,21 +96,22 @@ export default function StoresView() {
     }
   })
 
-  // Full-width page view state: 'list' | 'add' | 'edit' | 'view'
+  // Full-width view state: 'list' | 'add' | 'edit' | 'view'
   const [viewMode, setViewMode] = useState('list')
   const [selectedStore, setSelectedStore] = useState(null)
 
-  // Filters state (for list view)
+  // Filters state
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
 
   // Delete modal state
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, store: null })
 
-  // Form state (used for add and edit full-width pages)
+  // Form state
   const [formData, setFormData] = useState({
     title: '',
     subtitle: '',
+    sortingOrder: 1,
     image: '/supermart-bg.jpg',
     coordinates: '',
     googleUrl: '',
@@ -124,15 +129,18 @@ export default function StoresView() {
     }
   }, [stores])
 
-  const filteredStores = stores.filter((store) => {
-    const matchesStatus =
-      statusFilter === 'all' || store.status.toLowerCase() === statusFilter.toLowerCase()
-    const matchesSearch =
-      store.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      store.subtitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (store.coordinates && store.coordinates.includes(searchQuery))
-    return matchesStatus && matchesSearch
-  })
+  // Sorted and filtered stores list
+  const filteredStores = [...stores]
+    .sort((a, b) => (Number(a.sortingOrder) || 999) - (Number(b.sortingOrder) || 999))
+    .filter((store) => {
+      const matchesStatus =
+        statusFilter === 'all' || store.status.toLowerCase() === statusFilter.toLowerCase()
+      const matchesSearch =
+        store.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        store.subtitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (store.coordinates && store.coordinates.includes(searchQuery))
+      return matchesStatus && matchesSearch
+    })
 
   // Navigation handlers
   const handleGoToList = () => {
@@ -145,6 +153,7 @@ export default function StoresView() {
     setFormData({
       title: '',
       subtitle: '',
+      sortingOrder: stores.length + 1,
       image: '/supermart-bg.jpg',
       coordinates: '',
       googleUrl: '',
@@ -160,6 +169,7 @@ export default function StoresView() {
     setFormData({
       title: store.title || '',
       subtitle: store.subtitle || '',
+      sortingOrder: store.sortingOrder ?? 1,
       image: store.image || '/supermart-bg.jpg',
       coordinates: store.coordinates || '',
       googleUrl: store.googleUrl || '',
@@ -176,34 +186,39 @@ export default function StoresView() {
   }
 
   const handleFormSubmit = (e) => {
-    e.preventDefault()
+    if (e && e.preventDefault) e.preventDefault()
     if (!formData.title.trim()) {
-      toast.error('Validation Error', 'Please enter a store title/name.')
+      toast.error('Validation Error', 'Please enter a store title / name.')
       return
     }
 
+    const payload = {
+      ...formData,
+      sortingOrder: Number(formData.sortingOrder) || 1,
+    }
+
     if (viewMode === 'edit' && selectedStore) {
-      // Update existing store
+      // Update store
       const updatedList = stores.map((s) =>
         s.id === selectedStore.id
           ? {
               ...s,
-              ...formData,
+              ...payload,
             }
           : s
       )
       setStores(updatedList)
-      setSelectedStore({ ...selectedStore, ...formData })
-      toast.success('Store Updated', `"${formData.title}" details updated successfully!`)
+      setSelectedStore({ ...selectedStore, ...payload })
+      toast.success('Store Updated', `"${formData.title}" updated successfully!`)
       setViewMode('list')
     } else {
       // Create new store
       const newStore = {
         id: Date.now(),
-        ...formData,
+        ...payload,
       }
-      setStores([newStore, ...stores])
-      toast.success('Store Added', `"${formData.title}" has been listed successfully!`)
+      setStores([...stores, newStore])
+      toast.success('Store Added', `"${formData.title}" added to store listings!`)
       setViewMode('list')
     }
   }
@@ -215,7 +230,7 @@ export default function StoresView() {
       setViewMode('list')
       setSelectedStore(null)
     }
-    toast.success('Store Removed', `"${storeTitle}" has been deleted from store listings.`)
+    toast.success('Store Removed', `"${storeTitle}" removed from listings.`)
   }
 
   const handleToggleStatus = (store) => {
@@ -225,23 +240,23 @@ export default function StoresView() {
     if (selectedStore && selectedStore.id === store.id) {
       setSelectedStore({ ...selectedStore, status: newStatus })
     }
-    toast.info('Status Changed', `"${store.title}" is now marked as ${newStatus}.`)
+    toast.info('Status Changed', `"${store.title}" is now ${newStatus}.`)
   }
 
   const handleCopyCoordinates = (coords) => {
     if (!coords) return
     navigator.clipboard.writeText(coords)
-    toast.success('Copied to Clipboard', `Coordinates "${coords}" copied!`)
+    toast.success('Copied', `Coordinates "${coords}" copied to clipboard!`)
   }
 
   /* ==========================================================================
-     FULL-WIDTH PAGE 1: ADD / EDIT STORE FORM PAGE
+     FULL-WIDTH PAGE 1: ADD / EDIT STORE FORM (MINIMAL & CLEAN LAYOUT)
      ========================================================================== */
   if (viewMode === 'add' || viewMode === 'edit') {
     const isEdit = viewMode === 'edit'
     return (
       <div className="w-full space-y-6 pb-20">
-        {/* Full-width Top Action Bar with Back Button */}
+        {/* Full-width Top Action Bar */}
         <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center space-x-4">
             <BackButton
@@ -251,18 +266,16 @@ export default function StoresView() {
             />
             <div className="h-6 w-px bg-slate-200 hidden sm:block" />
             <div>
-              <div className="flex items-center space-x-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#064C23]">
-                  {isEdit ? 'Store Management' : 'New Outlet Setup'}
-                </span>
-              </div>
+              <span className="text-xs font-bold uppercase tracking-wider text-[#064C23]">
+                {isEdit ? 'Store Editor' : 'New Store Setup'}
+              </span>
               <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                {isEdit ? `Edit Store: ${selectedStore?.title}` : 'Add New Store Location'}
+                {isEdit ? `Edit ${selectedStore?.title}` : 'Add New Store Location'}
               </h1>
             </div>
           </div>
 
-          <div className="flex items-center space-x-2 self-end sm:self-auto">
+          <div className="flex items-center space-x-2.5 self-end sm:self-auto">
             <Button
               variant="cancel"
               size="sm"
@@ -280,54 +293,65 @@ export default function StoresView() {
           </div>
         </div>
 
-        {/* Full-width Form Master Card */}
+        {/* Minimal Clean Form Card */}
         <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-xs">
           <form onSubmit={handleFormSubmit} className="space-y-6">
             
-            {/* Section 1: Basic Information */}
+            {/* Group 1: Store Branding & Sorting */}
             <div className="space-y-4">
-              <div className="border-b border-slate-100 pb-3">
-                <h3 className="text-base font-bold text-slate-900 flex items-center space-x-2">
-                  <span className="w-2 h-2 rounded-full bg-[#064C23]" />
-                  <span>General Store Details</span>
-                </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Enter the primary branding, title, and descriptive subtitle for this supermarket outlet.
-                </p>
+              <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                  Basic Store Identity
+                </span>
+                <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                  Step 1
+                </span>
               </div>
 
-              <FormRow cols={1}>
-                <InputField
-                  label="Store Title / Outlet Name"
-                  required
-                  placeholder="e.g. Bazario Central Superstore #01"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  helperText="Primary name displayed on mobile app and customer receipt headers."
-                />
-              </FormRow>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="md:col-span-3">
+                  <InputField
+                    label="Store Title / Name"
+                    required
+                    placeholder="e.g. Bazario Central Superstore #01"
+                    value={formData.title}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                    helperText="Primary brand and branch identifier"
+                  />
+                </div>
 
-              <FormRow cols={1}>
-                <InputField
-                  label="Store Subtitle / Area & Branch Description"
-                  placeholder="e.g. Flagship Mega Mart & Fresh Produce Hub, Sector 18"
-                  value={formData.subtitle}
-                  onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
-                  helperText="Secondary tagline, shopping mall location, or landmark info."
-                />
-              </FormRow>
+                <div className="md:col-span-1">
+                  <InputField
+                    label="Sorting Order"
+                    type="number"
+                    min="1"
+                    icon={<FontAwesomeIcon icon={faArrowUpDown} className="text-xs text-slate-400" />}
+                    placeholder="1"
+                    value={formData.sortingOrder}
+                    onChange={(e) => setFormData({ ...formData, sortingOrder: e.target.value })}
+                    helperText="Display priority (1 = Top)"
+                  />
+                </div>
+              </div>
+
+              <InputField
+                label="Store Subtitle / Area Description"
+                placeholder="e.g. Flagship Mega Mart & Fresh Produce Hub, Sector 18"
+                value={formData.subtitle}
+                onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
+                helperText="Branch location or shopping complex landmark"
+              />
             </div>
 
-            {/* Section 2: Location & GPS Mapping */}
+            {/* Group 2: Location & Mapping */}
             <div className="space-y-4 pt-4 border-t border-slate-100">
-              <div className="border-b border-slate-100 pb-3">
-                <h3 className="text-base font-bold text-slate-900 flex items-center space-x-2">
-                  <span className="w-2 h-2 rounded-full bg-[#A44F37]" />
-                  <span>Geo Location & Map Pinning</span>
-                </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Provide exact GPS coordinates and Google Maps URL for customer navigation and driver dispatch.
-                </p>
+              <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                  Geo Coordinates & Navigation
+                </span>
+                <span className="text-[11px] font-semibold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-200">
+                  Step 2
+                </span>
               </div>
 
               <FormRow cols={2}>
@@ -337,7 +361,7 @@ export default function StoresView() {
                   placeholder="e.g. 28.5708, 77.3261"
                   value={formData.coordinates}
                   onChange={(e) => setFormData({ ...formData, coordinates: e.target.value })}
-                  helperText="Latitude, Longitude separated by comma (e.g. 28.5708, 77.3261)"
+                  helperText="Latitude, Longitude coordinates"
                 />
 
                 <InputField
@@ -346,31 +370,30 @@ export default function StoresView() {
                   placeholder="e.g. https://maps.google.com/?q=28.5708,77.3261"
                   value={formData.googleUrl}
                   onChange={(e) => setFormData({ ...formData, googleUrl: e.target.value })}
-                  helperText="Direct Google Maps sharing link or pin URL"
+                  helperText="Google Maps share link for directions"
                 />
               </FormRow>
             </div>
 
-            {/* Section 3: Contact & Hours */}
+            {/* Group 3: Contact & Hours */}
             <div className="space-y-4 pt-4 border-t border-slate-100">
-              <div className="border-b border-slate-100 pb-3">
-                <h3 className="text-base font-bold text-slate-900 flex items-center space-x-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-600" />
-                  <span>Contact & Operating Hours</span>
-                </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Supermarket customer helpline and daily operational opening/closing schedule.
-                </p>
+              <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                  Store Contact & Operating Hours
+                </span>
+                <span className="text-[11px] font-semibold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
+                  Step 3
+                </span>
               </div>
 
               <FormRow cols={2}>
                 <InputField
-                  label="Store Contact Phone"
+                  label="Contact Helpline Phone"
                   icon={<FontAwesomeIcon icon={faPhone} className="text-xs text-slate-400" />}
                   placeholder="e.g. +91 98111 22334"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  helperText="Store branch manager or customer support phone"
+                  helperText="Branch phone or customer support number"
                 />
 
                 <InputField
@@ -379,33 +402,32 @@ export default function StoresView() {
                   placeholder="e.g. 7:00 AM - 11:00 PM"
                   value={formData.operatingHours}
                   onChange={(e) => setFormData({ ...formData, operatingHours: e.target.value })}
-                  helperText="Store working hours shown to customers"
+                  helperText="Daily opening and closing schedule"
                 />
               </FormRow>
             </div>
 
-            {/* Section 4: Store Front Image */}
+            {/* Group 4: Store Photo */}
             <div className="space-y-4 pt-4 border-t border-slate-100">
-              <div className="border-b border-slate-100 pb-3">
-                <h3 className="text-base font-bold text-slate-900 flex items-center space-x-2">
-                  <span className="w-2 h-2 rounded-full bg-indigo-600" />
-                  <span>Store Front Photo / Banner</span>
-                </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Upload an attractive high-resolution photograph of the outlet facade or interior.
-                </p>
+              <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                  Store Facade Photo
+                </span>
+                <span className="text-[11px] font-semibold text-purple-700 bg-purple-50 px-2.5 py-0.5 rounded-full border border-purple-200">
+                  Step 4
+                </span>
               </div>
 
               <ImageUploadFrame
-                label="Store Photo"
+                label="Store Front Photo / Banner"
                 aspectRatio="banner"
                 value={formData.image}
                 onChange={(img) => setFormData({ ...formData, image: img })}
               />
             </div>
 
-            {/* Section 5: Operating Status Toggle */}
-            <div className="p-5 rounded-2xl bg-gradient-to-r from-slate-50 to-[#f0f9f3]/40 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            {/* Group 5: Operating Status Toggle */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <div className="flex items-center space-x-2">
                   <span className="text-sm font-bold text-slate-800">Store Live Operating Status</span>
@@ -420,7 +442,7 @@ export default function StoresView() {
                   </span>
                 </div>
                 <p className="text-xs text-slate-500 mt-1">
-                  When marked as <span className="font-bold text-emerald-700">Open</span>, customers can place online delivery orders and visit the store.
+                  Controls whether this outlet accepts orders on the app and web.
                 </p>
               </div>
               <ToggleButton
@@ -430,16 +452,17 @@ export default function StoresView() {
               />
             </div>
 
-            {/* Form Action Controls */}
+            {/* Bottom Form Actions */}
             <FormActions align="right">
               <Button
                 type="button"
                 variant="cancel"
+                size="md"
                 onClick={handleGoToList}
               >
                 Cancel
               </Button>
-              <Button type="submit" variant="primary">
+              <Button type="submit" variant="primary" size="md">
                 {isEdit ? 'Save Changes' : 'Publish Store'}
               </Button>
             </FormActions>
@@ -450,7 +473,7 @@ export default function StoresView() {
   }
 
   /* ==========================================================================
-     FULL-WIDTH PAGE 2: VIEW STORE DETAILS PAGE
+     FULL-WIDTH PAGE 2: VIEW STORE DETAILS
      ========================================================================== */
   if (viewMode === 'view' && selectedStore) {
     return (
@@ -468,6 +491,9 @@ export default function StoresView() {
               <div className="flex items-center space-x-2">
                 <span className="text-xs font-bold uppercase tracking-wider text-[#064C23]">
                   Store Details
+                </span>
+                <span className="text-xs font-mono font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">
+                  Order #{selectedStore.sortingOrder || 1}
                 </span>
                 <span
                   className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${
@@ -537,10 +563,15 @@ export default function StoresView() {
             
             <div className="absolute bottom-6 left-6 right-6 flex flex-col md:flex-row md:items-end justify-between gap-4 text-white">
               <div className="space-y-1 max-w-2xl">
-                <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-[#A44F37] text-white shadow-xs mb-1">
-                  <FontAwesomeIcon icon={faStore} className="mr-1.5 text-[11px]" />
-                  Bazario Verified Supermarket
-                </span>
+                <div className="flex items-center space-x-2 mb-1">
+                  <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-[#A44F37] text-white shadow-xs">
+                    <FontAwesomeIcon icon={faStore} className="mr-1.5 text-[11px]" />
+                    Bazario Supermarket
+                  </span>
+                  <span className="px-2 py-0.5 rounded-lg text-xs font-mono font-bold bg-white/20 text-white backdrop-blur-xs">
+                    Priority #{selectedStore.sortingOrder || 1}
+                  </span>
+                </div>
                 <h2 className="text-2xl sm:text-3xl font-black">{selectedStore.title}</h2>
                 <p className="text-sm text-slate-200">{selectedStore.subtitle}</p>
               </div>
@@ -561,7 +592,7 @@ export default function StoresView() {
           </div>
 
           {/* Grid Overview of Store Metadata */}
-          <div className="p-6 sm:p-8 space-y-8">
+          <div className="p-6 sm:p-8 space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               
               {/* Card 1: GPS Coordinates */}
@@ -608,40 +639,29 @@ export default function StoresView() {
                 <p className="text-[11px] text-slate-500">Daily business schedule</p>
               </div>
 
-              {/* Card 4: Operating Status */}
+              {/* Card 4: Sorting Order & Priority */}
               <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase text-slate-400">Live Status</span>
-                  <FontAwesomeIcon
-                    icon={selectedStore.status === 'Open' ? faDoorOpen : faDoorClosed}
-                    className={selectedStore.status === 'Open' ? 'text-emerald-600' : 'text-rose-600'}
-                  />
+                  <span className="text-xs font-bold uppercase text-slate-400">Display Order</span>
+                  <FontAwesomeIcon icon={faArrowUpDown} className="text-[#064C23] text-xs" />
                 </div>
-                <div className="flex items-center space-x-2">
-                  <span
-                    className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-black ${
-                      selectedStore.status === 'Open'
-                        ? 'bg-emerald-100 text-emerald-800'
-                        : 'bg-rose-100 text-rose-800'
-                    }`}
-                  >
-                    {selectedStore.status === 'Open' ? 'Open for Orders' : 'Store Closed'}
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-500">Customer POS & Online status</p>
+                <p className="text-base font-bold text-slate-900 font-mono">
+                  #{selectedStore.sortingOrder || 1}
+                </p>
+                <p className="text-[11px] text-slate-500">App listing sequence</p>
               </div>
             </div>
 
             {/* Google Maps Location Preview Card */}
-            <div className="p-6 rounded-2xl bg-gradient-to-br from-slate-50 via-[#f0f9f3]/30 to-slate-50 border border-slate-200 space-y-4">
+            <div className="p-6 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
-                  <h4 className="text-base font-bold text-slate-900 flex items-center space-x-2">
+                  <h4 className="text-sm font-bold text-slate-900 flex items-center space-x-2">
                     <FontAwesomeIcon icon={faCompass} className="text-[#064C23]" />
-                    <span>Google Maps Direct Link</span>
+                    <span>Google Maps Destination URL</span>
                   </h4>
                   <p className="text-xs text-slate-500">
-                    Direct hyperlink mapped to this physical retail store for directions and driver dispatch.
+                    Hyperlink for customer directions and rider delivery navigation.
                   </p>
                 </div>
                 {selectedStore.googleUrl && (
@@ -649,15 +669,15 @@ export default function StoresView() {
                     href={selectedStore.googleUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center space-x-1.5 px-4 py-2 bg-[#064C23] hover:bg-[#08632f] text-white rounded-xl text-xs font-bold transition-all shadow-xs shrink-0 self-start sm:self-auto"
+                    className="inline-flex items-center space-x-1.5 px-3.5 py-1.5 bg-[#064C23] hover:bg-[#08632f] text-white rounded-xl text-xs font-bold transition-all shadow-xs shrink-0 self-start sm:self-auto"
                   >
-                    <span>Open in Google Maps</span>
+                    <span>Open in Maps</span>
                     <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[10px]" />
                   </a>
                 )}
               </div>
 
-              <div className="p-3.5 bg-white rounded-xl border border-slate-200 font-mono text-xs text-slate-700 break-all select-all flex items-center justify-between gap-3">
+              <div className="p-3 bg-white rounded-xl border border-slate-200 font-mono text-xs text-slate-700 break-all select-all flex items-center justify-between gap-3">
                 <span className="truncate">{selectedStore.googleUrl || 'No Google Maps URL configured.'}</span>
                 {selectedStore.googleUrl && (
                   <button
@@ -692,7 +712,7 @@ export default function StoresView() {
   }
 
   /* ==========================================================================
-     FULL-WIDTH PAGE 0: STORES LIST / INDEX DIRECTORY (DEFAULT)
+     FULL-WIDTH PAGE 0: STORES DIRECTORY TABLE (DEFAULT LIST)
      ========================================================================== */
   return (
     <div className="w-full space-y-6 pb-20">
@@ -707,7 +727,7 @@ export default function StoresView() {
               Store Locations & Outlets
             </h1>
             <p className="text-xs sm:text-sm text-slate-500">
-              Manage listed supermarket branches, GPS coordinates, Google Maps URLs, and live opening status.
+              Manage listed supermarket branches, sorting order priority, GPS coordinates, and live status.
             </p>
           </div>
         </div>
@@ -771,6 +791,7 @@ export default function StoresView() {
             <thead className="bg-slate-50/80 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
               <tr>
                 <th className="px-6 py-4 w-16">Index</th>
+                <th className="px-6 py-4 w-20">Order</th>
                 <th className="px-6 py-4">Store Outlet</th>
                 <th className="px-6 py-4">Area & Subtitle</th>
                 <th className="px-6 py-4">GPS Coordinates</th>
@@ -786,6 +807,13 @@ export default function StoresView() {
                     {/* Index */}
                     <td className="px-6 py-4 font-bold text-slate-400 font-mono">
                       #{index + 1}
+                    </td>
+
+                    {/* Sorting Order */}
+                    <td className="px-6 py-4 font-mono font-bold text-slate-700">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-slate-100 border border-slate-200">
+                        {store.sortingOrder ?? index + 1}
+                      </span>
                     </td>
 
                     {/* Store Name & Thumbnail */}
@@ -900,7 +928,7 @@ export default function StoresView() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="7" className="px-6 py-12 text-center text-slate-400 text-xs">
+                  <td colSpan="8" className="px-6 py-12 text-center text-slate-400 text-xs">
                     No stores found matching your search.
                   </td>
                 </tr>
