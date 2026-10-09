@@ -182,14 +182,26 @@ function LoginBlade({ onLoginSuccess }) {
 }
 
 export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return localStorage.getItem('bazario_admin_auth') === 'true'
+  })
+
+  const handleLoginSuccess = () => {
+    localStorage.setItem('bazario_admin_auth', 'true')
+    setIsAuthenticated(true)
+  }
+
+  const handleLogout = () => {
+    localStorage.removeItem('bazario_admin_auth')
+    setIsAuthenticated(false)
+  }
 
   return (
     <ToastProvider>
       {isAuthenticated ? (
-        <DashboardPage onLogout={() => setIsAuthenticated(false)} />
+        <DashboardPage onLogout={handleLogout} />
       ) : (
-        <LoginBlade onLoginSuccess={() => setIsAuthenticated(true)} />
+        <LoginBlade onLoginSuccess={handleLoginSuccess} />
       )}
     </ToastProvider>
   )
