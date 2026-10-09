@@ -21,6 +21,9 @@ export { default as ProductsView } from './products/ProductsView'
 export { default as StoresView } from './stores/StoresView'
 export { default as CustomersView } from './customers/CustomersView'
 export { default as SettingsView } from './settings/SettingsView'
+export { default as AdminUsersView } from './adminManager/AdminUsersView'
+export { default as AdminRolesView } from './adminManager/AdminRolesView'
+export { default as AdminPermissionsView } from './adminManager/AdminPermissionsView'
 
 // Brand Logo
 export { default as BazarioLogo } from './BazarioLogo'

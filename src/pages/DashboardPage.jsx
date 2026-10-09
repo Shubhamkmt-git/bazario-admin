@@ -18,7 +18,10 @@ import {
   ProductsView,
   StoresView,
   CustomersView,
-  SettingsView
+  SettingsView,
+  AdminUsersView,
+  AdminRolesView,
+  AdminPermissionsView
 } from '../components'
 import { useToast } from '../context/ToastContext'
 import {
@@ -42,7 +45,11 @@ import {
   faWallet,
   faBasketShopping,
   faReceipt,
-  faTag
+  faTag,
+  faUserShield,
+  faUserTie,
+  faShieldHalved,
+  faKey
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
@@ -50,10 +57,21 @@ export default function DashboardPage({ onLogout }) {
   const toast = useToast()
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
-  // URL Hash Routing Synchronization (e.g. #/dashboard, #/orders, #/products, #/stores, #/customers, #/settings)
+  // URL Hash Routing Synchronization
   const getTabFromHash = () => {
     const hash = window.location.hash.replace('#/', '').replace('#', '').trim().toLowerCase()
-    const validTabs = ['dashboard', 'orders', 'products', 'stores', 'customers', 'settings']
+    if (hash === 'admin-manager') return 'admin-users'
+    const validTabs = [
+      'dashboard',
+      'orders',
+      'products',
+      'stores',
+      'customers',
+      'admin-users',
+      'admin-roles',
+      'admin-permissions',
+      'settings',
+    ]
     return validTabs.includes(hash) ? hash : 'dashboard'
   }
 
@@ -154,6 +172,16 @@ export default function DashboardPage({ onLogout }) {
     { id: 'products', name: 'Products & Stock', icon: faBoxesStacked },
     { id: 'stores', name: 'Stores', icon: faStore },
     { id: 'customers', name: 'Customers', icon: faUsers },
+    {
+      id: 'admin-manager',
+      name: 'Admin Manager',
+      icon: faUserShield,
+      children: [
+        { id: 'admin-users', name: 'Admin User', icon: faUserTie },
+        { id: 'admin-roles', name: 'Role', icon: faShieldHalved },
+        { id: 'admin-permissions', name: 'Permission', icon: faKey },
+      ],
+    },
     { id: 'settings', name: 'Settings', icon: faGear },
   ]
 
@@ -259,6 +287,12 @@ export default function DashboardPage({ onLogout }) {
               ? 'Store Locations & Outlets'
               : activeTab === 'customers'
               ? 'Customers'
+              : activeTab === 'admin-users'
+              ? 'Admin Users'
+              : activeTab === 'admin-roles'
+              ? 'Roles & Access Control'
+              : activeTab === 'admin-permissions'
+              ? 'System Permissions Matrix'
               : 'Dashboard'
           }
           onLogout={onLogout}
@@ -273,6 +307,9 @@ export default function DashboardPage({ onLogout }) {
             {activeTab === 'products' && <ProductsView />}
             {activeTab === 'stores' && <StoresView />}
             {activeTab === 'customers' && <CustomersView />}
+            {activeTab === 'admin-users' && <AdminUsersView />}
+            {activeTab === 'admin-roles' && <AdminRolesView />}
+            {activeTab === 'admin-permissions' && <AdminPermissionsView />}
             {activeTab === 'dashboard' && (
               <>
                 {/* Welcome Banner */}
