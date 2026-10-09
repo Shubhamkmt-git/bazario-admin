@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faEye, faEyeSlash, faSpinner, faCircleCheck, faLock } from '@fortawesome/free-solid-svg-icons'
+import { faEye, faEyeSlash, faSpinner, faCircleCheck } from '@fortawesome/free-solid-svg-icons'
 import BazarioLogo from './components/BazarioLogo'
 
 export default function App() {
@@ -18,66 +18,67 @@ export default function App() {
     setTimeout(() => {
       setIsLoading(false)
       setLoginSuccess(true)
-    }, 1200)
+    }, 1000)
   }
 
   return (
-    <div className="relative min-h-screen w-full flex items-center justify-center font-roboto overflow-hidden">
+    <div className="relative min-h-screen w-full flex items-center justify-center font-roboto overflow-hidden bg-slate-900 select-none">
       {/* Supermarket Fullscreen Background Image */}
       <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-1000 scale-105"
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
           backgroundImage: `url('/supermart-bg.jpg')`,
         }}
       />
 
-      {/* Dark Ambient Overlay */}
-      <div className="absolute inset-0 bg-slate-950/50 backdrop-blur-[2px]" />
+      {/* Dark Mood Overlay */}
+      <div className="absolute inset-0 bg-black/45 backdrop-blur-[1px]" />
 
-      {/* Main Container: Left Logo + Right Login Card */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-8 flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16">
+      {/* Main Content Grid: Left Logo + Right Login Card */}
+      <div className="relative z-10 w-full max-w-6xl mx-auto px-6 sm:px-10 lg:px-12 py-10 flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16">
         
-        {/* Left Side: Brand Logo */}
-        <div className="w-full lg:w-1/2 flex flex-col items-center lg:items-start justify-center text-center lg:text-left">
-          <div className="w-full max-w-md sm:max-w-lg lg:max-w-xl transition-transform duration-300 hover:scale-[1.02]">
+        {/* Left Side: Exact Bazario Logo */}
+        <div className="w-full lg:w-1/2 flex items-center justify-center lg:justify-start">
+          <div className="w-full max-w-[420px] sm:max-w-[480px] lg:max-w-[520px]">
             <BazarioLogo sticker={true} />
           </div>
         </div>
 
-        {/* Right Side: Admin / Store Login Card */}
+        {/* Right Side: Store Login Card */}
         <div className="w-full lg:w-1/2 flex justify-center lg:justify-end">
-          <div className="w-full max-w-md bg-white rounded-[2rem] p-8 sm:p-10 shadow-2xl border border-white/20 transition-all duration-300">
+          <div className="w-full max-w-[430px] bg-white rounded-[32px] p-8 sm:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.35)] transition-all duration-300">
             
-            {/* Card Title */}
-            <div className="mb-8">
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            {/* Heading */}
+            <div className="mb-7">
+              <h1 className="text-[28px] sm:text-[32px] font-extrabold text-[#111827] tracking-tight leading-tight">
                 Store Login
-              </h2>
+              </h1>
             </div>
 
             {loginSuccess ? (
-              <div className="py-8 text-center space-y-3 animate-fade-in">
-                <div className="w-16 h-16 bg-primary-50 text-primary-900 rounded-full flex items-center justify-center mx-auto text-2xl border border-primary-200">
+              <div className="py-8 text-center space-y-3">
+                <div className="w-16 h-16 bg-[#f0f9f3] text-[#064C23] rounded-full flex items-center justify-center mx-auto text-2xl border border-[#bae2cb]">
                   <FontAwesomeIcon icon={faCircleCheck} />
                 </div>
-                <h3 className="text-lg font-bold text-slate-800">Login Successful!</h3>
-                <p className="text-sm text-slate-500">Redirecting to Bazario Dashboard...</p>
+                <h2 className="text-xl font-bold text-[#111827]">Welcome back!</h2>
+                <p className="text-sm text-slate-500">Redirecting to Bazario Portal...</p>
                 <button
+                  type="button"
                   onClick={() => setLoginSuccess(false)}
-                  className="mt-4 text-xs font-semibold text-secondary-700 hover:text-secondary-800 underline"
+                  className="mt-4 inline-block text-xs font-semibold text-[#A44F37] hover:text-[#7e3b29] underline cursor-pointer"
                 >
-                  Back to Login
+                  Sign in with another account
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Email Field */}
                 <div>
                   <label
                     htmlFor="email"
-                    className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2"
+                    className="block text-[11px] font-bold text-[#374151] uppercase tracking-wider mb-2"
                   >
-                    Email
+                    EMAIL
                   </label>
                   <input
                     id="email"
@@ -86,7 +87,7 @@ export default function App() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter your email"
-                    className="w-full px-4 py-3.5 bg-slate-50/80 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-900/20 focus:border-primary-900 focus:bg-white transition-all"
+                    className="w-full px-4 py-3.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl text-sm text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#064C23]/20 focus:border-[#064C23] focus:bg-white transition-all"
                   />
                 </div>
 
@@ -94,9 +95,9 @@ export default function App() {
                 <div>
                   <label
                     htmlFor="password"
-                    className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2"
+                    className="block text-[11px] font-bold text-[#374151] uppercase tracking-wider mb-2"
                   >
-                    Password
+                    PASSWORD
                   </label>
                   <div className="relative">
                     <input
@@ -106,12 +107,12 @@ export default function App() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Enter your password"
-                      className="w-full pl-4 pr-12 py-3.5 bg-slate-50/80 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary-900/20 focus:border-primary-900 focus:bg-white transition-all"
+                      className="w-full pl-4 pr-12 py-3.5 bg-[#F9FAFB] border border-[#E5E7EB] rounded-xl text-sm text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#064C23]/20 focus:border-[#064C23] focus:bg-white transition-all"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600 transition-colors focus:outline-none"
+                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-[#9CA3AF] hover:text-[#4B5563] transition-colors focus:outline-none cursor-pointer"
                       aria-label={showPassword ? 'Hide password' : 'Show password'}
                     >
                       <FontAwesomeIcon
@@ -127,7 +128,7 @@ export default function App() {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full bg-primary-900 hover:bg-primary-950 text-white font-bold py-3.5 px-4 rounded-xl text-sm transition-all duration-200 shadow-lg shadow-primary-900/25 active:scale-[0.99] flex items-center justify-center space-x-2 disabled:opacity-75 disabled:cursor-not-allowed cursor-pointer"
+                    className="w-full bg-[#064C23] hover:bg-[#043b1b] text-white font-bold py-3.5 px-4 rounded-xl text-sm transition-all duration-150 shadow-md hover:shadow-lg active:scale-[0.99] flex items-center justify-center space-x-2 disabled:opacity-80 disabled:cursor-not-allowed cursor-pointer"
                   >
                     {isLoading ? (
                       <>
