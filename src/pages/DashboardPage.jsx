@@ -16,6 +16,7 @@ import {
   AlertModal,
   OrdersView,
   ProductsView,
+  StoresView,
   CustomersView,
   SettingsView
 } from '../components'
@@ -49,10 +50,10 @@ export default function DashboardPage({ onLogout }) {
   const toast = useToast()
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
-  // URL Hash Routing Synchronization (e.g. #/dashboard, #/orders, #/products, #/customers, #/settings)
+  // URL Hash Routing Synchronization (e.g. #/dashboard, #/orders, #/products, #/stores, #/customers, #/settings)
   const getTabFromHash = () => {
     const hash = window.location.hash.replace('#/', '').replace('#', '').trim().toLowerCase()
-    const validTabs = ['dashboard', 'orders', 'products', 'customers', 'settings']
+    const validTabs = ['dashboard', 'orders', 'products', 'stores', 'customers', 'settings']
     return validTabs.includes(hash) ? hash : 'dashboard'
   }
 
@@ -151,6 +152,7 @@ export default function DashboardPage({ onLogout }) {
     { id: 'dashboard', name: 'Dashboard', icon: faChartLine },
     { id: 'orders', name: 'Orders', icon: faCartShopping },
     { id: 'products', name: 'Products & Stock', icon: faBoxesStacked },
+    { id: 'stores', name: 'Stores', icon: faStore },
     { id: 'customers', name: 'Customers', icon: faUsers },
     { id: 'settings', name: 'Settings', icon: faGear },
   ]
@@ -253,6 +255,8 @@ export default function DashboardPage({ onLogout }) {
               ? 'Store Orders'
               : activeTab === 'products'
               ? 'Products & Stock'
+              : activeTab === 'stores'
+              ? 'Store Locations & Outlets'
               : activeTab === 'customers'
               ? 'Customers'
               : 'Dashboard'
@@ -267,6 +271,7 @@ export default function DashboardPage({ onLogout }) {
             {activeTab === 'settings' && <SettingsView />}
             {activeTab === 'orders' && <OrdersView />}
             {activeTab === 'products' && <ProductsView />}
+            {activeTab === 'stores' && <StoresView />}
             {activeTab === 'customers' && <CustomersView />}
             {activeTab === 'dashboard' && (
               <>
