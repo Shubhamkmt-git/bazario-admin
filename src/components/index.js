@@ -37,6 +37,12 @@ export { default as TopBarManageView } from './webManager/TopBarManageView'
 export { default as CtaManageView } from './webManager/CtaManageView'
 export { default as CareerManageView } from './webManager/CareerManageView'
 export { default as HomePageSectionManageView } from './webManager/HomePageSectionManageView'
+export { default as HeroBannerManageView } from './heroBanner/HeroBannerManageView'
+export { default as HeroBannerListView } from './heroBanner/HeroBannerListView'
+export { default as AddHeroBannerView } from './heroBanner/AddHeroBannerView'
+export { default as EditHeroBannerView } from './heroBanner/EditHeroBannerView'
+export { default as HeroBannerDetailsView } from './heroBanner/HeroBannerDetailsView'
 
 // Brand Logo
 export { default as BazarioLogo } from './BazarioLogo'
+

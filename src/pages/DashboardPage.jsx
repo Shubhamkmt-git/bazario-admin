@@ -25,7 +25,8 @@ import {
   CtaManageView,
   CareerManageView,
   HomePageSectionManageView,
-  ProductCategoriesView
+  ProductCategoriesView,
+  HeroBannerManageView
 } from '../components'
 import { useToast } from '../context/ToastContext'
 import {
@@ -60,7 +61,8 @@ import {
   faBullhorn,
   faBriefcase,
   faTableCellsLarge,
-  faTags
+  faTags,
+  faImages
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
@@ -74,6 +76,7 @@ export default function DashboardPage({ onLogout }) {
     const baseTab = rawHash.split('/')[0]
     if (baseTab === 'admin-manager') return 'admin-users'
     if (baseTab === 'web-manager') return 'web-about'
+    if (baseTab === 'hero-banner-manage' || baseTab === 'hero-banners' || baseTab === 'hero-banner') return 'web-hero-banner'
     const validTabs = [
       'dashboard',
       'stores',
@@ -88,6 +91,9 @@ export default function DashboardPage({ onLogout }) {
       'web-cta',
       'web-career',
       'web-homepage',
+      'web-hero-banner',
+      'hero-banner-manage',
+      'hero-banners',
       'settings',
     ]
     return validTabs.includes(baseTab) ? baseTab : 'dashboard'
@@ -137,6 +143,7 @@ export default function DashboardPage({ onLogout }) {
         { id: 'web-cta', name: 'CTA Manage', icon: faBullhorn },
         { id: 'web-career', name: 'Career Manage', icon: faBriefcase },
         { id: 'web-homepage', name: 'Home Page Section Heading Manage', icon: faTableCellsLarge },
+        { id: 'web-hero-banner', name: 'Hero Banner Manage', icon: faImages },
       ],
     },
     { id: 'settings', name: 'Settings', icon: faGear },
@@ -301,6 +308,8 @@ export default function DashboardPage({ onLogout }) {
               ? 'Career Manage'
               : activeTab === 'web-homepage'
               ? 'Home Page Section Heading Manage'
+              : activeTab === 'web-hero-banner' || activeTab === 'hero-banner-manage'
+              ? 'Hero Banner Manage'
               : 'Dashboard'
           }
           onLogout={onLogout}
@@ -324,6 +333,9 @@ export default function DashboardPage({ onLogout }) {
             {activeTab === 'web-cta' && <CtaManageView />}
             {activeTab === 'web-career' && <CareerManageView />}
             {activeTab === 'web-homepage' && <HomePageSectionManageView />}
+            {(activeTab === 'web-hero-banner' || activeTab === 'hero-banner-manage') && (
+              <HeroBannerManageView />
+            )}
             {activeTab === 'dashboard' && (
               <>
                 {/* Welcome Banner */}
