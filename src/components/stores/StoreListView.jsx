@@ -111,7 +111,6 @@ export default function StoreListView({
           <table className="w-full text-left text-sm text-slate-600">
             <thead className="bg-slate-50/80 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
               <tr>
-                <th className="px-6 py-4 w-16">Index</th>
                 <th className="px-6 py-4 w-20">Order</th>
                 <th className="px-6 py-4">Store Outlet</th>
                 <th className="px-6 py-4">Area & Subtitle</th>
@@ -123,11 +122,6 @@ export default function StoreListView({
               {filteredStores.length > 0 ? (
                 filteredStores.map((store, index) => (
                   <tr key={store.id} className="hover:bg-slate-50/75 transition-colors">
-                    {/* Index */}
-                    <td className="px-6 py-4 font-bold text-slate-400 font-mono">
-                      #{index + 1}
-                    </td>
-
                     {/* Sorting Order */}
                     <td className="px-6 py-4 font-mono font-bold text-slate-700">
                       <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-slate-100 border border-slate-200">
@@ -196,7 +190,7 @@ export default function StoreListView({
                 ))
               ) : (
                 <tr>
-                  <td colSpan="6" className="px-6 py-12 text-center text-slate-400 text-xs">
+                  <td colSpan="5" className="px-6 py-12 text-center text-slate-400 text-xs">
                     No stores found matching your search.
                   </td>
                 </tr>
