@@ -879,8 +879,6 @@ export default function StoresView() {
                 <th className="px-6 py-4 w-20">Order</th>
                 <th className="px-6 py-4">Store Outlet</th>
                 <th className="px-6 py-4">Area & Subtitle</th>
-                <th className="px-6 py-4">GPS Coordinates</th>
-                <th className="px-6 py-4">Google Maps</th>
                 <th className="px-6 py-4">Status</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
@@ -926,44 +924,8 @@ export default function StoresView() {
                     </td>
 
                     {/* Subtitle / Area */}
-                    <td className="px-6 py-4 text-xs font-medium text-slate-600 max-w-[220px]">
+                    <td className="px-6 py-4 text-xs font-medium text-slate-600 max-w-[280px]">
                       <p className="line-clamp-2">{store.subtitle}</p>
-                    </td>
-
-                    {/* Coordinates */}
-                    <td className="px-6 py-4 text-xs font-mono">
-                      {store.coordinates ? (
-                        <div className="inline-flex items-center space-x-1.5 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 text-slate-700">
-                          <FontAwesomeIcon icon={faLocationDot} className="text-[#064C23] text-[10px]" />
-                          <span className="font-bold">{store.coordinates}</span>
-                          <button
-                            type="button"
-                            onClick={() => handleCopyCoordinates(store.coordinates)}
-                            className="text-slate-400 hover:text-slate-700 cursor-pointer ml-1"
-                            title="Copy coordinates"
-                          >
-                            <FontAwesomeIcon icon={faCopy} className="text-[10px]" />
-                          </button>
-                        </div>
-                      ) : (
-                        <span className="text-slate-400">Not set</span>
-                      )}
-                    </td>
-
-                    {/* Google Maps Button */}
-                    <td className="px-6 py-4">
-                      <button
-                        type="button"
-                        onClick={() => openGoogleMaps(store.googleUrl, store.coordinates, store.title)}
-                        className="inline-flex items-center space-x-1.5 px-3 py-1.5 bg-[#f0f9f3] hover:bg-[#e2f3e8] text-[#064C23] border border-[#bae2cb] rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer group active:scale-95"
-                      >
-                        <FontAwesomeIcon icon={faMapLocationDot} className="text-xs text-[#A44F37]" />
-                        <span>View Map</span>
-                        <FontAwesomeIcon
-                          icon={faArrowUpRightFromSquare}
-                          className="text-[10px] group-hover:translate-x-0.5 transition-transform"
-                        />
-                      </button>
                     </td>
 
                     {/* Status Badge Toggle */}
@@ -1008,7 +970,7 @@ export default function StoresView() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="8" className="px-6 py-12 text-center text-slate-400 text-xs">
+                  <td colSpan="6" className="px-6 py-12 text-center text-slate-400 text-xs">
                     No stores found matching your search.
                   </td>
                 </tr>
