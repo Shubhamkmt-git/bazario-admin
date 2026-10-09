@@ -72,26 +72,28 @@ export default function Sidebar({
                 title={!isOpen ? item.name : ''}
                 className={`w-full flex items-center rounded-xl transition-all duration-200 cursor-pointer group relative ${
                   isOpen
-                    ? 'justify-between px-3.5 py-2.5 text-[15px]'
-                    : 'justify-center p-3 text-lg'
+                    ? 'justify-between p-2 text-[15px]'
+                    : 'justify-center p-2 text-lg'
                 } ${
                   isActive
-                    ? 'bg-gradient-to-r from-[#A44F37] to-[#b8563b] text-white font-semibold shadow-md shadow-[#A44F37]/25 border border-[#A44F37]'
-                    : 'text-[#1c4b31] font-medium border border-transparent hover:border-[#bfe0cd] hover:text-[#064C23] hover:bg-white/70'
+                    ? 'bg-white text-[#064C23] font-bold shadow-sm shadow-[#064C23]/8 border border-[#9fd3b4]'
+                    : 'text-[#28573d] font-semibold border border-transparent hover:border-[#bfe0cd] hover:bg-white/60 hover:text-[#064C23]'
                 }`}
               >
-                <div className="flex items-center space-x-3.5 min-w-0">
+                <div className="flex items-center space-x-3 min-w-0">
                   {item.icon && (
-                    <FontAwesomeIcon
-                      icon={item.icon}
-                      className={`shrink-0 transition-transform duration-200 group-hover:scale-110 ${
-                        isOpen ? 'w-5 h-5 text-base' : 'w-6 h-6 text-lg'
-                      } ${
+                    <div
+                      className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-all duration-200 ${
                         isActive
-                          ? 'text-white'
-                          : 'text-[#2b6d4b] group-hover:text-[#064C23]'
+                          ? 'bg-[#064C23] text-white shadow-xs'
+                          : 'bg-white/60 text-[#2b6d4b] group-hover:bg-white group-hover:text-[#064C23] group-hover:shadow-2xs'
                       }`}
-                    />
+                    >
+                      <FontAwesomeIcon
+                        icon={item.icon}
+                        className={isOpen ? 'text-sm' : 'text-base'}
+                      />
+                    </div>
                   )}
                   {isOpen && <span className="truncate tracking-tight">{item.name}</span>}
                 </div>
@@ -101,7 +103,7 @@ export default function Sidebar({
                   <span
                     className={`px-2 py-0.5 text-xs font-bold rounded-full transition-colors shrink-0 ml-2 ${
                       isActive
-                        ? 'bg-white/25 text-white border border-white/30'
+                        ? 'bg-[#064C23] text-white shadow-2xs'
                         : 'bg-[#064C23]/10 text-[#064C23] border border-[#064C23]/15'
                     }`}
                   >
@@ -111,7 +113,7 @@ export default function Sidebar({
 
                 {/* Collapsed Badge Dot */}
                 {!isOpen && item.badge && (
-                  <span className="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-[#A44F37] ring-2 ring-white" />
+                  <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-[#A44F37] ring-2 ring-white" />
                 )}
 
                 {/* Collapsed Tooltip on Hover */}
