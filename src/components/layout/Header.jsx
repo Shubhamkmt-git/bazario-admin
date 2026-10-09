@@ -11,9 +11,10 @@ export default function Header({
   user = { name: 'Admin User', email: 'admin@bazario.com', avatar: 'BA' },
   onLogout,
   actions = null,
+  className = '',
 }) {
   return (
-    <header className="h-16 bg-white border-b border-slate-200 px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30 shadow-xs">
+    <header className={`sticky top-0 z-40 w-full h-16 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 sm:px-6 flex items-center justify-between shadow-xs transition-all ${className}`}>
       {/* Left side: Hamburger Toggle / Optional Title */}
       <div className="flex items-center space-x-4">
         {onMenuToggle && (
