@@ -13,7 +13,8 @@ import {
   FormRow,
   FormActions,
   Modal,
-  AlertModal
+  AlertModal,
+  SettingsView
 } from '../components'
 import { useToast } from '../context/ToastContext'
 import {
@@ -227,9 +228,12 @@ export default function DashboardPage({ onLogout }) {
         {/* Scrollable Main Body & Content */}
         <div className="flex-1 overflow-y-auto flex flex-col justify-between">
           <main className="p-4 sm:p-6 lg:p-8 space-y-6 flex-1">
-          
-          {/* Welcome Banner */}
-          <div className="relative overflow-hidden bg-gradient-to-r from-[#042813] via-[#064C23] to-[#0a5c2d] rounded-3xl p-6 sm:p-8 text-white shadow-lg border border-[#064C23]">
+            {activeTab === 'settings' ? (
+              <SettingsView />
+            ) : (
+              <>
+                {/* Welcome Banner */}
+                <div className="relative overflow-hidden bg-gradient-to-r from-[#042813] via-[#064C23] to-[#0a5c2d] rounded-3xl p-6 sm:p-8 text-white shadow-lg border border-[#064C23]">
             <div className="absolute right-0 top-0 translate-x-12 -translate-y-12 w-64 h-64 bg-[#A44F37]/25 rounded-full blur-3xl pointer-events-none" />
             
             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -560,9 +564,11 @@ export default function DashboardPage({ onLogout }) {
                   )}
                 </tbody>
               </table>
+              </div>
             </div>
-          </div>
-        </main>
+          </>
+        )}
+      </main>
 
         {/* Reusable Footer */}
         <Footer />

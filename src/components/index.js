@@ -15,5 +15,8 @@ export { default as Modal } from './ui/Modal'
 export { default as AlertModal } from './ui/AlertModal'
 export { default as Toast } from './ui/Toast'
 
+// Settings Component
+export { default as SettingsView } from './settings/SettingsView'
+
 // Brand Logo
 export { default as BazarioLogo } from './BazarioLogo'
