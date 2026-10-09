@@ -266,8 +266,6 @@ export default function CareerManageView() {
                 <th className="px-6 py-4">Job Title & Dept</th>
                 <th className="px-6 py-4">Location Branch</th>
                 <th className="px-6 py-4">Employment Type</th>
-                <th className="px-6 py-4">Salary Range (INR ₹)</th>
-                <th className="px-6 py-4">Applicants</th>
                 <th className="px-6 py-4">Job Status</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
@@ -304,17 +302,6 @@ export default function CareerManageView() {
                       </span>
                     </td>
 
-                    <td className="px-6 py-4 text-xs font-mono font-bold text-slate-900">
-                      {job.salary}
-                    </td>
-
-                    <td className="px-6 py-4">
-                      <span className="inline-flex items-center space-x-1 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
-                        <FontAwesomeIcon icon={faUsers} className="text-[10px]" />
-                        <span>{job.applicants} Applied</span>
-                      </span>
-                    </td>
-
                     <td className="px-6 py-4">
                       <ToggleButton
                         size="sm"
@@ -345,7 +332,7 @@ export default function CareerManageView() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={8} className="px-6 py-12 text-center text-slate-400">
+                  <td colSpan={6} className="px-6 py-12 text-center text-slate-400">
                     No matching job openings found.
                   </td>
                 </tr>

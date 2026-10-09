@@ -53,7 +53,7 @@ export default function ActionButton({
     },
   }
 
-  const currentConfig = configs[action] || configs.view
+  const currentConfig = configs[action] || configs[props.variant] || configs.view
   const displayIcon = icon || currentConfig.icon
   const displayTooltip = tooltip || currentConfig.defaultTooltip
 
