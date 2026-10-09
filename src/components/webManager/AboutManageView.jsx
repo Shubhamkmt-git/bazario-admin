@@ -9,6 +9,8 @@ import {
   faPlus,
   faTrashCan,
   faCheck,
+  faMagnifyingGlass,
+  faXmark,
   faLeaf,
   faTruckFast,
   faShieldHalved,
@@ -18,28 +20,125 @@ import {
   faHeart,
   faCheckDouble,
   faHandHoldingHeart,
-  faBagShopping
+  faBagShopping,
+  faCartShopping,
+  faStar,
+  faPercent,
+  faClock,
+  faBoxOpen,
+  faTruck,
+  faThumbsUp,
+  faFaceSmile,
+  faUsers,
+  faLocationDot,
+  faPhone,
+  faReceipt,
+  faCoins,
+  faBasketShopping,
+  faCarrot,
+  faAppleWhole,
+  faEgg,
+  faFish,
+  faGem,
+  faCrown,
+  faBolt,
+  faFire,
+  faGift,
+  faHeadset,
+  faQrcode,
+  faRecycle,
+  faBuilding,
+  faGlobe,
+  faSun,
+  faSnowflake,
+  faShieldHeart,
+  faHandshake,
+  faCircleCheck,
+  faCreditCard,
+  faMoneyBillWave,
+  faBullhorn,
+  faUtensils,
+  faScaleBalanced,
+  faSeedling,
+  faPepperHot,
+  faLemon,
+  faWheatAwn,
+  faBreadSlice,
+  faJar,
+  faUserTie,
+  faLock
 } from '@fortawesome/free-solid-svg-icons'
 import {
   Button,
   InputField,
   ImageUploadFrame,
-  ToggleButton
+  ToggleButton,
+  Modal
 } from '../../components'
 import { useToast } from '../../context/ToastContext'
 
-const ICONS = [
-  { id: 'leaf', name: 'Leaf / Organic' },
-  { id: 'truck', name: 'Fast Delivery' },
-  { id: 'shield', name: 'Quality Shield' },
-  { id: 'tags', name: 'Best Price' },
-  { id: 'store', name: 'Retail Store' },
-  { id: 'award', name: 'Trust Award' },
-  { id: 'heart', name: 'Customer Care' },
-  { id: 'check', name: 'Quality Check' },
-  { id: 'care', name: 'Community' },
-  { id: 'bag', name: 'Shopping Bag' }
+// Comprehensive catalog of FontAwesome Free Solid icons
+const FONTAWESOME_ICONS = [
+  { id: 'faLeaf', name: 'Fresh Leaf', icon: faLeaf, category: 'Food & Freshness' },
+  { id: 'faCarrot', name: 'Carrot / Veggies', icon: faCarrot, category: 'Food & Freshness' },
+  { id: 'faAppleWhole', name: 'Apple / Fruits', icon: faAppleWhole, category: 'Food & Freshness' },
+  { id: 'faSeedling', name: 'Plant Seedling', icon: faSeedling, category: 'Food & Freshness' },
+  { id: 'faPepperHot', name: 'Pepper / Spices', icon: faPepperHot, category: 'Food & Freshness' },
+  { id: 'faLemon', name: 'Lemon / Citrus', icon: faLemon, category: 'Food & Freshness' },
+  { id: 'faWheatAwn', name: 'Wheat / Grains', icon: faWheatAwn, category: 'Food & Freshness' },
+  { id: 'faBreadSlice', name: 'Bakery / Bread', icon: faBreadSlice, category: 'Food & Freshness' },
+  { id: 'faEgg', name: 'Dairy & Eggs', icon: faEgg, category: 'Food & Freshness' },
+  { id: 'faFish', name: 'Fish & Seafood', icon: faFish, category: 'Food & Freshness' },
+  { id: 'faJar', name: 'Pantry / Jar', icon: faJar, category: 'Food & Freshness' },
+  { id: 'faUtensils', name: 'Kitchen & Dining', icon: faUtensils, category: 'Food & Freshness' },
+
+  { id: 'faStore', name: 'Supermarket Store', icon: faStore, category: 'Shopping & Retail' },
+  { id: 'faBasketShopping', name: 'Shopping Basket', icon: faBasketShopping, category: 'Shopping & Retail' },
+  { id: 'faCartShopping', name: 'Shopping Cart', icon: faCartShopping, category: 'Shopping & Retail' },
+  { id: 'faBagShopping', name: 'Shopping Bag', icon: faBagShopping, category: 'Shopping & Retail' },
+  { id: 'faTags', name: 'Price Tags', icon: faTags, category: 'Shopping & Retail' },
+  { id: 'faPercent', name: 'Discount / Offers', icon: faPercent, category: 'Shopping & Retail' },
+  { id: 'faCoins', name: 'Savings & Coins', icon: faCoins, category: 'Shopping & Retail' },
+  { id: 'faMoneyBillWave', name: 'Cash / Bill', icon: faMoneyBillWave, category: 'Shopping & Retail' },
+  { id: 'faCreditCard', name: 'POS Card Payment', icon: faCreditCard, category: 'Shopping & Retail' },
+  { id: 'faReceipt', name: 'Billing Receipt', icon: faReceipt, category: 'Shopping & Retail' },
+  { id: 'faGift', name: 'Gift Rewards', icon: faGift, category: 'Shopping & Retail' },
+  { id: 'faQrcode', name: 'UPI & QR Code', icon: faQrcode, category: 'Shopping & Retail' },
+
+  { id: 'faTruckFast', name: 'Express Delivery', icon: faTruckFast, category: 'Logistics & Speed' },
+  { id: 'faTruck', name: 'Delivery Truck', icon: faTruck, category: 'Logistics & Speed' },
+  { id: 'faBoxOpen', name: 'Parcel Package', icon: faBoxOpen, category: 'Logistics & Speed' },
+  { id: 'faClock', name: 'Fast Timings', icon: faClock, category: 'Logistics & Speed' },
+  { id: 'faBolt', name: 'Lightning Fast', icon: faBolt, category: 'Logistics & Speed' },
+  { id: 'faFire', name: 'Hot Trending', icon: faFire, category: 'Logistics & Speed' },
+
+  { id: 'faShieldHalved', name: 'Quality Shield', icon: faShieldHalved, category: 'Trust & Quality' },
+  { id: 'faShieldHeart', name: 'Safety & Hygiene', icon: faShieldHeart, category: 'Trust & Quality' },
+  { id: 'faAward', name: 'Gold Award', icon: faAward, category: 'Trust & Quality' },
+  { id: 'faStar', name: '5-Star Rating', icon: faStar, category: 'Trust & Quality' },
+  { id: 'faCrown', name: 'Premium Brand', icon: faCrown, category: 'Trust & Quality' },
+  { id: 'faGem', name: 'Top Grade', icon: faGem, category: 'Trust & Quality' },
+  { id: 'faCheckDouble', name: 'Quality Verified', icon: faCheckDouble, category: 'Trust & Quality' },
+  { id: 'faCircleCheck', name: 'FSSAI Approved', icon: faCircleCheck, category: 'Trust & Quality' },
+  { id: 'faScaleBalanced', name: 'Accurate Weighing', icon: faScaleBalanced, category: 'Trust & Quality' },
+
+  { id: 'faHeart', name: 'Customer Love', icon: faHeart, category: 'Care & Community' },
+  { id: 'faHandHoldingHeart', name: 'Care & Empathy', icon: faHandHoldingHeart, category: 'Care & Community' },
+  { id: 'faHandshake', name: 'Farmer Partnership', icon: faHandshake, category: 'Care & Community' },
+  { id: 'faThumbsUp', name: 'Satisfaction', icon: faThumbsUp, category: 'Care & Community' },
+  { id: 'faFaceSmile', name: 'Friendly Service', icon: faFaceSmile, category: 'Care & Community' },
+  { id: 'faUsers', name: 'Family & Shoppers', icon: faUsers, category: 'Care & Community' },
+  { id: 'faHeadset', name: '24x7 Support', icon: faHeadset, category: 'Care & Community' },
+  { id: 'faRecycle', name: 'Eco-Friendly', icon: faRecycle, category: 'Care & Community' },
+  { id: 'faLocationDot', name: 'Store Branch', icon: faLocationDot, category: 'Care & Community' },
+  { id: 'faBuilding', name: 'Warehouse Hub', icon: faBuilding, category: 'Care & Community' },
+  { id: 'faGlobe', name: 'Regional Reach', icon: faGlobe, category: 'Care & Community' }
 ]
+
+const getFontAwesomeIcon = (iconId) => {
+  const match = FONTAWESOME_ICONS.find((item) => item.id === iconId || item.id === `fa${iconId.charAt(0).toUpperCase() + iconId.slice(1)}`)
+  return match ? match.icon : faLeaf
+}
 
 const INITIAL_FORM = {
   // 1. Hero Banner
@@ -85,10 +184,10 @@ const INITIAL_FORM = {
     label: 'WHY CHOOSE US',
     title: 'The Bazario Quality Promise',
     cards: [
-      { icon: 'leaf', label: 'VALUE 1', title: '100% Farm Fresh', subtitle: 'Directly sourced from verified farmers daily', baseline: 'Fresh produce promise' },
-      { icon: 'tags', label: 'VALUE 2', title: 'Honest Pricing', subtitle: 'Lowest prices without middlemen margins', baseline: 'Save up to 20% on bills' },
-      { icon: 'shield', label: 'VALUE 3', title: 'Quality Assurance', subtitle: 'Strict grading and multi-point freshness inspection', baseline: 'FSSAI compliant handling' },
-      { icon: 'truck', label: 'VALUE 4', title: 'Express Delivery', subtitle: 'Fast doorstep delivery from your nearest outlet', baseline: '20-minute delivery' }
+      { icon: 'faLeaf', label: 'VALUE 1', title: '100% Farm Fresh', subtitle: 'Directly sourced from verified farmers daily', baseline: 'Fresh produce promise' },
+      { icon: 'faTags', label: 'VALUE 2', title: 'Honest Pricing', subtitle: 'Lowest prices without middlemen margins', baseline: 'Save up to 20% on bills' },
+      { icon: 'faShieldHalved', label: 'VALUE 3', title: 'Quality Assurance', subtitle: 'Strict grading and multi-point freshness inspection', baseline: 'FSSAI compliant handling' },
+      { icon: 'faTruckFast', label: 'VALUE 4', title: 'Express Delivery', subtitle: 'Fast doorstep delivery from your nearest outlet', baseline: '20-minute delivery' }
     ]
   },
 
@@ -110,9 +209,9 @@ const INITIAL_FORM = {
     label: 'OUR COMMITMENT',
     title: 'Built on Trust & Hygiene',
     cards: [
-      { icon: 'heart', label: 'PILLAR 1', title: 'Sanitized Facilities', subtitle: 'Regular sanitization of shopping carts, racks and billing stations', baseline: 'Hygienic touchpoints' },
-      { icon: 'care', label: 'PILLAR 2', title: 'Farmer First', subtitle: 'Supporting 500+ local agricultural families with fair wages', baseline: '100% local procurement' },
-      { icon: 'award', label: 'PILLAR 3', title: 'Instant Replacements', subtitle: 'No-questions-asked item replacement or refund policy', baseline: 'Satisfaction guaranteed' }
+      { icon: 'faHeart', label: 'PILLAR 1', title: 'Sanitized Facilities', subtitle: 'Regular sanitization of shopping carts, racks and billing stations', baseline: 'Hygienic touchpoints' },
+      { icon: 'faHandHoldingHeart', label: 'PILLAR 2', title: 'Farmer First', subtitle: 'Supporting 500+ local agricultural families with fair wages', baseline: '100% local procurement' },
+      { icon: 'faAward', label: 'PILLAR 3', title: 'Instant Replacements', subtitle: 'No-questions-asked item replacement or refund policy', baseline: 'Satisfaction guaranteed' }
     ]
   },
 
@@ -143,6 +242,11 @@ export default function AboutManageView() {
   const toast = useToast()
   const [activeStep, setActiveStep] = useState(1)
   const [saving, setSaving] = useState(false)
+
+  // Icon Picker Modal State
+  const [iconModalOpen, setIconModalOpen] = useState(false)
+  const [iconSearchQuery, setIconSearchQuery] = useState('')
+  const [iconTarget, setIconTarget] = useState(null) // { section: 'section2' | 'section4', index: number }
 
   const [formData, setFormData] = useState(() => {
     try {
@@ -206,6 +310,29 @@ export default function AboutManageView() {
     )
     updateSection('section3', 'gallery', updated)
   }
+
+  // Icon Selection Handlers
+  const handleOpenIconPicker = (sectionKey, index) => {
+    setIconTarget({ section: sectionKey, index })
+    setIconSearchQuery('')
+    setIconModalOpen(true)
+  }
+
+  const handleSelectIcon = (iconId) => {
+    if (!iconTarget) return
+    const { section, index } = iconTarget
+    const updated = [...formData[section].cards]
+    updated[index] = { ...updated[index], icon: iconId }
+    updateSection(section, 'cards', updated)
+    setIconModalOpen(false)
+    toast.success('Icon Selected', `FontAwesome icon updated.`)
+  }
+
+  const filteredIcons = FONTAWESOME_ICONS.filter((item) =>
+    item.name.toLowerCase().includes(iconSearchQuery.toLowerCase()) ||
+    item.id.toLowerCase().includes(iconSearchQuery.toLowerCase()) ||
+    item.category.toLowerCase().includes(iconSearchQuery.toLowerCase())
+  )
 
   return (
     <div className="space-y-6 pb-16 max-w-6xl mx-auto">
@@ -525,14 +652,14 @@ export default function AboutManageView() {
         )}
 
         {/* ==========================================================
-            STEP 4: SECTION 2 (4 CARDS: ICON, LABLE, TITLE, SUBTITLE, BASE LINE)
+            STEP 4: SECTION 2 (4 CARDS: ICON SELECT, LABLE, TITLE, SUBTITLE, BASE LINE)
             ========================================================== */}
         {activeStep === 4 && (
           <div className="p-6 sm:p-8 space-y-6">
             <div className="flex items-center justify-between pb-4 border-b border-slate-100">
               <div>
                 <h2 className="text-base font-black text-slate-900">Section 2</h2>
-                <p className="text-xs text-slate-500">Label, title, and 4 cards (icon select, lable, title, subtitle, base line)</p>
+                <p className="text-xs text-slate-500">Lable, title, and 4 cards with visual FontAwesome icon selection</p>
               </div>
               <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold">
                 <span className="text-slate-600">Status:</span>
@@ -570,24 +697,23 @@ export default function AboutManageView() {
                 }
 
                 return (
-                  <div key={idx} className="p-5 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-3">
-                    <div className="flex items-center justify-between">
+                  <div key={idx} className="p-5 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-3.5">
+                    {/* Visual Icon Header */}
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-200">
                       <span className="text-xs font-black text-[#064C23]">Card #{idx + 1}</span>
                       
-                      <div className="flex items-center space-x-2">
-                        <span className="text-[11px] font-bold text-slate-500">ICON:</span>
-                        <select
-                          value={card.icon}
-                          onChange={(e) => updateCard('icon', e.target.value)}
-                          className="px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-800 outline-none"
-                        >
-                          {ICONS.map((i) => (
-                            <option key={i.id} value={i.id}>
-                              {i.name}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+                      {/* Visual FontAwesome Icon Picker Button */}
+                      <button
+                        type="button"
+                        onClick={() => handleOpenIconPicker('section2', idx)}
+                        className="flex items-center space-x-2 px-3 py-1.5 bg-white hover:bg-[#f0f9f3] border border-slate-200 hover:border-[#064C23] rounded-xl text-xs font-bold cursor-pointer transition-all shadow-2xs group"
+                        title="Click to change icon from FontAwesome library"
+                      >
+                        <div className="w-6 h-6 rounded-lg bg-[#064C23]/10 text-[#064C23] group-hover:bg-[#064C23] group-hover:text-white flex items-center justify-center text-xs transition-colors">
+                          <FontAwesomeIcon icon={getFontAwesomeIcon(card.icon)} />
+                        </div>
+                        <span className="text-slate-700 group-hover:text-[#064C23]">Choose Icon ▾</span>
+                      </button>
                     </div>
 
                     <InputField
@@ -783,19 +909,21 @@ export default function AboutManageView() {
 
                 return (
                   <div key={idx} className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-3">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-200">
                       <span className="text-xs font-black text-[#064C23]">Card #{idx + 1}</span>
-                      <select
-                        value={card.icon}
-                        onChange={(e) => updateCard('icon', e.target.value)}
-                        className="px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-800 outline-none"
+                      
+                      {/* Visual FontAwesome Icon Picker Button */}
+                      <button
+                        type="button"
+                        onClick={() => handleOpenIconPicker('section4', idx)}
+                        className="flex items-center space-x-2 px-2.5 py-1 bg-white hover:bg-[#f0f9f3] border border-slate-200 hover:border-[#064C23] rounded-xl text-xs font-bold cursor-pointer transition-all shadow-2xs group"
+                        title="Click to select FontAwesome icon"
                       >
-                        {ICONS.map((i) => (
-                          <option key={i.id} value={i.id}>
-                            {i.name}
-                          </option>
-                        ))}
-                      </select>
+                        <div className="w-5 h-5 rounded-md bg-[#064C23]/10 text-[#064C23] group-hover:bg-[#064C23] group-hover:text-white flex items-center justify-center text-xs transition-colors">
+                          <FontAwesomeIcon icon={getFontAwesomeIcon(card.icon)} />
+                        </div>
+                        <span className="text-[11px] text-slate-700 group-hover:text-[#064C23]">Icon ▾</span>
+                      </button>
                     </div>
 
                     <InputField
@@ -980,6 +1108,77 @@ export default function AboutManageView() {
           </div>
         </div>
       </div>
+
+      {/* ==========================================================
+          VISUAL FONTAWESOME ICON PICKER MODAL
+          ========================================================== */}
+      <Modal
+        isOpen={iconModalOpen}
+        onClose={() => setIconModalOpen(false)}
+        title="Select FontAwesome Icon"
+        size="lg"
+      >
+        <div className="space-y-4">
+          {/* Search Input */}
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search all free FontAwesome icons (e.g. food, leaf, truck, star, store, price)..."
+              value={iconSearchQuery}
+              onChange={(e) => setIconSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 outline-none focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10"
+              autoFocus
+            />
+            <FontAwesomeIcon
+              icon={faMagnifyingGlass}
+              className="absolute left-3.5 top-3.5 text-slate-400 text-xs"
+            />
+          </div>
+
+          {/* Visual Icon Grid */}
+          <div className="max-h-96 overflow-y-auto pr-1 no-scrollbar">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2.5">
+              {filteredIcons.map((item) => {
+                const isSelected =
+                  iconTarget &&
+                  formData[iconTarget.section]?.cards[iconTarget.index]?.icon === item.id
+
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => handleSelectIcon(item.id)}
+                    className={`p-3 rounded-2xl border flex flex-col items-center justify-center text-center gap-2 transition-all cursor-pointer group ${
+                      isSelected
+                        ? 'bg-[#064C23] text-white border-[#064C23] shadow-sm'
+                        : 'bg-slate-50 hover:bg-white text-slate-700 border-slate-200 hover:border-[#064C23] hover:shadow-2xs'
+                    }`}
+                  >
+                    <div
+                      className={`w-9 h-9 rounded-xl flex items-center justify-center text-base transition-transform group-hover:scale-110 ${
+                        isSelected
+                          ? 'bg-white/20 text-white'
+                          : 'bg-white text-[#064C23] shadow-2xs'
+                      }`}
+                    >
+                      <FontAwesomeIcon icon={item.icon} />
+                    </div>
+                    <span className="text-[10px] font-bold truncate max-w-full leading-tight">
+                      {item.name}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+
+            {filteredIcons.length === 0 && (
+              <div className="text-center py-10 text-xs font-semibold text-slate-400">
+                No matching FontAwesome icons found for "{iconSearchQuery}".
+              </div>
+            )}
+          </div>
+        </div>
+      </Modal>
     </div>
   )
 }
