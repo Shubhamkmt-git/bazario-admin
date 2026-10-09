@@ -218,7 +218,7 @@ export default function DashboardPage({ onLogout }) {
       <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden">
         {/* Fixed Reusable Header (Never Scrolls) */}
         <Header
-          onMenuToggle={() => setSidebarOpen(true)}
+          onMenuToggle={() => setSidebarOpen((prev) => !prev)}
           onLogout={onLogout}
           className="shrink-0"
         />

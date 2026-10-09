@@ -21,8 +21,9 @@ export default function Header({
           <button
             type="button"
             onClick={onMenuToggle}
-            className="lg:hidden text-slate-600 hover:text-slate-900 p-2 rounded-xl hover:bg-slate-100 transition-colors focus:outline-none cursor-pointer"
+            className="text-slate-600 hover:text-slate-900 p-2 rounded-xl hover:bg-slate-100 transition-colors focus:outline-none cursor-pointer"
             aria-label="Toggle navigation menu"
+            title="Toggle Sidebar"
           >
             <FontAwesomeIcon icon={faBars} className="text-lg" />
           </button>

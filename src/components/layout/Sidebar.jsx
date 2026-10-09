@@ -1,19 +1,18 @@
 import React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faXmark } from '@fortawesome/free-solid-svg-icons'
-import BazarioLogo from '../BazarioLogo'
+import { faXmark, faChevronLeft } from '@fortawesome/free-solid-svg-icons'
 
 export default function Sidebar({
-  isOpen = false,
+  isOpen = true,
   onClose,
   navItems = [],
   activeTab = '',
   onSelectTab,
-  user = { name: 'Admin User', email: 'admin@bazario.com' },
+  user = { name: 'Store Admin', email: 'admin@bazario.com', avatar: 'BA' },
 }) {
   return (
     <>
-      {/* Mobile Backdrop */}
+      {/* Mobile Backdrop Overlay */}
       {isOpen && (
         <div
           onClick={onClose}
@@ -21,21 +20,33 @@ export default function Sidebar({
         />
       )}
 
+      {/* Sidebar Aside */}
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-[#042813] text-slate-200 flex flex-col border-r border-[#03200f] transition-transform duration-300 ease-in-out ${
-          isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        className={`fixed lg:static inset-y-0 left-0 z-50 bg-[#042813] text-slate-200 flex flex-col border-r border-[#03200f] transition-all duration-300 ease-in-out shrink-0 ${
+          isOpen
+            ? 'w-64 translate-x-0 shadow-2xl lg:shadow-none'
+            : '-translate-x-full lg:translate-x-0 lg:w-0 lg:border-r-0 lg:overflow-hidden'
         }`}
       >
-        {/* Brand Header */}
-        <div className="h-16 flex items-center justify-between px-5 border-b border-[#063a1c]">
-          <div className="w-32 py-1">
-            <img src="/logo.png" alt="Bazario Admin" className="h-8 object-contain" />
+        {/* Brand Header with Large Left-Aligned Logo & Close Button */}
+        <div className="h-16 flex items-center justify-between px-4 sm:px-5 border-b border-[#063a1c] min-w-[250px]">
+          {/* Large Left-Aligned Logo */}
+          <div className="flex items-center justify-start flex-1 py-1">
+            <img
+              src="/logo.png"
+              alt="Bazario Admin"
+              className="h-9 sm:h-10 w-auto max-w-[175px] object-contain object-left drop-shadow-sm select-none"
+              draggable="false"
+            />
           </div>
+
+          {/* Close Sidebar Toggle Button */}
           {onClose && (
             <button
               type="button"
               onClick={onClose}
-              className="lg:hidden text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-white/10"
+              className="text-emerald-300/70 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition-colors focus:outline-none cursor-pointer"
+              title="Close Sidebar"
               aria-label="Close sidebar"
             >
               <FontAwesomeIcon icon={faXmark} className="text-base" />
@@ -44,7 +55,7 @@ export default function Sidebar({
         </div>
 
         {/* Navigation Menu */}
-        <nav className="flex-1 px-3 py-5 space-y-1 overflow-y-auto">
+        <nav className="flex-1 px-3 py-5 space-y-1 overflow-y-auto min-w-[250px]">
           <div className="text-[11px] font-bold text-emerald-300/50 uppercase tracking-wider px-3 mb-2">
             Navigation
           </div>
@@ -57,9 +68,8 @@ export default function Sidebar({
                 type="button"
                 onClick={() => {
                   onSelectTab && onSelectTab(item.id || item.name)
-                  onClose && onClose()
                 }}
-                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer ${
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all cursor-pointer select-none ${
                   isActive
                     ? 'bg-[#A44F37] text-white shadow-md shadow-black/20 font-semibold'
                     : 'text-emerald-100/75 hover:text-white hover:bg-white/10'
@@ -90,9 +100,9 @@ export default function Sidebar({
         </nav>
 
         {/* User Info Footer */}
-        <div className="p-4 border-t border-[#063a1c] bg-[#031d0e]/60 flex items-center space-x-3">
+        <div className="p-4 border-t border-[#063a1c] bg-[#031d0e]/60 flex items-center space-x-3 min-w-[250px]">
           <div className="w-9 h-9 rounded-full bg-[#A44F37] text-white flex items-center justify-center font-bold text-xs shadow-xs">
-            {user.avatar || 'AD'}
+            {user.avatar || 'BA'}
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-xs font-bold text-white truncate">{user.name}</p>
