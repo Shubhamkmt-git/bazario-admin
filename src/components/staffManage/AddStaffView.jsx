@@ -110,18 +110,9 @@ export default function AddStaffView({ onBack, onSave }) {
       <form onSubmit={handleSubmit} className="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 sm:p-8 space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left Column (4 cols): Profile Image */}
-          <div className="lg:col-span-4 bg-slate-50/60 p-5 rounded-2xl border border-slate-200/80 space-y-4">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                PROFILE PHOTO
-              </span>
-              <span className="text-[10px] font-bold text-slate-400 bg-white px-2 py-0.5 rounded-full border border-slate-200">
-                1:1 SQUARE
-              </span>
-            </div>
-
+          <div className="lg:col-span-4 flex flex-col justify-start">
             <ImageUploadFrame
-              label=""
+              label="PROFILE PHOTO / AVATAR"
               aspectRatio="square"
               description="Upload staff passport photo or avatar (PNG, JPG, WEBP max 5MB)"
               value={formData.image}

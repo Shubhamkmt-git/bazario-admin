@@ -24,9 +24,9 @@ export default function ImageUploadFrame({
   }, [value, previewUrl])
 
   const aspectClasses = {
-    square: 'aspect-square max-w-[260px]',
-    video: 'aspect-video max-w-md',
-    banner: 'aspect-[3/1] max-w-xl',
+    square: 'aspect-square w-full',
+    video: 'aspect-video w-full',
+    banner: 'aspect-[3/1] w-full',
     '5:1': 'aspect-[5/1] w-full max-w-full min-h-[110px]',
     '5/1': 'aspect-[5/1] w-full max-w-full min-h-[110px]',
     'webBanner': 'aspect-[5/1] w-full max-w-full min-h-[110px]',
