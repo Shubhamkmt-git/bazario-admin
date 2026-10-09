@@ -4,15 +4,13 @@ import {
   faBriefcase,
   faPlus,
   faMagnifyingGlass,
-  faFilter,
   faLocationDot,
-  faClock,
-  faIndianRupeeSign,
-  faUsers,
   faPenToSquare,
   faTrashCan,
   faFloppyDisk,
-  faBuilding
+  faEye,
+  faIndianRupeeSign,
+  faClock
 } from '@fortawesome/free-solid-svg-icons'
 import {
   Button,
@@ -28,88 +26,87 @@ const INITIAL_JOBS = [
   {
     id: 1,
     title: 'Store Operations Manager',
-    department: 'Retail Operations',
-    location: 'Central Superstore, Noida (Sec 18)',
+    subtitle: 'Retail Operations & Branch Leadership',
     type: 'Full Time',
-    salary: '₹45,000 - ₹60,000 / mo',
-    experience: '3 - 5 Years',
-    applicants: 18,
+    location: 'Central Superstore, Noida (Sec 18)',
     status: 'Active',
-    description: 'Responsible for day-to-day supermarket branch operations, inventory audits, and customer experience.'
+    salary: '₹45,000 - ₹60,000 / mo',
+    description: 'Responsible for day-to-day supermarket branch operations, inventory audits, team leadership, and customer satisfaction.'
   },
   {
     id: 2,
     title: 'POS Cashier & Billing Executive',
-    department: 'Front Desk & Cash',
-    location: 'DLF Cyber City Outlet, Gurugram',
+    subtitle: 'Front Desk & Cash Management',
     type: 'Full Time',
-    salary: '₹18,000 - ₹24,000 / mo',
-    experience: '1 - 2 Years',
-    applicants: 42,
+    location: 'DLF Cyber City Outlet, Gurugram',
     status: 'Active',
-    description: 'Handling fast-paced supermarket barcode scanning, cash and UPI POS terminals, and customer bagging.'
+    salary: '₹18,000 - ₹24,000 / mo',
+    description: 'Handling fast-paced supermarket barcode scanning, cash and UPI POS terminals, and friendly customer checkout bagging.'
   },
   {
     id: 3,
-    title: 'Fresh Fruits & Vegetables Procurement Lead',
-    department: 'Supply Chain & Sourcing',
-    location: 'Delhi Central Hub',
+    title: 'Fresh Procurement Lead',
+    subtitle: 'Farm Produce & Sourcing Quality',
     type: 'Full Time',
-    salary: '₹50,000 - ₹70,000 / mo',
-    experience: '4+ Years',
-    applicants: 9,
+    location: 'Delhi Central Hub',
     status: 'Active',
-    description: 'Direct procurement from farmers and APMC mandis to maintain grade-A freshness across all branches.'
+    salary: '₹50,000 - ₹70,000 / mo',
+    description: 'Direct procurement from farmers and local mandis to maintain grade-A freshness standards across all branches.'
   },
   {
     id: 4,
-    title: 'Express Grocery Delivery Partner',
-    department: 'Logistics & Fleet',
-    location: 'Multiple Outlets (Delhi NCR)',
+    title: 'Express Delivery Partner',
+    subtitle: '20-Minute Doorstep Fleet',
     type: 'Part Time',
-    salary: '₹20,000 - ₹30,000 / mo',
-    experience: 'Freshers Welcome',
-    applicants: 64,
+    location: 'Multiple Outlets (Delhi NCR)',
     status: 'Active',
+    salary: '₹20,000 - ₹30,000 / mo',
     description: 'Timely 20-minute grocery home delivery with two-wheeler bike and valid driver license.'
   },
   {
     id: 5,
-    title: 'Inventory & Stock Inward Supervisor',
-    department: 'Warehouse & Quality',
-    location: 'Indirapuram Branch, Ghaziabad',
+    title: 'Inventory & Stock Supervisor',
+    subtitle: 'Warehouse & Shelf Replenishment',
     type: 'Full Time',
+    location: 'Indirapuram Branch, Ghaziabad',
+    status: 'Inactive',
     salary: '₹25,000 - ₹32,000 / mo',
-    experience: '2 - 3 Years',
-    applicants: 15,
-    status: 'Closed',
     description: 'Verifying FMCG expiry dates, barcode labeling, shelf replenishment, and cold storage monitoring.'
   }
 ]
 
 export default function CareerManageView() {
   const toast = useToast()
+
+  // State: Careers list
   const [jobs, setJobs] = useState(() => {
-    const saved = localStorage.getItem('bazario_web_careers')
-    return saved ? JSON.parse(saved) : INITIAL_JOBS
+    try {
+      const saved = localStorage.getItem('bazario_web_careers')
+      return saved ? JSON.parse(saved) : INITIAL_JOBS
+    } catch {
+      return INITIAL_JOBS
+    }
   })
 
   const [searchQuery, setSearchQuery] = useState('')
 
+  // Modals state
   const [modalOpen, setModalOpen] = useState(false)
   const [editingJob, setEditingJob] = useState(null)
+  const [viewModalOpen, setViewModalOpen] = useState(false)
+  const [viewingJob, setViewingJob] = useState(null)
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [jobToDelete, setJobToDelete] = useState(null)
 
+  // Form State (Inputs: job title, suubtitle, type, location, status, sallary, description)
   const [formData, setFormData] = useState({
     title: '',
-    department: 'Retail Operations',
-    location: '',
+    subtitle: '',
     type: 'Full Time',
+    location: '',
+    status: 'Active',
     salary: '',
-    experience: '',
-    description: '',
-    status: 'Active'
+    description: ''
   })
 
   const saveToStorage = (updated) => {
@@ -117,38 +114,56 @@ export default function CareerManageView() {
     localStorage.setItem('bazario_web_careers', JSON.stringify(updated))
   }
 
+  // Open Add Modal
   const handleOpenAdd = () => {
     setEditingJob(null)
     setFormData({
       title: '',
-      department: 'Retail Operations',
-      location: 'Central Superstore, Noida',
+      subtitle: '',
       type: 'Full Time',
-      salary: '₹25,000 - ₹35,000 / mo',
-      experience: '1 - 3 Years',
-      description: '',
-      status: 'Active'
+      location: '',
+      status: 'Active',
+      salary: '',
+      description: ''
     })
     setModalOpen(true)
   }
 
+  // Open Edit Modal
   const handleOpenEdit = (job) => {
     setEditingJob(job)
-    setFormData({ ...job })
+    setFormData({
+      title: job.title || '',
+      subtitle: job.subtitle || '',
+      type: job.type || 'Full Time',
+      location: job.location || '',
+      status: job.status || 'Active',
+      salary: job.salary || '',
+      description: job.description || ''
+    })
     setModalOpen(true)
   }
 
-  const handleToggleStatus = (job) => {
-    const newStatus = job.status === 'Active' ? 'Closed' : 'Active'
-    const updated = jobs.map((j) => (j.id === job.id ? { ...j, status: newStatus } : j))
-    saveToStorage(updated)
-    toast.info('Job Status', `"${job.title}" is now ${newStatus}.`)
+  // Open View Modal
+  const handleOpenView = (job) => {
+    setViewingJob(job)
+    setViewModalOpen(true)
   }
 
+  // Toggle Status inline
+  const handleToggleStatus = (job) => {
+    const nextStatus = job.status === 'Active' ? 'Inactive' : 'Active'
+    const updated = jobs.map((j) => (j.id === job.id ? { ...j, status: nextStatus } : j))
+    saveToStorage(updated)
+    toast.info('Status Updated', `"${job.title}" is now ${nextStatus}.`)
+  }
+
+  // Form Submit (Create / Update)
   const handleSubmit = (e) => {
     e?.preventDefault?.()
-    if (!formData.title || !formData.department || !formData.location) {
-      toast.error('Validation Error', 'Please fill in all mandatory job details.')
+
+    if (!formData.title?.trim()) {
+      toast.error('Validation Error', 'Job Title is required.')
       return
     }
 
@@ -157,38 +172,42 @@ export default function CareerManageView() {
         j.id === editingJob.id ? { ...j, ...formData } : j
       )
       saveToStorage(updated)
-      toast.success('Job Vacancy Updated', `"${formData.title}" details updated.`)
+      toast.success('Career Updated', `"${formData.title}" details updated.`)
     } else {
       const newJob = {
         id: Date.now(),
-        applicants: 0,
         ...formData
       }
       saveToStorage([...jobs, newJob])
-      toast.success('Job Vacancy Published', `"${formData.title}" is now live on careers portal.`)
+      toast.success('Career Published', `"${formData.title}" added to career openings.`)
     }
     setModalOpen(false)
   }
 
+  // Delete Confirm
   const handleDeleteConfirm = () => {
     if (!jobToDelete) return
     const updated = jobs.filter((j) => j.id !== jobToDelete.id)
     saveToStorage(updated)
     setDeleteModalOpen(false)
     setJobToDelete(null)
-    toast.success('Job Deleted', 'The job posting has been permanently removed.')
+    toast.success('Career Deleted', 'The job vacancy has been permanently removed.')
   }
 
+  // Filtered list
   const filteredJobs = jobs.filter((job) => {
+    const q = searchQuery.toLowerCase()
     return (
-      job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.department.toLowerCase().includes(searchQuery.toLowerCase())
+      job.title?.toLowerCase().includes(q) ||
+      job.subtitle?.toLowerCase().includes(q) ||
+      job.location?.toLowerCase().includes(q) ||
+      job.type?.toLowerCase().includes(q) ||
+      job.salary?.toLowerCase().includes(q)
     )
   })
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full pb-20">
       {/* Header Banner */}
       <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center space-x-4">
@@ -197,13 +216,15 @@ export default function CareerManageView() {
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h1 className="text-xl sm:text-2xl font-black text-slate-900">Career Manage</h1>
+              <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                Carrier Manage
+              </h1>
               <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                {jobs.filter((j) => j.status === 'Active').length} Active Openings
+                {jobs.filter((j) => j.status === 'Active').length} Active
               </span>
             </div>
             <p className="text-xs sm:text-sm text-slate-500">
-              Manage job openings, departments, requirements, compensation, and applicant postings.
+              Manage website career listings, job roles, locations, salaries, and employment types.
             </p>
           </div>
         </div>
@@ -211,7 +232,7 @@ export default function CareerManageView() {
         <Button
           variant="primary"
           onClick={handleOpenAdd}
-          icon={<FontAwesomeIcon icon={faPlus} />}
+          icon={<FontAwesomeIcon icon={faPlus} className="text-xs" />}
         >
           Post New Vacancy
         </Button>
@@ -224,7 +245,7 @@ export default function CareerManageView() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search job title, branch, or department..."
+            placeholder="Search job title, subtitle, location, or type..."
             className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 placeholder-slate-400 focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 outline-none transition-all"
           />
           <FontAwesomeIcon
@@ -241,14 +262,15 @@ export default function CareerManageView() {
             <thead className="bg-slate-50/80 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
               <tr>
                 <th className="px-6 py-4 w-16">Index</th>
-                <th className="px-6 py-4">Job Title & Dept</th>
-                <th className="px-6 py-4">Location Branch</th>
-                <th className="px-6 py-4">Employment Type</th>
-                <th className="px-6 py-4">Job Status</th>
-                <th className="px-6 py-4 text-right">Actions</th>
+                <th className="px-6 py-4 min-w-[240px]">Job Title & Subtitle</th>
+                <th className="px-6 py-4">Type</th>
+                <th className="px-6 py-4">Location</th>
+                <th className="px-6 py-4">Sallary</th>
+                <th className="px-6 py-4 w-28">Status</th>
+                <th className="px-6 py-4 text-right w-32">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200">
+            <tbody className="divide-y divide-slate-100">
               {filteredJobs.length > 0 ? (
                 filteredJobs.map((job, index) => (
                   <tr key={job.id} className="hover:bg-slate-50/75 transition-colors">
@@ -261,16 +283,11 @@ export default function CareerManageView() {
                         <span className="font-bold text-slate-900 block text-sm">
                           {job.title}
                         </span>
-                        <span className="text-xs font-semibold text-[#064C23] bg-[#064C23]/10 px-2 py-0.5 rounded-md inline-block mt-0.5">
-                          {job.department}
-                        </span>
-                      </div>
-                    </td>
-
-                    <td className="px-6 py-4 text-xs font-medium text-slate-700">
-                      <div className="flex items-center space-x-1.5">
-                        <FontAwesomeIcon icon={faLocationDot} className="text-[#A44F37] text-xs" />
-                        <span>{job.location}</span>
+                        {job.subtitle && (
+                          <span className="text-xs text-slate-500 block mt-0.5">
+                            {job.subtitle}
+                          </span>
+                        )}
                       </div>
                     </td>
 
@@ -278,6 +295,17 @@ export default function CareerManageView() {
                       <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
                         {job.type}
                       </span>
+                    </td>
+
+                    <td className="px-6 py-4 text-xs font-medium text-slate-700">
+                      <div className="flex items-center space-x-1.5">
+                        <FontAwesomeIcon icon={faLocationDot} className="text-[#A44F37] text-xs" />
+                        <span>{job.location || 'All Outlets'}</span>
+                      </div>
+                    </td>
+
+                    <td className="px-6 py-4 text-xs font-mono font-bold text-slate-900">
+                      {job.salary || 'Not specified'}
                     </td>
 
                     <td className="px-6 py-4">
@@ -292,13 +320,18 @@ export default function CareerManageView() {
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end space-x-1.5">
                         <ActionButton
-                          variant="edit"
-                          tooltip="Edit Job"
+                          action="view"
+                          tooltip="View Details"
+                          onClick={() => handleOpenView(job)}
+                        />
+                        <ActionButton
+                          action="edit"
+                          tooltip="Edit Career"
                           onClick={() => handleOpenEdit(job)}
                         />
                         <ActionButton
-                          variant="delete"
-                          tooltip="Delete Job"
+                          action="delete"
+                          tooltip="Delete Career"
                           onClick={() => {
                             setJobToDelete(job)
                             setDeleteModalOpen(true)
@@ -310,8 +343,8 @@ export default function CareerManageView() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-slate-400">
-                    No matching job openings found.
+                  <td colSpan={7} className="px-6 py-12 text-center text-slate-400">
+                    No matching career openings found.
                   </td>
                 </tr>
               )}
@@ -320,7 +353,9 @@ export default function CareerManageView() {
         </div>
       </div>
 
-      {/* Add / Edit Modal */}
+      {/* ==========================================================
+          ADD / EDIT MODAL (INPUTS: JOB TITLE, SUUBTITLE, TYPE, LOCATION, STATUS, SALLARY, DESCRIPTION)
+          ========================================================== */}
       <Modal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -328,40 +363,33 @@ export default function CareerManageView() {
         size="lg"
       >
         <form onSubmit={handleSubmit} className="space-y-4">
-          <InputField
-            label="JOB TITLE"
-            value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            placeholder="e.g. Store Operations Manager"
-            required
-          />
-
+          {/* Row 1: Job Title & Subtitle */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <InputField
-              label="DEPARTMENT"
-              value={formData.department}
-              onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-              placeholder="e.g. Retail Operations / Logistics"
+              label="JOB TITLE"
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              placeholder="e.g. Store Operations Manager"
               required
             />
             <InputField
-              label="LOCATION / STORE BRANCH"
-              value={formData.location}
-              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-              placeholder="e.g. Sector 18, Noida Superstore"
-              required
+              label="SUUBTITLE"
+              value={formData.subtitle}
+              onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
+              placeholder="e.g. Retail Operations & Branch Leadership"
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Row 2: Type, Location, Status, Sallary */}
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                JOB TYPE
+                TYPE
               </label>
               <select
                 value={formData.type}
                 onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 outline-none focus:border-[#064C23]"
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 outline-none focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 transition-all cursor-pointer"
               >
                 <option value="Full Time">Full Time</option>
                 <option value="Part Time">Part Time</option>
@@ -370,54 +398,128 @@ export default function CareerManageView() {
               </select>
             </div>
 
-            <InputField
-              label="SALARY (INR ₹)"
-              value={formData.salary}
-              onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
-              placeholder="e.g. ₹25,000 - ₹35,000 / mo"
-            />
+            <div>
+              <InputField
+                label="LOCATION"
+                value={formData.location}
+                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                placeholder="e.g. Sector 18, Noida"
+              />
+            </div>
 
-            <InputField
-              label="EXPERIENCE REQUIRED"
-              value={formData.experience}
-              onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
-              placeholder="e.g. 2 - 4 Years"
-            />
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                STATUS
+              </label>
+              <select
+                value={formData.status}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 outline-none focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 transition-all cursor-pointer"
+              >
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            </div>
+
+            <div>
+              <InputField
+                label="SALLARY"
+                value={formData.salary}
+                onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
+                placeholder="e.g. ₹25,000 - ₹35,000 / mo"
+              />
+            </div>
           </div>
 
+          {/* Row 3: Description */}
           <div className="space-y-1.5">
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-              JOB ROLE & RESPONSIBILITIES DESCRIPTION
+              DESCRIPTION
             </label>
             <textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              rows={3}
-              className="w-full px-3.5 py-2.5 bg-slate-50/50 hover:bg-slate-50 focus:bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-800 transition-all focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 outline-none"
-              placeholder="Detailed description of role duties and requirements..."
+              rows={4}
+              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 outline-none focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 transition-all"
+              placeholder="Detailed description of role duties, responsibilities, and requirements..."
             />
           </div>
 
-          <div className="flex items-center justify-between p-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs">
-            <span className="font-bold text-slate-700">Accepting Live Applications</span>
-            <ToggleButton
-              size="sm"
-              checked={formData.status === 'Active'}
-              onChange={(val) => setFormData({ ...formData, status: val ? 'Active' : 'Closed' })}
-              activeColor="#064C23"
-            />
-          </div>
-
-          <div className="pt-3 border-t border-slate-200 flex justify-end space-x-3">
+          {/* Footer Actions */}
+          <div className="pt-3 border-t border-slate-100 flex justify-end space-x-3">
             <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" icon={<FontAwesomeIcon icon={faFloppyDisk} />}>
+            <Button type="submit" variant="primary" icon={<FontAwesomeIcon icon={faFloppyDisk} className="text-xs" />}>
               {editingJob ? 'Save Changes' : 'Publish Job'}
             </Button>
           </div>
         </form>
       </Modal>
+
+      {/* ==========================================================
+          VIEW DETAILS MODAL
+          ========================================================== */}
+      {viewingJob && (
+        <Modal
+          isOpen={viewModalOpen}
+          onClose={() => setViewModalOpen(false)}
+          title="Career Details"
+          size="md"
+        >
+          <div className="space-y-5">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div>
+                <h3 className="text-lg font-black text-slate-900">{viewingJob.title}</h3>
+                {viewingJob.subtitle && (
+                  <p className="text-xs font-semibold text-slate-500">{viewingJob.subtitle}</p>
+                )}
+              </div>
+              <span
+                className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                  viewingJob.status === 'Active'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                    : 'bg-slate-100 text-slate-600 border border-slate-200'
+                }`}
+              >
+                {viewingJob.status}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-0.5">
+                <span className="text-[11px] font-bold text-slate-500 uppercase">Type</span>
+                <p className="text-xs font-bold text-slate-800">{viewingJob.type}</p>
+              </div>
+
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-0.5">
+                <span className="text-[11px] font-bold text-slate-500 uppercase">Location</span>
+                <p className="text-xs font-bold text-slate-800">{viewingJob.location || 'All Outlets'}</p>
+              </div>
+
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-0.5 col-span-2">
+                <span className="text-[11px] font-bold text-slate-500 uppercase">Sallary</span>
+                <p className="text-sm font-mono font-bold text-slate-900">{viewingJob.salary || 'Not specified'}</p>
+              </div>
+            </div>
+
+            {viewingJob.description && (
+              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                <span className="text-[11px] font-bold text-slate-500 uppercase">Description</span>
+                <p className="text-xs font-medium text-slate-700 whitespace-pre-line leading-relaxed">
+                  {viewingJob.description}
+                </p>
+              </div>
+            )}
+
+            <div className="pt-2 flex justify-end">
+              <Button variant="outline" size="sm" onClick={() => setViewModalOpen(false)}>
+                Close
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
 
       {/* Delete Alert */}
       <AlertModal
@@ -425,7 +527,7 @@ export default function CareerManageView() {
         onClose={() => setDeleteModalOpen(false)}
         onConfirm={handleDeleteConfirm}
         title="Delete Job Posting?"
-        message={`Are you sure you want to permanently delete the job vacancy "${jobToDelete?.title}"?`}
+        message={`Are you sure you want to permanently delete "${jobToDelete?.title}"?`}
         confirmText="Delete Posting"
         type="danger"
       />
