@@ -158,9 +158,8 @@ export default function CategoryListView({
               <tr>
                 <th className="px-6 py-4 w-20 text-center">Order</th>
                 <th className="px-6 py-4">Category</th>
-                <th className="px-6 py-4">Description</th>
                 <th className="px-6 py-4 text-center">Featured</th>
-                <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4 text-center">Status</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
@@ -175,7 +174,7 @@ export default function CategoryListView({
                       </span>
                     </td>
 
-                    {/* Category: Thumbnail + Title + Subtitle */}
+                    {/* Category: Thumbnail + Title */}
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-3.5 max-w-md">
                         {category.image ? (
@@ -189,57 +188,34 @@ export default function CategoryListView({
                             <FontAwesomeIcon icon={faTags} />
                           </div>
                         )}
-                        <div>
-                          <div className="flex items-center space-x-2">
-                            <span className="font-bold text-slate-900 text-sm">
-                              {category.title}
-                            </span>
-                            {category.isFeatured && (
-                              <span className="inline-flex items-center space-x-0.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
-                                <FontAwesomeIcon icon={faStar} className="text-[8px]" />
-                                <span>Featured</span>
-                              </span>
-                            )}
-                          </div>
-                          <span className="text-xs text-slate-400 block line-clamp-1 mt-0.5">
-                            {category.subtitle || 'No subtitle provided'}
-                          </span>
-                        </div>
+                        <span className="font-bold text-slate-900 text-sm">
+                          {category.title}
+                        </span>
                       </div>
                     </td>
 
-                    {/* Description */}
-                    <td className="px-6 py-4">
-                      <p className="text-xs text-slate-600 line-clamp-2 max-w-xs leading-relaxed">
-                        {category.description || '—'}
-                      </p>
-                    </td>
-
-                    {/* Featured Toggle Badge */}
+                    {/* Featured Toggle */}
                     <td className="px-6 py-4 text-center">
-                      <button
-                        type="button"
-                        onClick={() => onToggleFeatured(category)}
-                        className={`px-2.5 py-1 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
-                          category.isFeatured
-                            ? 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100'
-                            : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100'
-                        }`}
-                        title="Toggle featured status"
-                      >
-                        <FontAwesomeIcon icon={faStar} className="mr-1 text-[10px]" />
-                        {category.isFeatured ? 'Featured' : 'Standard'}
-                      </button>
+                      <div className="inline-flex justify-center">
+                        <ToggleButton
+                          size="sm"
+                          checked={Boolean(category.isFeatured)}
+                          onChange={() => onToggleFeatured(category)}
+                          activeColor="#064C23"
+                        />
+                      </div>
                     </td>
 
                     {/* Status Toggle */}
-                    <td className="px-6 py-4">
-                      <ToggleButton
-                        size="sm"
-                        checked={category.status === 'Active'}
-                        onChange={() => onToggleStatus(category)}
-                        activeColor="#064C23"
-                      />
+                    <td className="px-6 py-4 text-center">
+                      <div className="inline-flex justify-center">
+                        <ToggleButton
+                          size="sm"
+                          checked={category.status === 'Active'}
+                          onChange={() => onToggleStatus(category)}
+                          activeColor="#064C23"
+                        />
+                      </div>
                     </td>
 
                     {/* Actions */}
@@ -266,7 +242,7 @@ export default function CategoryListView({
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="px-6 py-14 text-center">
+                  <td colSpan={5} className="px-6 py-14 text-center">
                     <div className="max-w-xs mx-auto space-y-3">
                       <div className="w-12 h-12 mx-auto rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center text-lg">
                         <FontAwesomeIcon icon={faTags} />
