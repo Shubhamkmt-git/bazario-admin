@@ -633,23 +633,6 @@ export default function AddProductView({ onBack, onSave }) {
                 Summary snippet displayed in Google search results (120-160 characters).
               </p>
             </div>
-
-            {/* Google Search Snippet Preview */}
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                Google Search Result Preview
-              </div>
-              <div className="text-xs text-emerald-800 font-mono truncate">
-                https://bazario.in/products/{formData.slug || 'product-slug'}
-              </div>
-              <div className="text-sm font-bold text-blue-700 hover:underline cursor-pointer">
-                {formData.metaTitle || formData.title || 'Product Title | Bazario Supermarket'}
-              </div>
-              <div className="text-xs text-slate-600 line-clamp-2">
-                {formData.metaDescription ||
-                  `Buy ${formData.title || 'this product'} online at lowest price from Bazario Supermarket with guaranteed freshness and express delivery.`}
-              </div>
-            </div>
           </div>
         </div>
 

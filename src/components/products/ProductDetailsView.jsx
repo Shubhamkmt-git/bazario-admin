@@ -315,20 +315,6 @@ export default function ProductDetailsView({ product, onBack, onEdit }) {
                 </p>
               </div>
             </div>
-
-            {/* Google SERP Snippet Box */}
-            <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1 text-left">
-              <div className="text-[10px] text-emerald-800 font-mono truncate">
-                https://bazario.in/products/{product.slug || 'product-slug'}
-              </div>
-              <div className="text-xs font-bold text-blue-700 hover:underline line-clamp-1">
-                {product.metaTitle || product.title}
-              </div>
-              <div className="text-[11px] text-slate-600 line-clamp-2">
-                {product.metaDescription ||
-                  `Order ${product.title} online with doorstep delivery from Bazario.`}
-              </div>
-            </div>
           </div>
         </div>
       </div>
