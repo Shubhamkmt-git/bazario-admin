@@ -1,13 +1,12 @@
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faFloppyDisk,
   faPhone,
   faEnvelope,
   faUser,
-  faTruck,
-  faCircleCheck,
-  faShieldHalved
+  faStore,
+  faTruck
 } from '@fortawesome/free-solid-svg-icons'
 import {
   Button,
@@ -17,13 +16,37 @@ import {
 } from '../index'
 import { useToast } from '../../context/ToastContext'
 
+const DEFAULT_STORES = [
+  'Bazario Central Superstore #01',
+  'Bazario Express Store - Cyber City',
+  'Bazario Supermarket - Green Park',
+  'Bazario Daily Outlet - Indirapuram',
+  'Bazario Hub - Sector 62 Noida'
+]
+
 export default function AddDeliveryStaffView({ onBack, onSave }) {
   const toast = useToast()
+
+  // Dynamically load stores from localStorage if available
+  const availableStores = useMemo(() => {
+    try {
+      const saved = localStorage.getItem('bazario_stores_data')
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const titles = parsed.map((s) => s.title || s.name).filter(Boolean)
+          if (titles.length > 0) return titles
+        }
+      }
+    } catch {}
+    return DEFAULT_STORES
+  }, [])
 
   const [formData, setFormData] = useState({
     name: '',
     mobileNumber: '',
     email: '',
+    belongToStore: availableStores[0] || 'Bazario Central Superstore #01',
     image: '',
     status: 'Active'
   })
@@ -38,9 +61,14 @@ export default function AddDeliveryStaffView({ onBack, onSave }) {
       toast.error('Validation Error', 'Please enter a contact mobile number.')
       return
     }
+    if (!formData.belongToStore) {
+      toast.error('Validation Error', 'Please select which store this staff belongs to.')
+      return
+    }
 
     const newStaff = {
       id: Date.now(),
+      riderId: `BAZ-DRV-${Math.floor(1000 + Math.random() * 9000)}`,
       ...formData
     }
 
@@ -58,7 +86,7 @@ export default function AddDeliveryStaffView({ onBack, onSave }) {
               Add Delivery Staff
             </h1>
             <p className="text-xs sm:text-sm text-slate-500">
-              Onboard a new delivery rider or dispatch driver with contact details and profile photo.
+              Onboard a new delivery rider or dispatch driver with store assignment and profile photo.
             </p>
           </div>
         </div>
@@ -102,7 +130,7 @@ export default function AddDeliveryStaffView({ onBack, onSave }) {
               onChange={(url) => setFormData({ ...formData, image: url })}
             />
 
-            {/* Status & ID Badge Preview Card */}
+            {/* Status & Assigned Store Preview Card */}
             <div className="p-3.5 rounded-xl bg-white border border-slate-200 space-y-2">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-slate-500 font-medium">Duty Status</span>
@@ -121,14 +149,18 @@ export default function AddDeliveryStaffView({ onBack, onSave }) {
                   {formData.status === 'Active' ? 'Available' : 'Off Duty'}
                 </span>
               </div>
-              <div className="flex items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
-                <span>Fleet System</span>
-                <span className="font-bold text-slate-700">Bazario Express</span>
+
+              <div className="pt-2 border-t border-slate-100 text-xs">
+                <span className="text-slate-400 font-medium block text-[11px]">Assigned Store</span>
+                <span className="font-bold text-[#064C23] flex items-center mt-0.5 truncate">
+                  <FontAwesomeIcon icon={faStore} className="mr-1.5 text-xs text-[#064C23]" />
+                  {formData.belongToStore || 'Not Assigned'}
+                </span>
               </div>
             </div>
           </div>
 
-          {/* Right Column (8 cols): Name, Mobile, Email, Status */}
+          {/* Right Column (8 cols): Name, Mobile, Email, Belong to Store, Status */}
           <div className="lg:col-span-8 space-y-5">
             {/* Full Name */}
             <InputField
@@ -165,8 +197,32 @@ export default function AddDeliveryStaffView({ onBack, onSave }) {
               />
             </div>
 
-            {/* Status Selection & Helper Info in balanced 2-column grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start pt-1">
+            {/* Belong to Store & Status in balanced 2-column grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+              {/* Belong to Store Dropdown */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                  BELONG TO STORE <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    value={formData.belongToStore}
+                    onChange={(e) => setFormData({ ...formData, belongToStore: e.target.value })}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 outline-none focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 transition-all cursor-pointer"
+                    required
+                  >
+                    <option value="" disabled>Select Supermarket Store</option>
+                    {availableStores.map((storeName) => (
+                      <option key={storeName} value={storeName}>
+                        {storeName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <p className="text-[11px] text-slate-400 mt-1">Supermarket outlet branch assigned for order pickups</p>
+              </div>
+
+              {/* Status Select */}
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
                   STATUS
@@ -181,18 +237,14 @@ export default function AddDeliveryStaffView({ onBack, onSave }) {
                 </select>
                 <p className="text-[11px] text-slate-400 mt-1">Delivery availability and dispatch status</p>
               </div>
+            </div>
 
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-xs text-slate-600 space-y-1">
-                <div className="font-bold text-slate-800 flex items-center">
-                  <FontAwesomeIcon icon={faTruck} className="text-[#064C23] mr-1.5 text-xs" />
-                  Dispatch Assignment Note
-                </div>
-                <p className="text-[11px] text-slate-500 leading-relaxed">
-                  {formData.status === 'Active'
-                    ? 'Rider will automatically be eligible to receive and accept incoming supermarket orders.'
-                    : 'Rider is currently paused and will not appear in the active dispatch assignment queue.'}
-                </p>
-              </div>
+            {/* Dispatch Note */}
+            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 text-xs text-slate-600 flex items-start space-x-2.5">
+              <FontAwesomeIcon icon={faTruck} className="text-[#064C23] mt-0.5 text-xs shrink-0" />
+              <p className="text-[11px] text-slate-500 leading-relaxed">
+                Rider orders will be routed strictly from orders dispatched by <strong className="text-slate-800">{formData.belongToStore || 'the assigned store'}</strong>.
+              </p>
             </div>
           </div>
         </div>

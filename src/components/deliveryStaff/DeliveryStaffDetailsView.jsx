@@ -7,6 +7,7 @@ import {
   faCircleCheck,
   faCircleXmark,
   faTruck,
+  faStore,
   faIdCard
 } from '@fortawesome/free-solid-svg-icons'
 import { Button, BackButton } from '../index'
@@ -49,7 +50,7 @@ export default function DeliveryStaffDetailsView({ staff, onBack, onEdit }) {
               </span>
             </div>
             <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-              Delivery rider profile, contact details, and dispatch information.
+              Delivery rider profile, contact details, store assignment, and dispatch information.
             </p>
           </div>
         </div>
@@ -71,8 +72,8 @@ export default function DeliveryStaffDetailsView({ staff, onBack, onEdit }) {
       </div>
 
       {/* Main Profile Info Card */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs">
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xs space-y-6">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 pb-6 border-b border-slate-100">
           {/* Avatar / Photo */}
           {staff.image ? (
             <img
@@ -94,53 +95,88 @@ export default function DeliveryStaffDetailsView({ staff, onBack, onEdit }) {
           )}
 
           {/* Details Column */}
-          <div className="flex-1 space-y-4 text-center sm:text-left">
-            <div>
-              <div className="flex items-center justify-center sm:justify-start space-x-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#064C23]">
-                  Bazario Fleet Personnel
-                </span>
-                <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[10px] font-mono font-bold">
-                  BAZ-DRV-0{staff.id}
-                </span>
-              </div>
-              <h2 className="text-2xl font-black text-slate-900 mt-1">{staff.name}</h2>
+          <div className="flex-1 space-y-2 text-center sm:text-left">
+            <div className="flex items-center justify-center sm:justify-start space-x-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#064C23]">
+                Bazario Fleet Personnel
+              </span>
+              <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[11px] font-mono font-bold">
+                {staff.riderId || `BAZ-DRV-0${staff.id}`}
+              </span>
             </div>
+            <h2 className="text-2xl font-black text-slate-900">{staff.name}</h2>
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
+              <span className="inline-flex items-center px-2.5 py-1 rounded-xl bg-[#064C23]/10 text-[#064C23] font-bold text-xs">
+                <FontAwesomeIcon icon={faStore} className="mr-1.5 text-xs" />
+                Belongs to: {staff.belongToStore || 'Bazario Central Superstore #01'}
+              </span>
+              <span className="inline-flex items-center px-2.5 py-1 rounded-xl bg-slate-100 text-slate-700 font-semibold text-xs">
+                <FontAwesomeIcon icon={faTruck} className="mr-1.5 text-xs text-slate-500" />
+                Express Delivery Partner
+              </span>
+            </div>
+          </div>
+        </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-              <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 flex items-center space-x-3">
-                <div className="w-9 h-9 rounded-xl bg-[#064C23]/10 text-[#064C23] flex items-center justify-center text-sm shrink-0">
-                  <FontAwesomeIcon icon={faPhone} />
-                </div>
-                <div className="min-w-0 text-left">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
-                    Mobile Number
-                  </span>
-                  <a
-                    href={`tel:${staff.mobileNumber}`}
-                    className="text-xs font-bold font-mono text-slate-800 hover:text-[#064C23] hover:underline truncate block"
-                  >
-                    {staff.mobileNumber || 'Not provided'}
-                  </a>
-                </div>
-              </div>
+        {/* Contact and Store Assignment Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Belong to Store Card */}
+          <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-start space-x-3.5">
+            <div className="w-10 h-10 rounded-xl bg-[#064C23]/10 text-[#064C23] flex items-center justify-center text-sm shrink-0 mt-0.5">
+              <FontAwesomeIcon icon={faStore} />
+            </div>
+            <div className="min-w-0 text-left">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+                Belong to Store
+              </span>
+              <span className="text-xs font-bold text-slate-900 mt-0.5 block truncate">
+                {staff.belongToStore || 'Bazario Central Superstore #01'}
+              </span>
+              <span className="text-[11px] text-emerald-700 font-semibold block mt-0.5">
+                Designated Pick-up Hub
+              </span>
+            </div>
+          </div>
 
-              <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 flex items-center space-x-3">
-                <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center text-sm shrink-0">
-                  <FontAwesomeIcon icon={faEnvelope} />
-                </div>
-                <div className="min-w-0 text-left">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
-                    Email Address
-                  </span>
-                  <a
-                    href={`mailto:${staff.email}`}
-                    className="text-xs font-bold text-slate-800 hover:text-[#064C23] hover:underline truncate block"
-                  >
-                    {staff.email || 'Not provided'}
-                  </a>
-                </div>
-              </div>
+          {/* Mobile Number Card */}
+          <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-start space-x-3.5">
+            <div className="w-10 h-10 rounded-xl bg-[#064C23]/10 text-[#064C23] flex items-center justify-center text-sm shrink-0 mt-0.5">
+              <FontAwesomeIcon icon={faPhone} />
+            </div>
+            <div className="min-w-0 text-left">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+                Mobile Number
+              </span>
+              <a
+                href={`tel:${staff.mobileNumber}`}
+                className="text-xs font-bold font-mono text-slate-800 hover:text-[#064C23] hover:underline truncate block mt-0.5"
+              >
+                {staff.mobileNumber || 'Not provided'}
+              </a>
+              <span className="text-[11px] text-slate-400 block mt-0.5">
+                Dispatch direct dial line
+              </span>
+            </div>
+          </div>
+
+          {/* Email Address Card */}
+          <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex items-start space-x-3.5">
+            <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center text-sm shrink-0 mt-0.5">
+              <FontAwesomeIcon icon={faEnvelope} />
+            </div>
+            <div className="min-w-0 text-left">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+                Email Address
+              </span>
+              <a
+                href={`mailto:${staff.email}`}
+                className="text-xs font-bold text-slate-800 hover:text-[#064C23] hover:underline truncate block mt-0.5"
+              >
+                {staff.email || 'Not provided'}
+              </a>
+              <span className="text-[11px] text-slate-400 block mt-0.5">
+                Fleet notification account
+              </span>
             </div>
           </div>
         </div>

@@ -11,33 +11,41 @@ const DELIVERY_STAFF_STORAGE_KEY = 'bazario_delivery_staff'
 const INITIAL_DELIVERY_STAFF = [
   {
     id: 1,
+    riderId: 'BAZ-DRV-1001',
     name: 'Ramesh Kumar Sharma',
     mobileNumber: '+91 98765 43210',
     email: 'ramesh.sharma@bazario.in',
+    belongToStore: 'Bazario Central Superstore #01',
     image: '',
     status: 'Active'
   },
   {
     id: 2,
+    riderId: 'BAZ-DRV-1002',
     name: 'Mohammad Imran Khan',
     mobileNumber: '+91 98111 22334',
     email: 'imran.khan@bazario.in',
+    belongToStore: 'Bazario Express Store - Cyber City',
     image: '',
     status: 'Active'
   },
   {
     id: 3,
+    riderId: 'BAZ-DRV-1003',
     name: 'Sunil Gurjar',
     mobileNumber: '+91 97222 33445',
     email: 'sunil.gurjar@bazario.in',
+    belongToStore: 'Bazario Supermarket - Green Park',
     image: '',
     status: 'Active'
   },
   {
     id: 4,
+    riderId: 'BAZ-DRV-1004',
     name: 'Vikas Deep Singh',
     mobileNumber: '+91 99888 77665',
     email: 'vikas.singh@bazario.in',
+    belongToStore: 'Bazario Daily Outlet - Indirapuram',
     image: '',
     status: 'Inactive'
   }
