@@ -21,9 +21,17 @@ export { default as ProductsView } from './products/ProductsView'
 export { default as StoresView } from './stores/StoresView'
 export { default as CustomersView } from './customers/CustomersView'
 export { default as SettingsView } from './settings/SettingsView'
+// Admin Manager Views
 export { default as AdminUsersView } from './adminManager/AdminUsersView'
 export { default as AdminRolesView } from './adminManager/AdminRolesView'
 export { default as AdminPermissionsView } from './adminManager/AdminPermissionsView'
+
+// Web Manager Views
+export { default as AboutManageView } from './webManager/AboutManageView'
+export { default as TopBarManageView } from './webManager/TopBarManageView'
+export { default as CtaManageView } from './webManager/CtaManageView'
+export { default as CareerManageView } from './webManager/CareerManageView'
+export { default as HomePageSectionManageView } from './webManager/HomePageSectionManageView'
 
 // Brand Logo
 export { default as BazarioLogo } from './BazarioLogo'

@@ -19,7 +19,12 @@ import {
   SettingsView,
   AdminUsersView,
   AdminRolesView,
-  AdminPermissionsView
+  AdminPermissionsView,
+  AboutManageView,
+  TopBarManageView,
+  CtaManageView,
+  CareerManageView,
+  HomePageSectionManageView
 } from '../components'
 import { useToast } from '../context/ToastContext'
 import {
@@ -47,7 +52,13 @@ import {
   faUserShield,
   faUserTie,
   faShieldHalved,
-  faKey
+  faKey,
+  faGlobe,
+  faCircleInfo,
+  faWindowMaximize,
+  faBullhorn,
+  faBriefcase,
+  faTableCellsLarge
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
@@ -59,6 +70,7 @@ export default function DashboardPage({ onLogout }) {
   const getTabFromHash = () => {
     const hash = window.location.hash.replace('#/', '').replace('#', '').trim().toLowerCase()
     if (hash === 'admin-manager') return 'admin-users'
+    if (hash === 'web-manager') return 'web-about'
     const validTabs = [
       'dashboard',
       'stores',
@@ -66,6 +78,11 @@ export default function DashboardPage({ onLogout }) {
       'admin-users',
       'admin-roles',
       'admin-permissions',
+      'web-about',
+      'web-topbar',
+      'web-cta',
+      'web-career',
+      'web-homepage',
       'settings',
     ]
     return validTabs.includes(hash) ? hash : 'dashboard'
@@ -102,6 +119,18 @@ export default function DashboardPage({ onLogout }) {
         { id: 'admin-users', name: 'Admin User', icon: faUserTie },
         { id: 'admin-roles', name: 'Role', icon: faShieldHalved },
         { id: 'admin-permissions', name: 'Permission', icon: faKey },
+      ],
+    },
+    {
+      id: 'web-manager',
+      name: 'Web Manager',
+      icon: faGlobe,
+      children: [
+        { id: 'web-about', name: 'About Manage', icon: faCircleInfo },
+        { id: 'web-topbar', name: 'Top-Bar Manage', icon: faWindowMaximize },
+        { id: 'web-cta', name: 'CTA Manage', icon: faBullhorn },
+        { id: 'web-career', name: 'Carrier Manage', icon: faBriefcase },
+        { id: 'web-homepage', name: 'Home Page Section Manage', icon: faTableCellsLarge },
       ],
     },
     { id: 'settings', name: 'Settings', icon: faGear },
@@ -254,6 +283,16 @@ export default function DashboardPage({ onLogout }) {
               ? 'Roles & Access Control'
               : activeTab === 'admin-permissions'
               ? 'System Permissions Matrix'
+              : activeTab === 'web-about'
+              ? 'About Manage'
+              : activeTab === 'web-topbar'
+              ? 'Top-Bar Manage'
+              : activeTab === 'web-cta'
+              ? 'CTA Manage'
+              : activeTab === 'web-career'
+              ? 'Carrier Manage'
+              : activeTab === 'web-homepage'
+              ? 'Home Page Section Manage'
               : 'Dashboard'
           }
           onLogout={onLogout}
@@ -269,6 +308,11 @@ export default function DashboardPage({ onLogout }) {
             {activeTab === 'admin-users' && <AdminUsersView />}
             {activeTab === 'admin-roles' && <AdminRolesView />}
             {activeTab === 'admin-permissions' && <AdminPermissionsView />}
+            {activeTab === 'web-about' && <AboutManageView />}
+            {activeTab === 'web-topbar' && <TopBarManageView />}
+            {activeTab === 'web-cta' && <CtaManageView />}
+            {activeTab === 'web-career' && <CareerManageView />}
+            {activeTab === 'web-homepage' && <HomePageSectionManageView />}
             {activeTab === 'dashboard' && (
               <>
                 {/* Welcome Banner */}
