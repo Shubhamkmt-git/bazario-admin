@@ -30,7 +30,10 @@ import {
   DeliveryStaffManageView,
   ProductManageView,
   StaffManageView,
-  ManageOffersView
+  ManageOffersView,
+  DashboardWelcomeBanner,
+  OrdersAnalyticsSection,
+  CustomerAnalyticsSection
 } from '../components'
 import { useToast } from '../context/ToastContext'
 import {
@@ -401,61 +404,17 @@ export default function DashboardPage({ onLogout }) {
             {activeTab === 'manage-offers' && <ManageOffersView />}
             {activeTab === 'dashboard' && (
               <>
-                {/* Welcome Banner */}
-                <div className="relative overflow-hidden bg-gradient-to-r from-[#042813] via-[#064C23] to-[#0a5c2d] rounded-3xl p-6 sm:p-8 text-white shadow-lg border border-[#064C23]">
-                  <div className="absolute right-0 top-0 translate-x-12 -translate-y-12 w-64 h-64 bg-[#A44F37]/25 rounded-full blur-3xl pointer-events-none" />
-                  
-                  <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                    <div className="space-y-1.5 max-w-2xl">
-                      <div className="flex items-center space-x-2">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-[#A44F37] text-white shadow-xs">
-                          <FontAwesomeIcon icon={faStore} className="mr-1 text-[10px]" />
-                          Bazario Supermarket Retail
-                        </span>
-                        <span className="text-xs text-emerald-200/80">Active POS & Cloud Sync</span>
-                      </div>
-                      <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-                        Admin Overview & Operations
-                      </h1>
-                      <p className="text-xs sm:text-sm text-emerald-100/85">
-                        Centralized control center for store outlets, customer directory, staff role authorizations, and platform parameters.
-                      </p>
-                    </div>
-
-                    {/* Date Filters & Export */}
-                    <div className="flex flex-wrap items-center gap-2">
-                      <div className="bg-black/30 backdrop-blur-md p-1 rounded-xl flex items-center border border-white/15">
-                        {['today', 'week', 'month'].map((period) => (
-                          <button
-                            key={period}
-                            type="button"
-                            onClick={() => {
-                              setDateFilter(period)
-                              toast.info('Filter Applied', `Displaying analytics for ${period.toUpperCase()}`)
-                            }}
-                            className={`px-3 py-1 text-xs font-bold rounded-lg uppercase transition-all cursor-pointer ${
-                              dateFilter === period
-                                ? 'bg-white text-[#064C23] shadow-xs'
-                                : 'text-emerald-100/70 hover:text-white'
-                            }`}
-                          >
-                            {period}
-                          </button>
-                        ))}
-                      </div>
-
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="bg-white/10 hover:bg-white/20 text-white border-white/20"
-                        icon={<FontAwesomeIcon icon={faDownload} className="text-xs" />}
-                        onClick={() => toast.success('Report Exported', 'Store summary PDF & CSV exported successfully!')}
-                      >
-                        Export Summary
-                      </Button>
-                    </div>
-                  </div>
-                </div>
+                {/* Enhanced Welcome Banner with Integrated Logo Image Box */}
+                <DashboardWelcomeBanner
+                  dateFilter={dateFilter}
+                  onDateFilterChange={(period) => {
+                    setDateFilter(period)
+                    toast.info('Filter Applied', `Displaying analytics for ${period.toUpperCase()}`)
+                  }}
+                  onExport={() => toast.success('Report Exported', 'Store summary PDF & CSV exported successfully!')}
+                  totalOrders="548"
+                  activeBranches="4 Outlets"
+                />
 
                 {/* 4 KPI Metrics in Indian Rupees (₹) */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
@@ -494,6 +453,12 @@ export default function DashboardPage({ onLogout }) {
                     </div>
                   ))}
                 </div>
+
+                {/* Orders Volume, Trajectory Graph & Fulfillment Breakdown */}
+                <OrdersAnalyticsSection />
+
+                {/* Customer Growth, Retention Graph & Segmentation Analysis */}
+                <CustomerAnalyticsSection />
 
                 {/* Middle Grid: Store Outlets Monitor + Quick Actions */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -63,6 +63,11 @@ export { default as AddOfferView } from './manageOffers/AddOfferView'
 export { default as EditOfferView } from './manageOffers/EditOfferView'
 export { default as OfferDetailsView } from './manageOffers/OfferDetailsView'
 
+// Dashboard Analytics Components
+export { default as DashboardWelcomeBanner } from './dashboard/DashboardWelcomeBanner'
+export { default as OrdersAnalyticsSection } from './dashboard/OrdersAnalyticsSection'
+export { default as CustomerAnalyticsSection } from './dashboard/CustomerAnalyticsSection'
+
 // Brand Logo
 export { default as BazarioLogo } from './BazarioLogo'
 

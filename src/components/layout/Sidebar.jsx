@@ -69,12 +69,12 @@ export default function Sidebar({
         {/* Brand Header */}
         <div className="h-16 shrink-0 flex items-center border-b border-[#bfe0cd] px-4 sm:px-5 transition-all bg-white/50 backdrop-blur-sm">
           {isOpen ? (
-            /* Expanded Header: Clean Left-Aligned Brand Logo */
-            <div className="flex items-center justify-start w-full py-1">
+            /* Expanded Header: Clean Boxed Brand Logo in Panel */
+            <div className="flex items-center w-full bg-white/90 px-3 py-1.5 rounded-xl border border-[#bfe0cd]/80 shadow-2xs">
               <img
                 src="/logo.png"
                 alt="Bazario Admin"
-                className="h-9 sm:h-10 w-auto max-w-[190px] object-contain object-left drop-shadow-xs"
+                className="h-8 sm:h-9 w-auto max-w-[175px] object-contain object-left drop-shadow-xs"
                 draggable="false"
               />
             </div>
