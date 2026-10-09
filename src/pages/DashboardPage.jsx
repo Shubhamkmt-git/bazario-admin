@@ -28,7 +28,8 @@ import {
   ProductCategoriesView,
   HeroBannerManageView,
   DeliveryStaffManageView,
-  ProductManageView
+  ProductManageView,
+  StaffManageView
 } from '../components'
 import { useToast } from '../context/ToastContext'
 import {
@@ -64,7 +65,8 @@ import {
   faBriefcase,
   faTableCellsLarge,
   faTags,
-  faImages
+  faImages,
+  faUserGroup
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
@@ -100,11 +102,20 @@ export default function DashboardPage({ onLogout }) {
     ) {
       return 'products'
     }
+    if (
+      baseTab === 'staff-manage' ||
+      baseTab === 'staff-manages' ||
+      baseTab === 'staffs' ||
+      baseTab === 'staff'
+    ) {
+      return 'staff-manage'
+    }
     const validTabs = [
       'dashboard',
       'stores',
       'customers',
       'delivery-staff',
+      'staff-manage',
       'products',
       'product-categories',
       'product-category',
@@ -148,6 +159,7 @@ export default function DashboardPage({ onLogout }) {
     { id: 'stores', name: 'Stores', icon: faStore },
     { id: 'customers', name: 'Customers', icon: faUsers },
     { id: 'delivery-staff', name: 'Delivery Staff', icon: faTruck },
+    { id: 'staff-manage', name: 'Staff Manage', icon: faUserGroup },
     { id: 'products', name: 'Products', icon: faBoxesStacked },
     { id: 'product-categories', name: 'Product Category', icon: faTags },
     { id: 'hero-banner-manage', name: 'Hero Banner Manage', icon: faImages },
@@ -319,6 +331,8 @@ export default function DashboardPage({ onLogout }) {
               ? 'Customers'
               : activeTab === 'delivery-staff'
               ? 'Delivery Staff'
+              : activeTab === 'staff-manage'
+              ? 'Staff Manage'
               : activeTab === 'products'
               ? 'Products'
               : activeTab === 'product-categories' || activeTab === 'product-category'
@@ -354,6 +368,7 @@ export default function DashboardPage({ onLogout }) {
             {activeTab === 'stores' && <StoresView />}
             {activeTab === 'customers' && <CustomersView />}
             {activeTab === 'delivery-staff' && <DeliveryStaffManageView />}
+            {activeTab === 'staff-manage' && <StaffManageView />}
             {activeTab === 'products' && <ProductManageView />}
             {(activeTab === 'product-categories' || activeTab === 'product-category') && (
               <ProductCategoriesView />

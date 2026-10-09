@@ -52,6 +52,11 @@ export { default as DeliveryStaffListView } from './deliveryStaff/DeliveryStaffL
 export { default as AddDeliveryStaffView } from './deliveryStaff/AddDeliveryStaffView'
 export { default as EditDeliveryStaffView } from './deliveryStaff/EditDeliveryStaffView'
 export { default as DeliveryStaffDetailsView } from './deliveryStaff/DeliveryStaffDetailsView'
+export { default as StaffManageView } from './staffManage/StaffManageView'
+export { default as StaffListView } from './staffManage/StaffListView'
+export { default as AddStaffView } from './staffManage/AddStaffView'
+export { default as EditStaffView } from './staffManage/EditStaffView'
+export { default as StaffDetailsView } from './staffManage/StaffDetailsView'
 
 // Brand Logo
 export { default as BazarioLogo } from './BazarioLogo'
