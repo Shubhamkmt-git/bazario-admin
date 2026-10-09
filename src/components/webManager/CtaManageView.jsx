@@ -157,10 +157,10 @@ export default function CtaManageView() {
           </div>
         </div>
 
-        {/* 1. LABLE */}
+        {/* 1. LABEL */}
         <div className="space-y-1.5">
           <InputField
-            label="LABLE"
+            label="LABEL"
             placeholder="e.g. LIMITED TIME PROMOTION"
             value={formData.label}
             onChange={(e) => handleChange('label', e.target.value)}
@@ -194,10 +194,10 @@ export default function CtaManageView() {
           />
         </div>
 
-        {/* 4. TAAG (3) */}
+        {/* 4. TAGS (3) */}
         <div className="space-y-2">
           <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-            TAAG (3)
+            TAGS (3)
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <InputField
@@ -232,10 +232,10 @@ export default function CtaManageView() {
           />
         </div>
 
-        {/* 6 & 7. BUTTON LABLE & BUUTTON URL */}
+        {/* 6 & 7. BUTTON LABEL & BUTTON URL */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
           <InputField
-            label="BUTTON LAABLE"
+            label="BUTTON LABEL"
             placeholder="e.g. Download App Now"
             value={formData.buttonLabel}
             onChange={(e) => handleChange('buttonLabel', e.target.value)}
@@ -244,7 +244,7 @@ export default function CtaManageView() {
           />
 
           <InputField
-            label="BUUTTON URL"
+            label="BUTTON URL"
             placeholder="e.g. https://bazario.in/download or /app"
             value={formData.buttonUrl}
             onChange={(e) => handleChange('buttonUrl', e.target.value)}

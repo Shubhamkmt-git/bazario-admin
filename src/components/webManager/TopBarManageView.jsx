@@ -532,7 +532,7 @@ export default function TopBarManageView() {
             {/* 3. URL / Copytext */}
             <div className="space-y-1.5">
               <InputField
-                label="UUTL / COPYTEXT"
+                label="URL / COPYTEXT"
                 placeholder="e.g. https://bazario.in/deals or PROMOCODE150"
                 value={formData.urlOrCopyText}
                 onChange={(e) => setFormData({ ...formData, urlOrCopyText: e.target.value })}
@@ -660,10 +660,10 @@ export default function TopBarManageView() {
               </p>
             </div>
 
-            {/* UUTL / Copytext Section */}
+            {/* URL / Copytext Section */}
             <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                UUTL / Copytext
+                URL / Copytext
               </span>
               <div className="flex items-center space-x-3">
                 <span className="font-mono text-sm font-bold text-slate-800 bg-white px-3.5 py-2 rounded-xl border border-slate-200 shadow-2xs">

@@ -284,7 +284,7 @@ export default function CareerManageView() {
               <div>
                 <div className="flex items-center space-x-2">
                   <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                    Carrier Manage
+                    Career Manage
                   </h1>
                   <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                     {jobs.filter((j) => j.status === 'Active').length} Active
@@ -332,7 +332,7 @@ export default function CareerManageView() {
                     <th className="px-6 py-4 min-w-[240px]">Job Title & Subtitle</th>
                     <th className="px-6 py-4">Type & Exp</th>
                     <th className="px-6 py-4">Location</th>
-                    <th className="px-6 py-4">Sallary</th>
+                    <th className="px-6 py-4">Salary</th>
                     <th className="px-6 py-4 w-28">Status</th>
                     <th className="px-6 py-4 text-right w-32">Actions</th>
                   </tr>
@@ -445,7 +445,7 @@ export default function CareerManageView() {
                   {pageMode === 'add' ? 'Post New Career Opening' : 'Edit Career Opening'}
                 </h1>
                 <p className="text-xs sm:text-sm text-slate-500">
-                  Configure job title, subtitle, type, experience, location, status, sallary, and SEO meta.
+                  Configure job title, subtitle, type, experience, location, status, salary, and SEO meta.
                 </p>
               </div>
             </div>
@@ -508,14 +508,14 @@ export default function CareerManageView() {
                 required
               />
               <InputField
-                label="SUUBTITLE"
+                label="SUBTITLE"
                 value={formData.subtitle}
                 onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
                 placeholder="e.g. Retail Operations & Branch Leadership"
               />
             </div>
 
-            {/* Row 3: Type, Experience, Location, Sallary */}
+            {/* Row 3: Type, Experience, Location, Salary */}
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-5">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
@@ -553,7 +553,7 @@ export default function CareerManageView() {
 
               <div>
                 <InputField
-                  label="SALLARY"
+                  label="SALARY"
                   value={formData.salary}
                   onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
                   placeholder="e.g. ₹25,000 - ₹35,000 / mo"
@@ -703,7 +703,7 @@ export default function CareerManageView() {
               </div>
 
               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-1">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Sallary</span>
+                <span className="text-[11px] font-bold text-slate-500 uppercase">Salary</span>
                 <p className="text-sm font-mono font-bold text-slate-900">{activeJob.salary || 'Not specified'}</p>
               </div>
             </div>

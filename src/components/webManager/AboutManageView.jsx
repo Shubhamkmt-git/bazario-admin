@@ -514,7 +514,7 @@ export default function AboutManageView() {
                     </div>
 
                     <InputField
-                      label="LABLE"
+                      label="LABEL"
                       placeholder="e.g. Happy Shoppers"
                       value={card.label}
                       onChange={(e) => updateCard('label', e.target.value)}
@@ -541,7 +541,7 @@ export default function AboutManageView() {
         )}
 
         {/* ==========================================================
-            STEP 3: SECTION ONE (MISSION & VISSION CARDS)
+            STEP 3: SECTION ONE (MISSION & VISION CARDS)
             ========================================================== */}
         {activeStep === 3 && (
           <div className="p-6 sm:p-8 space-y-6">
@@ -564,7 +564,7 @@ export default function AboutManageView() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InputField
-                label="LABLE"
+                label="LABEL"
                 placeholder="e.g. WHO WE ARE"
                 value={formData.section1.label}
                 onChange={(e) => updateSection('section1', 'label', e.target.value)}
@@ -589,7 +589,7 @@ export default function AboutManageView() {
                 </div>
 
                 <InputField
-                  label="LABLE"
+                  label="LABEL"
                   placeholder="e.g. OUR MISSION"
                   value={formData.section1.mission.label}
                   onChange={(e) => {
@@ -609,7 +609,7 @@ export default function AboutManageView() {
                 />
                 <div className="space-y-1.5">
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                    SUUBTITLE
+                    SUBTITLE
                   </label>
                   <textarea
                     rows={3}
@@ -624,17 +624,17 @@ export default function AboutManageView() {
                 </div>
               </div>
 
-              {/* Vission Card */}
+              {/* Vision Card */}
               <div className="p-6 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-4">
                 <div className="flex items-center space-x-2 pb-2 border-b border-slate-200">
                   <div className="w-7 h-7 rounded-lg bg-[#A44F37] text-white flex items-center justify-center text-xs font-bold">
                     V
                   </div>
-                  <h3 className="text-sm font-black text-slate-900">Vission Card</h3>
+                  <h3 className="text-sm font-black text-slate-900">Vision Card</h3>
                 </div>
 
                 <InputField
-                  label="LABLE"
+                  label="LABEL"
                   placeholder="e.g. OUR VISION"
                   value={formData.section1.vision.label}
                   onChange={(e) => {
@@ -654,7 +654,7 @@ export default function AboutManageView() {
                 />
                 <div className="space-y-1.5">
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                    SUUBTITLE
+                    SUBTITLE
                   </label>
                   <textarea
                     rows={3}
@@ -673,7 +673,7 @@ export default function AboutManageView() {
         )}
 
         {/* ==========================================================
-            STEP 4: SECTION 2 (4 CARDS: ICON, LABLE, TITLE, SUBTITLE, BASE LINE)
+            STEP 4: SECTION 2 (4 CARDS: ICON, LABEL, TITLE, SUBTITLE, BASE LINE)
             ========================================================== */}
         {activeStep === 4 && (
           <div className="p-6 sm:p-8 space-y-6">
@@ -681,7 +681,7 @@ export default function AboutManageView() {
               <div>
                 <span className="text-[11px] font-bold text-[#064C23] uppercase tracking-wider">Step 4 of 7</span>
                 <h2 className="text-lg font-black text-slate-900">Section 2</h2>
-                <p className="text-xs text-slate-500">Lable, title, and 4 cards with visual FontAwesome icon selection.</p>
+                <p className="text-xs text-slate-500">Label, title, and 4 cards with visual FontAwesome icon selection.</p>
               </div>
               <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold">
                 <span className="text-slate-700">Section Status:</span>
@@ -696,7 +696,7 @@ export default function AboutManageView() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InputField
-                label="LABLE"
+                label="LABEL"
                 placeholder="e.g. WHY CHOOSE US"
                 value={formData.section2.label}
                 onChange={(e) => updateSection('section2', 'label', e.target.value)}
@@ -737,7 +737,7 @@ export default function AboutManageView() {
                     </div>
 
                     <InputField
-                      label="LABLE"
+                      label="LABEL"
                       placeholder="e.g. VALUE 1"
                       value={card.label}
                       onChange={(e) => updateCard('label', e.target.value)}
@@ -786,7 +786,7 @@ export default function AboutManageView() {
               <div>
                 <span className="text-[11px] font-bold text-[#064C23] uppercase tracking-wider">Step 5 of 7</span>
                 <h2 className="text-lg font-black text-slate-900">Section 3</h2>
-                <p className="text-xs text-slate-500">Lable, title, description, and dynamic gallery images.</p>
+                <p className="text-xs text-slate-500">Label, title, description, and dynamic gallery images.</p>
               </div>
               <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold">
                 <span className="text-slate-700">Section Status:</span>
@@ -801,7 +801,7 @@ export default function AboutManageView() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InputField
-                label="LABLE"
+                label="LABEL"
                 placeholder="e.g. STORE TOUR"
                 value={formData.section3.label}
                 onChange={(e) => updateSection('section3', 'label', e.target.value)}
@@ -884,7 +884,7 @@ export default function AboutManageView() {
         )}
 
         {/* ==========================================================
-            STEP 6: SECTION 4 (3 CARDS: ICON, LABLE, TITLE, SUBTITLE, BASELINE)
+            STEP 6: SECTION 4 (3 CARDS: ICON, LABEL, TITLE, SUBTITLE, BASELINE)
             ========================================================== */}
         {activeStep === 6 && (
           <div className="p-6 sm:p-8 space-y-6">
@@ -892,7 +892,7 @@ export default function AboutManageView() {
               <div>
                 <span className="text-[11px] font-bold text-[#064C23] uppercase tracking-wider">Step 6 of 7</span>
                 <h2 className="text-lg font-black text-slate-900">Section 4</h2>
-                <p className="text-xs text-slate-500">Lable, title, and 3 cards manage (title, subtitle, icon, lable, baseline).</p>
+                <p className="text-xs text-slate-500">Label, title, and 3 cards manage (title, subtitle, icon, label, baseline).</p>
               </div>
               <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold">
                 <span className="text-slate-700">Section Status:</span>
@@ -907,7 +907,7 @@ export default function AboutManageView() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InputField
-                label="LABLE"
+                label="LABEL"
                 placeholder="e.g. OUR COMMITMENT"
                 value={formData.section4.label}
                 onChange={(e) => updateSection('section4', 'label', e.target.value)}
@@ -948,7 +948,7 @@ export default function AboutManageView() {
                     </div>
 
                     <InputField
-                      label="LABLE"
+                      label="LABEL"
                       placeholder="e.g. PILLAR 1"
                       value={card.label}
                       onChange={(e) => updateCard('label', e.target.value)}
@@ -997,7 +997,7 @@ export default function AboutManageView() {
               <div>
                 <span className="text-[11px] font-bold text-[#064C23] uppercase tracking-wider">Step 7 of 7</span>
                 <h2 className="text-lg font-black text-slate-900">About CTA Manage</h2>
-                <p className="text-xs text-slate-500">Lable, title, subtitle, primary and secondary button links.</p>
+                <p className="text-xs text-slate-500">Label, title, subtitle, primary and secondary button links.</p>
               </div>
               <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold">
                 <span className="text-slate-700">Section Status:</span>
@@ -1012,7 +1012,7 @@ export default function AboutManageView() {
 
             <div className="space-y-4">
               <InputField
-                label="LABLE"
+                label="LABEL"
                 placeholder="e.g. VISIT US TODAY"
                 value={formData.cta.label}
                 onChange={(e) => updateSection('cta', 'label', e.target.value)}
@@ -1043,14 +1043,14 @@ export default function AboutManageView() {
                 <div className="p-5 bg-emerald-50/70 border border-emerald-200 rounded-2xl space-y-3">
                   <span className="text-xs font-black text-[#064C23] uppercase block">Primary Button</span>
                   <InputField
-                    label="PRIMAARY BUTTON LABLE"
+                    label="PRIMARY BUTTON LABEL"
                     placeholder="e.g. Find Nearest Store"
                     value={formData.cta.primaryButtonLabel}
                     onChange={(e) => updateSection('cta', 'primaryButtonLabel', e.target.value)}
                     required
                   />
                   <InputField
-                    label="PRIMAARY BUTTON URL"
+                    label="PRIMARY BUTTON URL"
                     placeholder="e.g. /stores"
                     value={formData.cta.primaryButtonUrl}
                     onChange={(e) => updateSection('cta', 'primaryButtonUrl', e.target.value)}
@@ -1061,13 +1061,13 @@ export default function AboutManageView() {
                 <div className="p-5 bg-amber-50/70 border border-amber-200 rounded-2xl space-y-3">
                   <span className="text-xs font-black text-[#A44F37] uppercase block">Secondary Button</span>
                   <InputField
-                    label="SECONDAARY BUTTON LABLE"
+                    label="SECONDARY BUTTON LABEL"
                     placeholder="e.g. Download App"
                     value={formData.cta.secondaryButtonLabel}
                     onChange={(e) => updateSection('cta', 'secondaryButtonLabel', e.target.value)}
                   />
                   <InputField
-                    label="SECONDAARY BUTTON URL"
+                    label="SECONDARY BUTTON URL"
                     placeholder="e.g. /download"
                     value={formData.cta.secondaryButtonUrl}
                     onChange={(e) => updateSection('cta', 'secondaryButtonUrl', e.target.value)}
