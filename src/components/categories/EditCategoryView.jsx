@@ -60,7 +60,7 @@ export default function EditCategoryView({ category, onBack, onSave }) {
             Cancel
           </Button>
           <Button
-            type="button"
+            type="submit"
             variant="primary"
             size="md"
             onClick={handleSubmit}
@@ -71,32 +71,44 @@ export default function EditCategoryView({ category, onBack, onSave }) {
         </div>
       </div>
 
-      {/* Unified One-Card Form */}
+      {/* Main Form Card */}
       <form onSubmit={handleSubmit} className="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 sm:p-8 space-y-6">
-        {/* Card Header Info */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
-          <div>
-            <h2 className="text-base sm:text-lg font-black text-slate-900">
-              Category Details & Configuration
-            </h2>
-            <p className="text-xs text-slate-500">
-              Set display sequence, storefront highlight, branding texts, and image.
-            </p>
+        {/* Section 1: Title, Subtitle & Image */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left (2 cols): Title & Subtitle */}
+          <div className="lg:col-span-2 space-y-4">
+            <InputField
+              label="CATEGORY TITLE"
+              placeholder="e.g. Farm-Fresh Fruits & Vegetables"
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              helperText="Primary category name displayed to customers"
+              required
+            />
+
+            <InputField
+              label="SUBTITLE / TAGLINE"
+              placeholder="e.g. 100% Direct from local farms with morning freshness check"
+              value={formData.subtitle}
+              onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
+              helperText="Secondary subtitle or promotional tagline"
+            />
           </div>
 
-          <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold">
-            <span className="text-slate-700">Category Status:</span>
-            <ToggleButton
-              size="sm"
-              checked={formData.status === 'Active'}
-              onChange={(val) => setFormData({ ...formData, status: val ? 'Active' : 'Inactive' })}
-              activeColor="#064C23"
+          {/* Right (1 col): Category Image */}
+          <div className="lg:col-span-1">
+            <ImageUploadFrame
+              label="CATEGORY IMAGE / ICON"
+              aspectRatio="square"
+              description="PNG, JPG, WEBP (Max 5MB)"
+              value={formData.image}
+              onChange={(url) => setFormData({ ...formData, image: url })}
             />
           </div>
         </div>
 
-        {/* Row 1: Sorting Order, Status & Is Featured */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+        {/* Section 2: Sorting Order, Status & Is Featured */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 pt-2 border-t border-slate-100">
           <div>
             <InputField
               label="SORTING ORDER"
@@ -105,8 +117,8 @@ export default function EditCategoryView({ category, onBack, onSave }) {
               step="1"
               value={formData.sortingOrder}
               onChange={(e) => setFormData({ ...formData, sortingOrder: e.target.value })}
-              placeholder="e.g. 1"
-              helperText="Sequence priority in catalog menu"
+              placeholder="1"
+              helperText="Display sequence (1 = Top)"
               required
             />
           </div>
@@ -144,39 +156,8 @@ export default function EditCategoryView({ category, onBack, onSave }) {
           </div>
         </div>
 
-        {/* Row 2: Category Image Upload Frame */}
-        <div className="space-y-1.5">
-          <ImageUploadFrame
-            label="CATEGORY IMAGE / ICON"
-            aspectRatio="square"
-            description="Upload category thumbnail or icon (PNG, JPG, WEBP up to 5MB)"
-            value={formData.image}
-            onChange={(url) => setFormData({ ...formData, image: url })}
-          />
-        </div>
-
-        {/* Row 3: Title & Subtitle */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <InputField
-            label="TITLE"
-            placeholder="e.g. Farm-Fresh Fruits & Vegetables"
-            value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            helperText="Primary category name"
-            required
-          />
-
-          <InputField
-            label="SUBTITLE"
-            placeholder="e.g. 100% Direct from local farms with morning freshness check"
-            value={formData.subtitle}
-            onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
-            helperText="Short category tagline or sub-header"
-          />
-        </div>
-
-        {/* Row 4: Description */}
-        <div className="space-y-1.5">
+        {/* Section 3: Description */}
+        <div className="space-y-1.5 pt-2 border-t border-slate-100">
           <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
             DESCRIPTION
           </label>
@@ -185,7 +166,7 @@ export default function EditCategoryView({ category, onBack, onSave }) {
             placeholder="Enter detailed description of grocery products in this category..."
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 outline-none focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 transition-all"
+            className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 outline-none focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 transition-all leading-relaxed"
           />
         </div>
 
