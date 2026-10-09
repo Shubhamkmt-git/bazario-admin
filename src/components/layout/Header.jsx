@@ -43,34 +43,18 @@ export default function Header({
       <div className="flex items-center space-x-3 sm:space-x-4">
         {actions}
 
-        {/* Live Indian Standard Time (IST) Clock Widget */}
+        {/* Minimal Clean Live Indian Standard Time (IST) Clock */}
         <div
-          className="flex items-center space-x-2.5 bg-slate-50 border border-slate-200/90 px-3 py-1.5 rounded-xl shadow-2xs select-none group transition-all hover:bg-slate-100/80"
-          title={`Indian Standard Time (IST / Asia/Kolkata): ${dateStr} ${timeStr}`}
+          className="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-slate-50/90 border border-slate-200/80 text-xs select-none transition-colors hover:bg-slate-100/70"
+          title={`Indian Standard Time: ${dateStr} (UTC+5:30)`}
         >
-          {/* Live pulsing indicator */}
-          <div className="relative flex items-center justify-center">
-            <span className="w-2 h-2 rounded-full bg-emerald-500" />
-            <span className="absolute w-3.5 h-3.5 rounded-full bg-emerald-400/40 animate-ping pointer-events-none" />
-          </div>
-
-          {/* Clock Icon & Time */}
-          <div className="flex items-center space-x-1.5">
-            <FontAwesomeIcon icon={faClock} className="text-[#064C23] text-xs" />
-            <span className="text-xs sm:text-sm font-bold text-slate-800 tracking-tight font-mono">
-              {timeStr}
-            </span>
-          </div>
-
-          {/* Timezone Badge & Date (Hidden on very small screens) */}
-          <div className="hidden md:flex items-center space-x-1.5 border-l border-slate-200 pl-2">
-            <span className="text-[10px] font-bold text-[#064C23] bg-[#064C23]/10 px-1.5 py-0.5 rounded border border-[#064C23]/15">
-              {timeZone}
-            </span>
-            <span className="text-xs text-slate-500 font-medium">
-              {dateStr}
-            </span>
-          </div>
+          <FontAwesomeIcon icon={faClock} className="text-[#064C23] text-xs" />
+          <span className="font-semibold text-slate-800 font-mono tracking-tight text-xs sm:text-[13px]">
+            {timeStr}
+          </span>
+          <span className="text-[10px] font-bold text-slate-500 bg-slate-200/70 px-1.5 py-0.5 rounded-md">
+            IST
+          </span>
         </div>
 
         {/* User Profile */}
