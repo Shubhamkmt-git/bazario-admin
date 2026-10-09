@@ -504,48 +504,9 @@ export default function SettingsView() {
         </div>
       )}
 
-      {/* TAB 3: Web & App SEO Configuration & Google Preview Frame */}
+      {/* TAB 3: Web & App SEO Configuration */}
       {activeSubTab === 'seo' && (
         <div className="space-y-6">
-          {/* Live Google Search Result Instant Preview Frame */}
-          <div className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-3xl p-6 sm:p-8 text-white shadow-lg space-y-4 border border-slate-700">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-                <h3 className="text-sm font-bold text-emerald-400 uppercase tracking-wider">
-                  Live Instant Google Search Preview
-                </h3>
-              </div>
-              <span className="text-xs text-slate-400">SERP Snippet Simulator</span>
-            </div>
-
-            {/* Google Search Card Box */}
-            <div className="bg-white rounded-2xl p-5 text-slate-900 shadow-md space-y-1.5 max-w-3xl">
-              {/* URL & Breadcrumb */}
-              <div className="flex items-center space-x-2 text-xs text-slate-700">
-                <img
-                  src={settings.favicon || '/logo.png'}
-                  alt="Favicon"
-                  className="w-4 h-4 rounded-full object-contain bg-slate-100 p-0.5"
-                />
-                <span className="font-semibold text-slate-800">{settings.appName}</span>
-                <span className="text-slate-400">›</span>
-                <span className="text-slate-500">{settings.canonicalUrl || 'https://bazario.com'}</span>
-              </div>
-
-              {/* Blue Clickable Title */}
-              <h4 className="text-lg font-bold text-[#1a0dab] hover:underline cursor-pointer leading-snug">
-                {settings.seoTitle || `${settings.appName} - Online Supermarket & Grocery Store`}
-              </h4>
-
-              {/* Snippet Description */}
-              <p className="text-xs text-slate-600 leading-relaxed line-clamp-2">
-                {settings.seoDescription ||
-                  'Shop farm-fresh vegetables, dairy, bakery, beverages, and household essentials at lowest prices with 15-minute express delivery.'}
-              </p>
-            </div>
-          </div>
-
           {/* SEO Input Form Fields */}
           <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-xs space-y-6">
             <div className="border-b border-slate-100 pb-4 flex items-center justify-between">
