@@ -240,22 +240,22 @@ export default function OffersListView({
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end space-x-1.5">
                         <ActionButton
-                          type="view"
+                          action="view"
                           size="sm"
                           onClick={() => onOpenView(offer)}
-                          title="View Offer Details"
+                          tooltip="View Offer Details"
                         />
                         <ActionButton
-                          type="edit"
+                          action="edit"
                           size="sm"
                           onClick={() => onOpenEdit(offer)}
-                          title="Edit Offer"
+                          tooltip="Edit Offer"
                         />
                         <ActionButton
-                          type="delete"
+                          action="delete"
                           size="sm"
                           onClick={() => onOpenDelete(offer)}
-                          title="Delete Offer"
+                          tooltip="Delete Offer"
                         />
                       </div>
                     </td>

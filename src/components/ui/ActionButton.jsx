@@ -11,7 +11,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 
 export default function ActionButton({
-  action = 'view', // 'view' | 'edit' | 'delete' | 'copy' | 'download' | 'more'
+  action,
   icon = null,
   onClick,
   tooltip = '',
@@ -53,9 +53,14 @@ export default function ActionButton({
     },
   }
 
-  const currentConfig = configs[action] || configs[props.variant] || configs.view
+  const requestedAction =
+    action ||
+    (props.type && props.type !== 'button' ? props.type : null) ||
+    props.variant ||
+    'view'
+  const currentConfig = configs[requestedAction] || configs.view
   const displayIcon = icon || currentConfig.icon
-  const displayTooltip = tooltip || currentConfig.defaultTooltip
+  const displayTooltip = tooltip || props.title || currentConfig.defaultTooltip
 
   const sizeClasses = {
     sm: 'w-7 h-7 text-xs',
