@@ -19,6 +19,7 @@ import {
   ActionButton,
   ToggleButton,
   InputField,
+  ImageUploadFrame,
   AlertModal,
   BackButton
 } from '../../components'
@@ -128,6 +129,7 @@ export default function ProductCategoriesView() {
     sortingOrder: 1,
     status: 'Active',
     isFeatured: false,
+    image: '',
     description: ''
   })
 
@@ -171,6 +173,7 @@ export default function ProductCategoriesView() {
       sortingOrder: categories.length + 1,
       status: 'Active',
       isFeatured: false,
+      image: '',
       description: ''
     })
     setPageMode('add')
@@ -185,6 +188,7 @@ export default function ProductCategoriesView() {
       sortingOrder: category.sortingOrder || 1,
       status: category.status || 'Active',
       isFeatured: Boolean(category.isFeatured),
+      image: category.image || '',
       description: category.description || ''
     })
     setPageMode('edit')
@@ -405,23 +409,36 @@ export default function ProductCategoriesView() {
                           </span>
                         </td>
 
-                        {/* Title & Subtitle */}
+                        {/* Title, Thumbnail & Subtitle */}
                         <td className="px-6 py-4">
-                          <div className="max-w-md">
-                            <div className="flex items-center space-x-2">
-                              <span className="font-bold text-slate-900 text-sm">
-                                {category.title}
-                              </span>
-                              {category.isFeatured && (
-                                <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
-                                  <FontAwesomeIcon icon={faStar} className="text-[8px]" />
-                                  <span>Featured</span>
+                          <div className="flex items-center space-x-3.5 max-w-md">
+                            {category.image ? (
+                              <img
+                                src={category.image}
+                                alt={category.title}
+                                className="w-11 h-11 rounded-2xl object-cover border border-slate-200 shadow-2xs shrink-0"
+                              />
+                            ) : (
+                              <div className="w-11 h-11 rounded-2xl bg-slate-100 text-[#064C23] border border-slate-200 flex items-center justify-center text-base shrink-0">
+                                <FontAwesomeIcon icon={faTags} />
+                              </div>
+                            )}
+                            <div>
+                              <div className="flex items-center space-x-2">
+                                <span className="font-bold text-slate-900 text-sm">
+                                  {category.title}
                                 </span>
-                              )}
+                                {category.isFeatured && (
+                                  <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                                    <FontAwesomeIcon icon={faStar} className="text-[8px]" />
+                                    <span>Featured</span>
+                                  </span>
+                                )}
+                              </div>
+                              <span className="text-xs text-slate-400 block line-clamp-1 mt-0.5">
+                                {category.subtitle || 'No subtitle provided'}
+                              </span>
                             </div>
-                            <span className="text-xs text-slate-400 block line-clamp-1 mt-0.5">
-                              {category.subtitle || 'No subtitle provided'}
-                            </span>
                           </div>
                         </td>
 
@@ -605,7 +622,18 @@ export default function ProductCategoriesView() {
               </div>
             </div>
 
-            {/* Row 2: Title & Subtitle */}
+            {/* Row 2: Category Image Upload Frame */}
+            <div className="p-5 bg-slate-50/80 rounded-2xl border border-slate-200 space-y-2">
+              <ImageUploadFrame
+                label="CATEGORY IMAGE / ICON"
+                aspectRatio="square"
+                description="Upload square category icon or thumbnail graphic (PNG, JPG, WEBP up to 5MB)"
+                value={formData.image}
+                onChange={(url) => setFormData({ ...formData, image: url })}
+              />
+            </div>
+
+            {/* Row 3: Title & Subtitle */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <InputField
                 label="TITLE"
@@ -623,7 +651,7 @@ export default function ProductCategoriesView() {
               />
             </div>
 
-            {/* Row 3: Description */}
+            {/* Row 4: Description */}
             <div className="space-y-1.5">
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
                 DESCRIPTION
@@ -730,27 +758,41 @@ export default function ProductCategoriesView() {
               </div>
             </div>
 
-            {/* Title & Subtitle Card */}
-            <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
-              <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block mb-1">
-                  Title
-                </span>
-                <p className="text-base font-bold text-slate-900">
-                  {activeCategory.title}
-                </p>
-              </div>
-
-              {activeCategory.subtitle && (
-                <div className="pt-3 border-t border-slate-200">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block mb-1">
-                    Subtitle
-                  </span>
-                  <p className="text-sm font-medium text-slate-700">
-                    {activeCategory.subtitle}
-                  </p>
+            {/* Title, Image Preview & Subtitle Card */}
+            <div className="p-6 bg-slate-50 rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-start gap-5">
+              {activeCategory.image ? (
+                <img
+                  src={activeCategory.image}
+                  alt={activeCategory.title}
+                  className="w-24 h-24 rounded-2xl object-cover border border-slate-200 shadow-sm shrink-0"
+                />
+              ) : (
+                <div className="w-24 h-24 rounded-2xl bg-white border border-slate-200 text-[#064C23] flex items-center justify-center text-3xl shrink-0 shadow-2xs">
+                  <FontAwesomeIcon icon={faTags} />
                 </div>
               )}
+
+              <div className="space-y-3 flex-1">
+                <div>
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block mb-1">
+                    Category Title
+                  </span>
+                  <p className="text-xl font-black text-slate-900">
+                    {activeCategory.title}
+                  </p>
+                </div>
+
+                {activeCategory.subtitle && (
+                  <div className="pt-2 border-t border-slate-200/80">
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block mb-0.5">
+                      Subtitle / Tagline
+                    </span>
+                    <p className="text-sm font-medium text-slate-700">
+                      {activeCategory.subtitle}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Description Card */}
