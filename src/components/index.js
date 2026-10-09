@@ -15,7 +15,10 @@ export { default as Modal } from './ui/Modal'
 export { default as AlertModal } from './ui/AlertModal'
 export { default as Toast } from './ui/Toast'
 
-// Settings Component
+// Route View Components
+export { default as OrdersView } from './orders/OrdersView'
+export { default as ProductsView } from './products/ProductsView'
+export { default as CustomersView } from './customers/CustomersView'
 export { default as SettingsView } from './settings/SettingsView'
 
 // Brand Logo

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Header,
   Sidebar,
@@ -14,6 +14,9 @@ import {
   FormActions,
   Modal,
   AlertModal,
+  OrdersView,
+  ProductsView,
+  CustomersView,
   SettingsView
 } from '../components'
 import { useToast } from '../context/ToastContext'
@@ -45,7 +48,29 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 export default function DashboardPage({ onLogout }) {
   const toast = useToast()
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [activeTab, setActiveTab] = useState('dashboard')
+
+  // URL Hash Routing Synchronization (e.g. #/dashboard, #/orders, #/products, #/customers, #/settings)
+  const getTabFromHash = () => {
+    const hash = window.location.hash.replace('#/', '').replace('#', '').trim().toLowerCase()
+    const validTabs = ['dashboard', 'orders', 'products', 'customers', 'settings']
+    return validTabs.includes(hash) ? hash : 'dashboard'
+  }
+
+  const [activeTab, setActiveTab] = useState(getTabFromHash)
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      setActiveTab(getTabFromHash())
+    }
+    window.addEventListener('hashchange', handleHashChange)
+    return () => window.removeEventListener('hashchange', handleHashChange)
+  }, [])
+
+  const handleSelectTab = (tabId) => {
+    setActiveTab(tabId)
+    window.location.hash = `#/${tabId}`
+  }
+
   const [dateFilter, setDateFilter] = useState('today')
   const [orderFilter, setOrderFilter] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
@@ -212,7 +237,7 @@ export default function DashboardPage({ onLogout }) {
         onToggle={() => setSidebarOpen((prev) => !prev)}
         navItems={navItems}
         activeTab={activeTab}
-        onSelectTab={setActiveTab}
+        onSelectTab={handleSelectTab}
         user={{ name: 'Store Admin', email: 'admin@bazario.com', avatar: 'BA' }}
       />
 
@@ -239,9 +264,11 @@ export default function DashboardPage({ onLogout }) {
         {/* Scrollable Main Body & Content */}
         <div className="flex-1 overflow-y-auto min-h-0 flex flex-col justify-between scrollbar-thin">
           <main className="p-4 sm:p-6 lg:p-8 space-y-6 flex-1 pb-16">
-            {activeTab === 'settings' ? (
-              <SettingsView />
-            ) : (
+            {activeTab === 'settings' && <SettingsView />}
+            {activeTab === 'orders' && <OrdersView />}
+            {activeTab === 'products' && <ProductsView />}
+            {activeTab === 'customers' && <CustomersView />}
+            {activeTab === 'dashboard' && (
               <>
                 {/* Welcome Banner */}
                 <div className="relative overflow-hidden bg-gradient-to-r from-[#042813] via-[#064C23] to-[#0a5c2d] rounded-3xl p-6 sm:p-8 text-white shadow-lg border border-[#064C23]">

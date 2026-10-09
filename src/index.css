@@ -7,8 +7,14 @@
     --color-primary: #064C23;
     --color-secondary: #A44F37;
   }
+  html, body, #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
   body {
-    @apply font-roboto text-slate-800 bg-slate-50 min-h-screen;
+    @apply font-roboto text-slate-800 bg-slate-100;
     font-family: 'Roboto', sans-serif;
   }
   ::selection {
