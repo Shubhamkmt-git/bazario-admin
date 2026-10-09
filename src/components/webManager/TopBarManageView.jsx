@@ -612,27 +612,7 @@ export default function TopBarManageView() {
 
           {/* Details Card */}
           <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 sm:p-8 space-y-6">
-            {/* Banner Preview */}
-            <div className="space-y-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                Live Storefront Representation
-              </span>
-              <div className="rounded-2xl px-5 py-3.5 bg-[#064C23] text-white flex flex-col sm:flex-row items-center justify-between gap-3 text-sm shadow-md">
-                <div className="flex items-center space-x-3">
-                  <span className="px-2 py-0.5 rounded-md bg-white/20 text-white font-mono text-xs font-black">
-                    #{activeItem.sortingOrder}
-                  </span>
-                  <span className="font-bold">{activeItem.title}</span>
-                </div>
-                {activeItem.urlOrCopyText && (
-                  <span className="font-mono text-xs bg-white/20 px-3 py-1 rounded-lg text-emerald-100">
-                    {activeItem.urlOrCopyText}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-slate-100">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-1">
                 <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
                   Sorting Order
