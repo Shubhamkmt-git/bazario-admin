@@ -14,8 +14,6 @@ import {
   FormActions,
   Modal,
   AlertModal,
-  OrdersView,
-  ProductsView,
   StoresView,
   CustomersView,
   SettingsView,
@@ -63,8 +61,6 @@ export default function DashboardPage({ onLogout }) {
     if (hash === 'admin-manager') return 'admin-users'
     const validTabs = [
       'dashboard',
-      'orders',
-      'products',
       'stores',
       'customers',
       'admin-users',
@@ -91,85 +87,11 @@ export default function DashboardPage({ onLogout }) {
   }
 
   const [dateFilter, setDateFilter] = useState('today')
-  const [orderFilter, setOrderFilter] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
-
-  // Add Product Modal State
-  const [isAddProductOpen, setIsAddProductOpen] = useState(false)
-  const [newProduct, setNewProduct] = useState({
-    name: '',
-    category: 'Fresh Fruits',
-    sku: '',
-    price: '',
-    stock: '',
-    image: null,
-  })
-
-  // View Order Modal State
-  const [selectedOrder, setSelectedOrder] = useState(null)
-
-  // Delete Confirm Modal State
-  const [deleteModal, setDeleteModal] = useState({ isOpen: false, orderId: null })
-
-  // Sample Orders Data
-  const [orders, setOrders] = useState([
-    {
-      id: '#ORD-9842',
-      customer: 'Priya Sharma',
-      email: 'priya.s@example.com',
-      items: '5 items (Apples, Milk, Bread)',
-      total: '$34.80',
-      status: 'Completed',
-      time: '10 mins ago',
-      payment: 'UPI / Online',
-    },
-    {
-      id: '#ORD-9841',
-      customer: 'Rahul Verma',
-      email: 'rahul.v@techmail.com',
-      items: '12 items (Grocery Pack)',
-      total: '$118.50',
-      status: 'Processing',
-      time: '24 mins ago',
-      payment: 'Credit Card',
-    },
-    {
-      id: '#ORD-9840',
-      customer: 'Ananya Roy',
-      email: 'ananya.roy@web.in',
-      items: '3 items (Fresh Strawberries x3)',
-      total: '$18.00',
-      status: 'Pending',
-      time: '45 mins ago',
-      payment: 'Cash on Delivery',
-    },
-    {
-      id: '#ORD-9839',
-      customer: 'Amit Patel',
-      email: 'amit.patel@corphub.com',
-      items: '8 items (Bakery & Dairy)',
-      total: '$52.20',
-      status: 'Completed',
-      time: '1 hour ago',
-      payment: 'UPI / Online',
-    },
-    {
-      id: '#ORD-9838',
-      customer: 'Kavita Joshi',
-      email: 'kavita.j@mail.com',
-      items: '2 items (Olive Oil 1L)',
-      total: '$29.90',
-      status: 'Completed',
-      time: '2 hours ago',
-      payment: 'Credit Card',
-    },
-  ])
 
   // Navigation Items
   const navItems = [
     { id: 'dashboard', name: 'Dashboard', icon: faChartLine },
-    { id: 'orders', name: 'Orders', icon: faCartShopping },
-    { id: 'products', name: 'Products & Stock', icon: faBoxesStacked },
     { id: 'stores', name: 'Stores', icon: faStore },
     { id: 'customers', name: 'Customers', icon: faUsers },
     {
@@ -279,10 +201,6 @@ export default function DashboardPage({ onLogout }) {
           title={
             activeTab === 'settings'
               ? 'Store Settings'
-              : activeTab === 'orders'
-              ? 'Store Orders'
-              : activeTab === 'products'
-              ? 'Products & Stock'
               : activeTab === 'stores'
               ? 'Store Locations & Outlets'
               : activeTab === 'customers'
@@ -303,8 +221,6 @@ export default function DashboardPage({ onLogout }) {
         <div className="flex-1 overflow-y-auto min-h-0 flex flex-col justify-between scrollbar-thin">
           <main className="p-4 sm:p-6 lg:p-8 space-y-6 flex-1 pb-16">
             {activeTab === 'settings' && <SettingsView />}
-            {activeTab === 'orders' && <OrdersView />}
-            {activeTab === 'products' && <ProductsView />}
             {activeTab === 'stores' && <StoresView />}
             {activeTab === 'customers' && <CustomersView />}
             {activeTab === 'admin-users' && <AdminUsersView />}
@@ -650,131 +566,9 @@ export default function DashboardPage({ onLogout }) {
         )}
       </main>
 
-        {/* Reusable Footer */}
-        <Footer />
-      </div>
+      {/* Reusable Footer */}
+      <Footer />
     </div>
-
-      {/* MODAL 1: Add New Product Form */}
-      <Modal
-        isOpen={isAddProductOpen}
-        onClose={() => setIsAddProductOpen(false)}
-        title="Add New Supermarket Product"
-        size="lg"
-      >
-        <form onSubmit={handleCreateProduct} className="space-y-4">
-          <FormRow cols={2}>
-            <InputField
-              label="Product Name"
-              required
-              placeholder="e.g. Fresh Red Apples (1kg)"
-              value={newProduct.name}
-              onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-            />
-            <InputField
-              label="SKU / Barcode"
-              placeholder="e.g. BZ-FRU-091"
-              value={newProduct.sku}
-              onChange={(e) => setNewProduct({ ...newProduct, sku: e.target.value })}
-            />
-          </FormRow>
-
-          <FormRow cols={2}>
-            <InputField
-              label="Price ($)"
-              type="number"
-              required
-              placeholder="0.00"
-              value={newProduct.price}
-              onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
-            />
-            <InputField
-              label="Initial Stock Qty"
-              type="number"
-              placeholder="50"
-              value={newProduct.stock}
-              onChange={(e) => setNewProduct({ ...newProduct, stock: e.target.value })}
-            />
-          </FormRow>
-
-          <ImageUploadFrame
-            label="Product Image"
-            aspectRatio="video"
-            value={newProduct.image}
-            onChange={(img) => setNewProduct({ ...newProduct, image: img })}
-          />
-
-          <FormActions align="right">
-            <Button
-              type="button"
-              variant="cancel"
-              onClick={() => setIsAddProductOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" variant="primary">
-              Save Product
-            </Button>
-          </FormActions>
-        </form>
-      </Modal>
-
-      {/* MODAL 2: View Order Details */}
-      {selectedOrder && (
-        <Modal
-          isOpen={Boolean(selectedOrder)}
-          onClose={() => setSelectedOrder(null)}
-          title={`Order Details - ${selectedOrder.id}`}
-          size="md"
-        >
-          <div className="space-y-4">
-            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2 text-xs">
-              <div className="flex justify-between font-bold text-slate-800">
-                <span>Customer:</span>
-                <span>{selectedOrder.customer}</span>
-              </div>
-              <div className="flex justify-between text-slate-500">
-                <span>Email:</span>
-                <span>{selectedOrder.email}</span>
-              </div>
-              <div className="flex justify-between text-slate-500">
-                <span>Items:</span>
-                <span>{selectedOrder.items}</span>
-              </div>
-              <div className="flex justify-between text-slate-500">
-                <span>Payment Method:</span>
-                <span>{selectedOrder.payment}</span>
-              </div>
-              <div className="flex justify-between text-slate-500">
-                <span>Order Time:</span>
-                <span>{selectedOrder.time}</span>
-              </div>
-              <div className="border-t border-slate-200 pt-2 flex justify-between font-extrabold text-base text-[#064C23]">
-                <span>Total Amount:</span>
-                <span>{selectedOrder.total}</span>
-              </div>
-            </div>
-
-            <div className="flex justify-end pt-2">
-              <Button variant="primary" size="sm" onClick={() => setSelectedOrder(null)}>
-                Close
-              </Button>
-            </div>
-          </div>
-        </Modal>
-      )}
-
-      {/* MODAL 3: Delete Confirmation */}
-      <AlertModal
-        isOpen={deleteModal.isOpen}
-        onClose={() => setDeleteModal({ isOpen: false, orderId: null })}
-        onConfirm={() => handleDeleteOrder(deleteModal.orderId)}
-        type="danger"
-        title="Delete Order Record"
-        description={`Are you sure you want to delete ${deleteModal.orderId}? This cannot be undone.`}
-        confirmText="Yes, Delete"
-        cancelText="Cancel"
-      />
-    </div>
+  </div>
   )
 }
