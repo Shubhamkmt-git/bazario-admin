@@ -550,7 +550,7 @@ export default function TopBarManageView() {
 
           {/* Form Card */}
           <form onSubmit={handleFormSubmit} className="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 sm:p-8 space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {/* 1. Sorting Order */}
               <div>
                 <InputField
@@ -566,25 +566,22 @@ export default function TopBarManageView() {
                 />
               </div>
 
-              {/* 4. Status Toggle */}
-              <div className="sm:col-span-2 flex flex-col justify-between">
+              {/* 4. Status Dropdown */}
+              <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
                   STATUS
                 </label>
-                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200 h-[46px]">
-                  <span className="text-xs font-bold text-slate-700">
-                    Display Announcement on Website
-                  </span>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-xs font-bold text-slate-600">{formData.status}</span>
-                    <ToggleButton
-                      size="sm"
-                      checked={formData.status === 'Active'}
-                      onChange={(val) => setFormData({ ...formData, status: val ? 'Active' : 'Inactive' })}
-                      activeColor="#064C23"
-                    />
-                  </div>
-                </div>
+                <select
+                  value={formData.status}
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 outline-none focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 transition-all cursor-pointer"
+                >
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
+                <p className="mt-1 text-[11px] text-slate-400">
+                  Select whether this announcement is active on the website
+                </p>
               </div>
             </div>
 
