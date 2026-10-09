@@ -22,7 +22,7 @@ export default function Sidebar({
 
       {/* Sidebar Aside: Minimal Smooth Light Brand Gradient with Crisp Outer Border */}
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-50 bg-gradient-to-b from-[#f2f8f4] via-[#e9f4ed] to-[#dfeee4] text-slate-800 flex flex-col border-r border-[#bfe0cd] transition-all duration-300 ease-in-out shrink-0 select-none ${
+        className={`fixed lg:static inset-y-0 left-0 z-50 h-screen lg:h-full max-h-screen bg-gradient-to-b from-[#f2f8f4] via-[#e9f4ed] to-[#dfeee4] text-slate-800 flex flex-col border-r border-[#bfe0cd] transition-all duration-300 ease-in-out shrink-0 select-none ${
           isOpen
             ? 'w-72 translate-x-0 shadow-xl lg:shadow-none'
             : '-translate-x-full lg:translate-x-0 lg:w-[80px] shadow-none'
