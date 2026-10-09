@@ -208,6 +208,7 @@ export default function DashboardPage({ onLogout }) {
       <Sidebar
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
+        onToggle={() => setSidebarOpen((prev) => !prev)}
         navItems={navItems}
         activeTab={activeTab}
         onSelectTab={setActiveTab}
