@@ -541,23 +541,6 @@ export default function SettingsView() {
                 placeholder="https://bazario.com/sitemap.xml"
                 value={settings.sitemapUrl}
                 onChange={(e) => handleChange('sitemapUrl', e.target.value)}
-                helperText="Submitted automatically to Google Search Console"
-              />
-            </div>
-
-            {/* Robots Indexing Toggle */}
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
-              <div>
-                <h4 className="text-sm font-bold text-slate-800">Search Engine Indexing</h4>
-                <p className="text-xs text-slate-500">
-                  Allow search crawlers like Google and Bing to index this store application (`robots: index, follow`).
-                </p>
-              </div>
-              <ToggleButton
-                enabled={settings.robotsIndex}
-                onChange={(val) => handleChange('robotsIndex', val)}
-                activeColor="#064C23"
-              />
             </div>
           </div>
         </div>
