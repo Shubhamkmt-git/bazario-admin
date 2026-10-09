@@ -17,6 +17,7 @@ import { useToast } from '../../context/ToastContext'
 import Button from '../ui/Button'
 import ActionButton from '../ui/ActionButton'
 import AlertModal from '../ui/AlertModal'
+import ToggleButton from '../ui/ToggleButton'
 
 const INITIAL_ADMIN_USERS = [
   {
@@ -183,21 +184,12 @@ export default function AdminUsersView() {
                     </td>
 
                     <td className="px-6 py-4">
-                      <button
-                        type="button"
-                        onClick={() => handleToggleStatus(user)}
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold cursor-pointer transition-all ${
-                          user.status === 'Active'
-                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
-                            : 'bg-slate-100 text-slate-500 border border-slate-200 hover:bg-slate-200'
-                        }`}
-                      >
-                        <FontAwesomeIcon
-                          icon={user.status === 'Active' ? faCircleCheck : faClock}
-                          className="mr-1.5 text-[10px]"
-                        />
-                        {user.status}
-                      </button>
+                      <ToggleButton
+                        size="sm"
+                        checked={user.status === 'Active'}
+                        onChange={() => handleToggleStatus(user)}
+                        activeColor="#064C23"
+                      />
                     </td>
 
                     <td className="px-6 py-4 text-xs text-slate-500">

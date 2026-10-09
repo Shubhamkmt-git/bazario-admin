@@ -10,6 +10,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import Button from '../ui/Button'
 import ActionButton from '../ui/ActionButton'
+import ToggleButton from '../ui/ToggleButton'
 
 export default function StoreListView({
   stores = [],
@@ -163,24 +164,14 @@ export default function StoreListView({
                       <p className="line-clamp-2">{store.subtitle}</p>
                     </td>
 
-                    {/* Status Badge Toggle */}
+                    {/* Status Toggle */}
                     <td className="px-6 py-4">
-                      <button
-                        type="button"
-                        onClick={() => onToggleStatus(store)}
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold cursor-pointer transition-all ${
-                          store.status === 'Open'
-                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
-                            : 'bg-rose-50 text-rose-600 border border-rose-200 hover:bg-rose-100'
-                        }`}
-                        title="Click to toggle status"
-                      >
-                        <FontAwesomeIcon
-                          icon={store.status === 'Open' ? faDoorOpen : faDoorClosed}
-                          className="mr-1.5 text-[11px]"
-                        />
-                        {store.status}
-                      </button>
+                      <ToggleButton
+                        size="sm"
+                        checked={store.status === 'Open'}
+                        onChange={() => onToggleStatus(store)}
+                        activeColor="#064C23"
+                      />
                     </td>
 
                     {/* Actions */}

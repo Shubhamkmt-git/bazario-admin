@@ -12,6 +12,7 @@ import {
 import { useToast } from '../../../context/ToastContext'
 import Button from '../../ui/Button'
 import ActionButton from '../../ui/ActionButton'
+import ToggleButton from '../../ui/ToggleButton'
 
 export default function PermissionListView({
   permissions = [],
@@ -168,24 +169,14 @@ export default function PermissionListView({
                       </div>
                     </td>
 
-                    {/* Status Badge Toggle */}
+                    {/* Status Toggle */}
                     <td className="px-6 py-4">
-                      <button
-                        type="button"
-                        onClick={() => onToggleStatus(perm)}
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold cursor-pointer transition-all ${
-                          perm.status === 'Active'
-                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
-                            : 'bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200'
-                        }`}
-                        title="Click to toggle status"
-                      >
-                        <FontAwesomeIcon
-                          icon={perm.status === 'Active' ? faCircleCheck : faCircleXmark}
-                          className="mr-1.5 text-[11px]"
-                        />
-                        {perm.status}
-                      </button>
+                      <ToggleButton
+                        size="sm"
+                        checked={perm.status === 'Active'}
+                        onChange={() => onToggleStatus(perm)}
+                        activeColor="#064C23"
+                      />
                     </td>
 
                     {/* Actions */}
