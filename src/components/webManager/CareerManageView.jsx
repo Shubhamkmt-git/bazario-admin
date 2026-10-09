@@ -9,7 +9,7 @@ import {
   faTrashCan,
   faFloppyDisk,
   faEye,
-  faUserTie
+  faGlobe
 } from '@fortawesome/free-solid-svg-icons'
 import {
   Button,
@@ -32,7 +32,10 @@ const INITIAL_JOBS = [
     location: 'Central Superstore, Noida (Sec 18)',
     status: 'Active',
     salary: '₹45,000 - ₹60,000 / mo',
-    description: 'Responsible for day-to-day supermarket branch operations, inventory audits, team leadership, and customer satisfaction.'
+    description: 'Responsible for day-to-day supermarket branch operations, inventory audits, team leadership, and customer satisfaction.',
+    seoTitle: 'Career Opportunity: Store Operations Manager at Bazario Supermarket',
+    seoKeywords: 'retail operations, store manager, supermarket careers, bazario jobs',
+    seoDescription: 'Join Bazario as Store Operations Manager in Noida. Lead grocery retail operations with competitive pay and growth opportunities.'
   },
   {
     id: 2,
@@ -44,7 +47,10 @@ const INITIAL_JOBS = [
     location: 'DLF Cyber City Outlet, Gurugram',
     status: 'Active',
     salary: '₹18,000 - ₹24,000 / mo',
-    description: 'Handling fast-paced supermarket barcode scanning, cash and UPI POS terminals, and friendly customer checkout bagging.'
+    description: 'Handling fast-paced supermarket barcode scanning, cash and UPI POS terminals, and friendly customer checkout bagging.',
+    seoTitle: 'POS Cashier Jobs at Bazario Gurugram',
+    seoKeywords: 'cashier jobs, billing executive, retail cashier, gurugram jobs',
+    seoDescription: 'Urgent hiring for POS Cashier and Billing Executives at Bazario Superstore in Gurugram.'
   },
   {
     id: 3,
@@ -56,7 +62,10 @@ const INITIAL_JOBS = [
     location: 'Delhi Central Hub',
     status: 'Active',
     salary: '₹50,000 - ₹70,000 / mo',
-    description: 'Direct procurement from farmers and local mandis to maintain grade-A freshness standards across all branches.'
+    description: 'Direct procurement from farmers and local mandis to maintain grade-A freshness standards across all branches.',
+    seoTitle: 'Fresh Produce Procurement Lead - Bazario Supply Chain',
+    seoKeywords: 'procurement lead, farm sourcing, agricultural supply chain jobs',
+    seoDescription: 'Manage farm produce sourcing and quality verification across North India at Bazario Hub.'
   },
   {
     id: 4,
@@ -68,7 +77,10 @@ const INITIAL_JOBS = [
     location: 'Multiple Outlets (Delhi NCR)',
     status: 'Active',
     salary: '₹20,000 - ₹30,000 / mo',
-    description: 'Timely 20-minute grocery home delivery with two-wheeler bike and valid driver license.'
+    description: 'Timely 20-minute grocery home delivery with two-wheeler bike and valid driver license.',
+    seoTitle: 'Express Grocery Delivery Partner Jobs - Bazario Fleet',
+    seoKeywords: 'delivery partner jobs, bike rider jobs, part time delivery, delhi ncr jobs',
+    seoDescription: 'Earn daily with flexible shifts as a Bazario 20-minute express grocery delivery partner in Delhi NCR.'
   },
   {
     id: 5,
@@ -80,7 +92,10 @@ const INITIAL_JOBS = [
     location: 'Indirapuram Branch, Ghaziabad',
     status: 'Inactive',
     salary: '₹25,000 - ₹32,000 / mo',
-    description: 'Verifying FMCG expiry dates, barcode labeling, shelf replenishment, and cold storage monitoring.'
+    description: 'Verifying FMCG expiry dates, barcode labeling, shelf replenishment, and cold storage monitoring.',
+    seoTitle: 'Supermarket Inventory Supervisor Job in Ghaziabad',
+    seoKeywords: 'inventory supervisor, warehouse stock management, grocery retail',
+    seoDescription: 'Supervise supermarket stock replenishment, expiry audits, and warehouse inwarding at Bazario.'
   }
 ]
 
@@ -107,7 +122,7 @@ export default function CareerManageView() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [jobToDelete, setJobToDelete] = useState(null)
 
-  // Form State (Inputs: sortingOrder, title, subtitle, type, experience, location, status, salary, description)
+  // Form State (Inputs: sortingOrder, title, subtitle, type, experience, location, status, salary, description, seoTitle, seoKeywords, seoDescription)
   const [formData, setFormData] = useState({
     sortingOrder: 1,
     title: '',
@@ -117,7 +132,10 @@ export default function CareerManageView() {
     location: '',
     status: 'Active',
     salary: '',
-    description: ''
+    description: '',
+    seoTitle: '',
+    seoKeywords: '',
+    seoDescription: ''
   })
 
   const saveToStorage = (updated) => {
@@ -138,7 +156,10 @@ export default function CareerManageView() {
       location: '',
       status: 'Active',
       salary: '',
-      description: ''
+      description: '',
+      seoTitle: '',
+      seoKeywords: '',
+      seoDescription: ''
     })
     setModalOpen(true)
   }
@@ -155,7 +176,10 @@ export default function CareerManageView() {
       location: job.location || '',
       status: job.status || 'Active',
       salary: job.salary || '',
-      description: job.description || ''
+      description: job.description || '',
+      seoTitle: job.seoTitle || '',
+      seoKeywords: job.seoKeywords || '',
+      seoDescription: job.seoDescription || ''
     })
     setModalOpen(true)
   }
@@ -254,7 +278,7 @@ export default function CareerManageView() {
               </span>
             </div>
             <p className="text-xs sm:text-sm text-slate-500">
-              Manage website career listings, sorting order, job roles, experience, locations, and salaries.
+              Manage website career listings, sorting order, job roles, experience, locations, salaries, and SEO meta.
             </p>
           </div>
         </div>
@@ -501,10 +525,48 @@ export default function CareerManageView() {
             <textarea
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              rows={4}
+              rows={3}
               className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 outline-none focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 transition-all"
               placeholder="Detailed description of role duties, responsibilities, and requirements..."
             />
+          </div>
+
+          {/* Row 5: SEO Meta Inputs */}
+          <div className="pt-3 border-t border-slate-100 space-y-3">
+            <div className="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-[#064C23]">
+              <FontAwesomeIcon icon={faGlobe} />
+              <span>SEO Meta Configuration</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <InputField
+                label="SEO META TITLE"
+                value={formData.seoTitle}
+                onChange={(e) => setFormData({ ...formData, seoTitle: e.target.value })}
+                placeholder="e.g. Careers at Bazario - Store Operations Manager"
+                helperText="Appears in Google search results and browser title tab"
+              />
+              <InputField
+                label="SEO KEYWORDS"
+                value={formData.seoKeywords}
+                onChange={(e) => setFormData({ ...formData, seoKeywords: e.target.value })}
+                placeholder="e.g. grocery jobs, supermarket manager, retail careers"
+                helperText="Comma separated target keywords"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                SEO META DESCRIPTION
+              </label>
+              <textarea
+                value={formData.seoDescription}
+                onChange={(e) => setFormData({ ...formData, seoDescription: e.target.value })}
+                rows={2}
+                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 outline-none focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 transition-all"
+                placeholder="Meta summary shown beneath the title in search engine result snippets..."
+              />
+            </div>
           </div>
 
           {/* Footer Actions */}
@@ -581,6 +643,32 @@ export default function CareerManageView() {
                 <p className="text-xs font-medium text-slate-700 whitespace-pre-line leading-relaxed">
                   {viewingJob.description}
                 </p>
+              </div>
+            )}
+
+            {(viewingJob.seoTitle || viewingJob.seoKeywords || viewingJob.seoDescription) && (
+              <div className="p-4 bg-emerald-50/50 rounded-xl border border-emerald-200/80 space-y-2">
+                <span className="text-[11px] font-bold text-[#064C23] uppercase block">
+                  SEO Configuration
+                </span>
+                {viewingJob.seoTitle && (
+                  <div>
+                    <span className="text-[10px] text-slate-500 font-bold uppercase block">Meta Title</span>
+                    <p className="text-xs font-semibold text-slate-800">{viewingJob.seoTitle}</p>
+                  </div>
+                )}
+                {viewingJob.seoKeywords && (
+                  <div>
+                    <span className="text-[10px] text-slate-500 font-bold uppercase block">Keywords</span>
+                    <p className="text-xs font-mono text-slate-700">{viewingJob.seoKeywords}</p>
+                  </div>
+                )}
+                {viewingJob.seoDescription && (
+                  <div>
+                    <span className="text-[10px] text-slate-500 font-bold uppercase block">Meta Description</span>
+                    <p className="text-xs text-slate-700">{viewingJob.seoDescription}</p>
+                  </div>
+                )}
               </div>
             )}
 
