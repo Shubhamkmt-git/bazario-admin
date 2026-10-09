@@ -60,7 +60,7 @@ export default function Sidebar({
 
       {/* Sidebar Aside */}
       <aside
-        className={`fixed lg:static inset-y-0 left-0 z-50 h-screen lg:h-full max-h-screen bg-gradient-to-b from-[#f2f8f4] via-[#e9f4ed] to-[#dfeee4] text-slate-800 flex flex-col border-r border-[#bfe0cd] transition-all duration-300 ease-in-out shrink-0 select-none ${
+        className={`fixed lg:static inset-y-0 left-0 z-50 h-screen lg:h-full max-h-screen bg-gradient-to-b from-[#f2f8f4] via-[#e9f4ed] to-[#dfeee4] text-slate-800 flex flex-col border-r border-[#bfe0cd] transition-all duration-300 ease-in-out shrink-0 select-none overflow-x-hidden ${
           isOpen
             ? 'w-72 translate-x-0 shadow-xl lg:shadow-none'
             : '-translate-x-full lg:translate-x-0 lg:w-[80px] shadow-none'
@@ -93,7 +93,11 @@ export default function Sidebar({
         </div>
 
         {/* Navigation Menu */}
-        <nav className="flex-1 py-4 space-y-1.5 overflow-y-auto px-3 scrollbar-thin">
+        <nav
+          className={`flex-1 py-4 space-y-1.5 overflow-y-auto overflow-x-hidden no-scrollbar ${
+            isOpen ? 'px-3' : 'px-2'
+          }`}
+        >
           {isOpen && (
             <div className="text-[11px] font-extrabold text-[#064C23]/75 uppercase tracking-wider px-3 mb-2">
               Main Menu
@@ -126,14 +130,18 @@ export default function Sidebar({
                     className={`w-full flex items-center rounded-xl transition-all duration-200 cursor-pointer group relative ${
                       isOpen
                         ? 'justify-between p-2 text-[15px]'
-                        : 'justify-center p-2 text-lg'
+                        : 'justify-center p-2 text-base'
                     } ${
                       isActive
                         ? 'bg-white text-[#064C23] font-bold shadow-sm shadow-[#064C23]/8 border border-[#9fd3b4]'
                         : 'text-[#28573d] font-semibold border border-transparent hover:border-[#bfe0cd] hover:bg-white/60 hover:text-[#064C23]'
                     }`}
                   >
-                    <div className="flex items-center space-x-3 min-w-0">
+                    <div
+                      className={`flex items-center min-w-0 ${
+                        isOpen ? 'space-x-3' : 'justify-center'
+                      }`}
+                    >
                       {item.icon && (
                         <div
                           className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-all duration-200 ${
@@ -256,14 +264,18 @@ export default function Sidebar({
                 className={`w-full flex items-center rounded-xl transition-all duration-200 cursor-pointer group relative ${
                   isOpen
                     ? 'justify-between p-2 text-[15px]'
-                    : 'justify-center p-2 text-lg'
+                    : 'justify-center p-2 text-base'
                 } ${
                   isActive
                     ? 'bg-white text-[#064C23] font-bold shadow-sm shadow-[#064C23]/8 border border-[#9fd3b4]'
                     : 'text-[#28573d] font-semibold border border-transparent hover:border-[#bfe0cd] hover:bg-white/60 hover:text-[#064C23]'
                 }`}
               >
-                <div className="flex items-center space-x-3 min-w-0">
+                <div
+                  className={`flex items-center min-w-0 ${
+                    isOpen ? 'space-x-3' : 'justify-center'
+                  }`}
+                >
                   {item.icon && (
                     <div
                       className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-all duration-200 ${
@@ -312,8 +324,8 @@ export default function Sidebar({
 
         {/* User Info Footer */}
         <div
-          className={`border-t border-[#bfe0cd] bg-white/55 backdrop-blur-sm flex items-center transition-all ${
-            isOpen ? 'p-3.5 space-x-3' : 'p-3 justify-center'
+          className={`border-t border-[#bfe0cd] bg-white/55 backdrop-blur-sm flex items-center shrink-0 transition-all ${
+            isOpen ? 'p-3.5 space-x-3' : 'p-3.5 justify-center'
           }`}
         >
           <div
