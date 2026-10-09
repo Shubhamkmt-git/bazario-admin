@@ -1,6 +1,5 @@
 import React from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faXmark, faBoxesStacked, faAnglesLeft, faAnglesRight } from '@fortawesome/free-solid-svg-icons'
 
 export default function Sidebar({
   isOpen = true,
@@ -30,30 +29,16 @@ export default function Sidebar({
         }`}
       >
         {/* Brand Header */}
-        <div className="h-16 flex items-center border-b border-[#063a1c] px-3.5 transition-all">
+        <div className="h-16 flex items-center border-b border-[#063a1c] px-4 transition-all">
           {isOpen ? (
-            /* Expanded Header: Large Left-Aligned Logo & Close Toggle */
-            <div className="flex items-center justify-between w-full">
-              <div className="flex items-center justify-start flex-1 py-1">
-                <img
-                  src="/logo.png"
-                  alt="Bazario Admin"
-                  className="h-9 sm:h-10 w-auto max-w-[175px] object-contain object-left drop-shadow-sm select-none"
-                  draggable="false"
-                />
-              </div>
-
-              {onClose && (
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="text-emerald-300/70 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition-colors focus:outline-none cursor-pointer shrink-0 ml-2"
-                  title="Collapse Sidebar"
-                  aria-label="Collapse sidebar"
-                >
-                  <FontAwesomeIcon icon={faXmark} className="text-base" />
-                </button>
-              )}
+            /* Expanded Header: Clean Large Left-Aligned Logo */
+            <div className="flex items-center justify-start w-full py-1">
+              <img
+                src="/logo.png"
+                alt="Bazario Admin"
+                className="h-9 sm:h-10 w-auto max-w-[180px] object-contain object-left drop-shadow-sm select-none"
+                draggable="false"
+              />
             </div>
           ) : (
             /* Collapsed Header: Centered Mini Logo Icon */
