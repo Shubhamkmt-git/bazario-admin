@@ -42,6 +42,11 @@ export { default as HeroBannerListView } from './heroBanner/HeroBannerListView'
 export { default as AddHeroBannerView } from './heroBanner/AddHeroBannerView'
 export { default as EditHeroBannerView } from './heroBanner/EditHeroBannerView'
 export { default as HeroBannerDetailsView } from './heroBanner/HeroBannerDetailsView'
+export { default as DeliveryStaffManageView } from './deliveryStaff/DeliveryStaffManageView'
+export { default as DeliveryStaffListView } from './deliveryStaff/DeliveryStaffListView'
+export { default as AddDeliveryStaffView } from './deliveryStaff/AddDeliveryStaffView'
+export { default as EditDeliveryStaffView } from './deliveryStaff/EditDeliveryStaffView'
+export { default as DeliveryStaffDetailsView } from './deliveryStaff/DeliveryStaffDetailsView'
 
 // Brand Logo
 export { default as BazarioLogo } from './BazarioLogo'
