@@ -18,8 +18,7 @@ import {
   faLayerGroup,
   faHashtag,
   faArrowDown19,
-  faArrowUp19,
-  faSparkles
+  faArrowUp19
 } from '@fortawesome/free-solid-svg-icons'
 import {
   Button,
