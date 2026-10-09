@@ -21,8 +21,15 @@ import {
   faFacebook,
   faXTwitter,
   faYoutube,
-  faLinkedin
+  faLinkedin,
+  faGooglePlay,
+  faAppStoreIos,
+  faApple
 } from '@fortawesome/free-brands-svg-icons'
+import {
+  faMobileScreenButton,
+  faDownload
+} from '@fortawesome/free-solid-svg-icons'
 import { useToast } from '../../context/ToastContext'
 import Button from '../ui/Button'
 import InputField from '../ui/InputField'
@@ -37,6 +44,10 @@ const DEFAULT_SETTINGS = {
   logoDark: '/logo.png',
   logoLight: '/logo.png',
   favicon: '/logo.png',
+
+  // App Install Links (Play Store & iOS App Store)
+  playStoreUrl: 'https://play.google.com/store/apps/details?id=com.bazario.app',
+  iosUrl: 'https://apps.apple.com/app/bazario-supermarket/id123456789',
 
   // 2. Contact & Customer Support Info
   contactNumber: '+91 98765 43210',
@@ -329,11 +340,99 @@ export default function SettingsView() {
           </div>
         </div>
 
-        {/* ================= SECTION 2: CONTACT INFO & SUPPORT CHANNELS ================= */}
+        {/* ================= SECTION 2: MOBILE APP INSTALL LINKS ================= */}
         <div className="p-6 sm:p-8 space-y-6">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 rounded-xl bg-[#064C23]/10 text-[#064C23] flex items-center justify-center text-sm font-bold">
               2
+            </div>
+            <div>
+              <div className="flex items-center space-x-2">
+                <h2 className="text-lg font-bold text-slate-900">Mobile App Install Links</h2>
+                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  Play Store & iOS
+                </span>
+              </div>
+              <p className="text-xs text-slate-500">
+                Configure direct application store download URLs used across website badges, SMS invites, and promotional CTA blocks.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* 1. Google Play Store URL */}
+            <div className="p-5 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <div className="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center text-xs">
+                    <FontAwesomeIcon icon={faGooglePlay} />
+                  </div>
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-800">
+                    Google Play Store URL (Android)
+                  </span>
+                </div>
+                {settings.playStoreUrl && (
+                  <a
+                    href={settings.playStoreUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[11px] font-bold text-[#064C23] hover:underline"
+                  >
+                    Test Link ↗
+                  </a>
+                )}
+              </div>
+
+              <InputField
+                label="PLAY STORE URL"
+                icon={<FontAwesomeIcon icon={faGooglePlay} className="text-xs text-emerald-700" />}
+                placeholder="https://play.google.com/store/apps/details?id=com.bazario.app"
+                value={settings.playStoreUrl}
+                onChange={(e) => handleChange('playStoreUrl', e.target.value)}
+                helperText="Public Google Play Store package link for Android smartphone users"
+              />
+            </div>
+
+            {/* 2. Apple iOS App Store URL */}
+            <div className="p-5 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <div className="w-7 h-7 rounded-lg bg-sky-100 text-sky-800 flex items-center justify-center text-xs">
+                    <FontAwesomeIcon icon={faAppStoreIos} />
+                  </div>
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-800">
+                    Apple App Store URL (iOS / iPhone)
+                  </span>
+                </div>
+                {settings.iosUrl && (
+                  <a
+                    href={settings.iosUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[11px] font-bold text-sky-700 hover:underline"
+                  >
+                    Test Link ↗
+                  </a>
+                )}
+              </div>
+
+              <InputField
+                label="IOS APP STORE URL"
+                icon={<FontAwesomeIcon icon={faAppStoreIos} className="text-xs text-sky-700" />}
+                placeholder="https://apps.apple.com/app/bazario-supermarket/id123456789"
+                value={settings.iosUrl}
+                onChange={(e) => handleChange('iosUrl', e.target.value)}
+                helperText="Official Apple App Store direct installation link for iPhone & iPad users"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* ================= SECTION 3: CONTACT INFO & SUPPORT CHANNELS ================= */}
+        <div className="p-6 sm:p-8 space-y-6">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 rounded-xl bg-[#064C23]/10 text-[#064C23] flex items-center justify-center text-sm font-bold">
+              3
             </div>
             <div>
               <h2 className="text-lg font-bold text-slate-900">Contact & Customer Support Channels</h2>
@@ -449,11 +548,11 @@ export default function SettingsView() {
           </div>
         </div>
 
-        {/* ================= SECTION 3: WEB & APP SEO METADATA ================= */}
+        {/* ================= SECTION 4: WEB & APP SEO METADATA ================= */}
         <div className="p-6 sm:p-8 space-y-6">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 rounded-xl bg-[#064C23]/10 text-[#064C23] flex items-center justify-center text-sm font-bold">
-              3
+              4
             </div>
             <div>
               <h2 className="text-lg font-bold text-slate-900">Web & App SEO Metadata</h2>
