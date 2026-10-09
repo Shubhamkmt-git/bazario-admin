@@ -15,7 +15,7 @@ import {
   faCopy,
   faPenToSquare,
   faTrashCan,
-  faArrowUpDown,
+  faSort,
   faHashtag,
   faCompass,
   faCircleCheck
@@ -325,7 +325,7 @@ export default function StoresView() {
                     label="Sorting Order"
                     type="number"
                     min="1"
-                    icon={<FontAwesomeIcon icon={faArrowUpDown} className="text-xs text-slate-400" />}
+                    icon={<FontAwesomeIcon icon={faSort} className="text-xs text-slate-400" />}
                     placeholder="1"
                     value={formData.sortingOrder}
                     onChange={(e) => setFormData({ ...formData, sortingOrder: e.target.value })}
@@ -673,7 +673,7 @@ export default function StoresView() {
               <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold uppercase text-slate-400">Display Order</span>
-                  <FontAwesomeIcon icon={faArrowUpDown} className="text-[#064C23] text-xs" />
+                  <FontAwesomeIcon icon={faSort} className="text-[#064C23] text-xs" />
                 </div>
                 <p className="text-base font-bold text-slate-900 font-mono">
                   #{selectedStore.sortingOrder || 1}
