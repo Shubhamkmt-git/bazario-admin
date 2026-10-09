@@ -87,17 +87,17 @@ export default function CategoryListView({
         </Button>
       </div>
 
-      {/* Search & Filter Controls */}
+      {/* Minimal Search & Filter Controls */}
       <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
         {/* Search Input */}
-        <div className="relative w-full md:w-96">
+        <div className="relative w-full md:w-80">
           <FontAwesomeIcon
             icon={faSearch}
             className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"
           />
           <input
             type="text"
-            placeholder="Search categories by title, subtitle, keywords..."
+            placeholder="Search categories..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-[#064C23] focus:ring-2 focus:ring-[#064C23]/10 transition-all"
@@ -150,14 +150,14 @@ export default function CategoryListView({
         </div>
       </div>
 
-      {/* Categories Table */}
+      {/* Clean Minimal Categories Table */}
       <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm text-slate-600">
             <thead className="bg-slate-50/80 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
               <tr>
                 <th className="px-6 py-4 w-20 text-center">Order</th>
-                <th className="px-6 py-4">Category Title & Subtitle</th>
+                <th className="px-6 py-4">Category</th>
                 <th className="px-6 py-4">Description</th>
                 <th className="px-6 py-4 text-center">Featured</th>
                 <th className="px-6 py-4">Status</th>
@@ -175,17 +175,17 @@ export default function CategoryListView({
                       </span>
                     </td>
 
-                    {/* Title, Thumbnail & Subtitle */}
+                    {/* Category: Thumbnail + Title + Subtitle */}
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-3.5 max-w-md">
                         {category.image ? (
                           <img
                             src={category.image}
                             alt={category.title}
-                            className="w-11 h-11 rounded-2xl object-cover border border-slate-200 shadow-2xs shrink-0"
+                            className="w-10 h-10 rounded-xl object-cover border border-slate-200 shadow-2xs shrink-0"
                           />
                         ) : (
-                          <div className="w-11 h-11 rounded-2xl bg-slate-100 text-[#064C23] border border-slate-200 flex items-center justify-center text-base shrink-0">
+                          <div className="w-10 h-10 rounded-xl bg-slate-100 text-[#064C23] border border-slate-200 flex items-center justify-center text-sm shrink-0">
                             <FontAwesomeIcon icon={faTags} />
                           </div>
                         )}
@@ -195,7 +195,7 @@ export default function CategoryListView({
                               {category.title}
                             </span>
                             {category.isFeatured && (
-                              <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                              <span className="inline-flex items-center space-x-0.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
                                 <FontAwesomeIcon icon={faStar} className="text-[8px]" />
                                 <span>Featured</span>
                               </span>
@@ -210,17 +210,17 @@ export default function CategoryListView({
 
                     {/* Description */}
                     <td className="px-6 py-4">
-                      <p className="text-xs text-slate-600 line-clamp-2 max-w-xs">
+                      <p className="text-xs text-slate-600 line-clamp-2 max-w-xs leading-relaxed">
                         {category.description || '—'}
                       </p>
                     </td>
 
-                    {/* Featured Toggle Switch */}
+                    {/* Featured Toggle Badge */}
                     <td className="px-6 py-4 text-center">
                       <button
                         type="button"
                         onClick={() => onToggleFeatured(category)}
-                        className={`px-3 py-1 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                        className={`px-2.5 py-1 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                           category.isFeatured
                             ? 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100'
                             : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100'
@@ -228,7 +228,7 @@ export default function CategoryListView({
                         title="Toggle featured status"
                       >
                         <FontAwesomeIcon icon={faStar} className="mr-1 text-[10px]" />
-                        {category.isFeatured ? 'Yes' : 'No'}
+                        {category.isFeatured ? 'Featured' : 'Standard'}
                       </button>
                     </td>
 
@@ -247,7 +247,7 @@ export default function CategoryListView({
                       <div className="flex items-center justify-end space-x-1.5">
                         <ActionButton
                           action="view"
-                          tooltip="View Category Details"
+                          tooltip="View Details"
                           onClick={() => onOpenView(category)}
                         />
                         <ActionButton

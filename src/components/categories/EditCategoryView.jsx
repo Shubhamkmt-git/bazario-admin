@@ -1,13 +1,6 @@
 import React, { useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import {
-  faFloppyDisk,
-  faStar,
-  faTags,
-  faSliders,
-  faImage,
-  faCircleInfo
-} from '@fortawesome/free-solid-svg-icons'
+import { faFloppyDisk, faStar } from '@fortawesome/free-solid-svg-icons'
 import {
   Button,
   ToggleButton,
@@ -53,19 +46,11 @@ export default function EditCategoryView({ category, onBack, onSave }) {
         <div className="flex items-center space-x-4">
           <BackButton onClick={onBack} />
           <div>
-            <div className="flex items-center space-x-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#064C23]">
-                Edit Mode
-              </span>
-              <span className="text-xs font-mono text-slate-400">
-                #CAT-{category?.id}
-              </span>
-            </div>
             <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
               Edit Product Category
             </h1>
             <p className="text-xs sm:text-sm text-slate-500">
-              Update category branding, hierarchy order, storefront featured badge, and description.
+              Update category title, subtitle, sorting order, status, featured highlight, image, and description.
             </p>
           </div>
         </div>
@@ -86,178 +71,137 @@ export default function EditCategoryView({ category, onBack, onSave }) {
         </div>
       </div>
 
-      {/* Main 2-Column Responsive Form Layout */}
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Left Column (2 Cols): Core Category Details */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 sm:p-8 space-y-6">
-            <div className="flex items-center space-x-2.5 pb-4 border-b border-slate-100">
-              <div className="w-8 h-8 rounded-xl bg-[#064C23]/10 text-[#064C23] flex items-center justify-center text-sm">
-                <FontAwesomeIcon icon={faTags} />
-              </div>
-              <div>
-                <h2 className="text-base font-black text-slate-900">
-                  Category Identity & Information
-                </h2>
-                <p className="text-xs text-slate-500">
-                  Customer-facing naming, tagline, and comprehensive catalogue summary.
-                </p>
-              </div>
-            </div>
+      {/* Unified One-Card Form */}
+      <form onSubmit={handleSubmit} className="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 sm:p-8 space-y-6">
+        {/* Card Header Info */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
+          <div>
+            <h2 className="text-base sm:text-lg font-black text-slate-900">
+              Category Details & Configuration
+            </h2>
+            <p className="text-xs text-slate-500">
+              Set display sequence, storefront highlight, branding texts, and image.
+            </p>
+          </div>
 
-            {/* Title & Subtitle */}
-            <div className="space-y-4">
-              <InputField
-                label="CATEGORY TITLE"
-                placeholder="e.g. Farm-Fresh Fruits & Vegetables"
-                value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                helperText="Primary name displayed in navigation bars and category menus"
-                required
-              />
+          <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold">
+            <span className="text-slate-700">Category Status:</span>
+            <ToggleButton
+              size="sm"
+              checked={formData.status === 'Active'}
+              onChange={(val) => setFormData({ ...formData, status: val ? 'Active' : 'Inactive' })}
+              activeColor="#064C23"
+            />
+          </div>
+        </div>
 
-              <InputField
-                label="SUBTITLE / TAGLINE"
-                placeholder="e.g. 100% Direct from local farms with morning freshness check"
-                value={formData.subtitle}
-                onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
-                helperText="Secondary tagline or promotional sub-header text"
-              />
-            </div>
+        {/* Row 1: Sorting Order, Status & Is Featured */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          <div>
+            <InputField
+              label="SORTING ORDER"
+              type="number"
+              min="1"
+              step="1"
+              value={formData.sortingOrder}
+              onChange={(e) => setFormData({ ...formData, sortingOrder: e.target.value })}
+              placeholder="e.g. 1"
+              helperText="Sequence priority in catalog menu"
+              required
+            />
+          </div>
 
-            {/* Description */}
-            <div className="space-y-1.5">
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                DESCRIPTION
-              </label>
-              <textarea
-                rows={5}
-                placeholder="Describe the types of grocery products, brands, or specialties contained in this category..."
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 outline-none focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 transition-all leading-relaxed"
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+              STATUS
+            </label>
+            <select
+              value={formData.status}
+              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 outline-none focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 transition-all cursor-pointer"
+            >
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+              IS FEATURED
+            </label>
+            <div className="flex items-center justify-between h-[42px] px-4 bg-slate-50 border border-slate-200 rounded-xl">
+              <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                <FontAwesomeIcon icon={faStar} className={formData.isFeatured ? 'text-amber-500' : 'text-slate-400'} />
+                <span>{formData.isFeatured ? 'Featured Category' : 'Standard'}</span>
+              </span>
+              <ToggleButton
+                size="sm"
+                checked={formData.isFeatured}
+                onChange={(val) => setFormData({ ...formData, isFeatured: val })}
+                activeColor="#A44F37"
               />
-              <p className="text-[11px] text-slate-400">
-                Detailed description used for category header banners and catalog SEO.
-              </p>
             </div>
           </div>
         </div>
 
-        {/* Right Column (1 Col): Image Upload & Publishing Parameters */}
-        <div className="space-y-6">
-          {/* Card 1: Category Media */}
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 space-y-4">
-            <div className="flex items-center space-x-2.5 pb-3 border-b border-slate-100">
-              <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center text-sm">
-                <FontAwesomeIcon icon={faImage} />
-              </div>
-              <div>
-                <h3 className="text-sm font-black text-slate-900">
-                  Category Icon & Graphic
-                </h3>
-                <p className="text-[11px] text-slate-500">
-                  Square visual for menus & grid
-                </p>
-              </div>
-            </div>
+        {/* Row 2: Category Image Upload Frame */}
+        <div className="space-y-1.5">
+          <ImageUploadFrame
+            label="CATEGORY IMAGE / ICON"
+            aspectRatio="square"
+            description="Upload category thumbnail or icon (PNG, JPG, WEBP up to 5MB)"
+            value={formData.image}
+            onChange={(url) => setFormData({ ...formData, image: url })}
+          />
+        </div>
 
-            <div className="flex flex-col items-center">
-              <ImageUploadFrame
-                label=""
-                aspectRatio="square"
-                description="Upload square icon (PNG, JPG, WEBP up to 5MB)"
-                value={formData.image}
-                onChange={(url) => setFormData({ ...formData, image: url })}
-              />
-            </div>
-          </div>
+        {/* Row 3: Title & Subtitle */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <InputField
+            label="TITLE"
+            placeholder="e.g. Farm-Fresh Fruits & Vegetables"
+            value={formData.title}
+            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            helperText="Primary category name"
+            required
+          />
 
-          {/* Card 2: Status & Display Parameters */}
-          <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 space-y-5">
-            <div className="flex items-center space-x-2.5 pb-3 border-b border-slate-100">
-              <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-sm">
-                <FontAwesomeIcon icon={faSliders} />
-              </div>
-              <div>
-                <h3 className="text-sm font-black text-slate-900">
-                  Display Settings
-                </h3>
-                <p className="text-[11px] text-slate-500">
-                  Order sequence & storefront visibility
-                </p>
-              </div>
-            </div>
+          <InputField
+            label="SUBTITLE"
+            placeholder="e.g. 100% Direct from local farms with morning freshness check"
+            value={formData.subtitle}
+            onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
+            helperText="Short category tagline or sub-header"
+          />
+        </div>
 
-            {/* Sorting Order */}
-            <div>
-              <InputField
-                label="SORTING ORDER"
-                type="number"
-                min="1"
-                step="1"
-                value={formData.sortingOrder}
-                onChange={(e) => setFormData({ ...formData, sortingOrder: e.target.value })}
-                placeholder="1"
-                helperText="Sequence priority on website menu (1 = First)"
-                required
-              />
-            </div>
+        {/* Row 4: Description */}
+        <div className="space-y-1.5">
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+            DESCRIPTION
+          </label>
+          <textarea
+            rows={4}
+            placeholder="Enter detailed description of grocery products in this category..."
+            value={formData.description}
+            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 outline-none focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 transition-all"
+          />
+        </div>
 
-            {/* Status Dropdown */}
-            <div className="space-y-1.5">
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                CATEGORY STATUS
-              </label>
-              <select
-                value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 outline-none focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 transition-all cursor-pointer"
-              >
-                <option value="Active">Active (Visible to Shoppers)</option>
-                <option value="Inactive">Inactive (Hidden)</option>
-              </select>
-            </div>
-
-            {/* Is Featured Toggle Tile */}
-            <div className="p-4 rounded-2xl bg-amber-50/60 border border-amber-200/80 space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <div className="w-6 h-6 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center text-xs">
-                    <FontAwesomeIcon icon={faStar} />
-                  </div>
-                  <span className="text-xs font-black text-amber-950 uppercase">
-                    Featured Highlight
-                  </span>
-                </div>
-                <ToggleButton
-                  size="sm"
-                  checked={formData.isFeatured}
-                  onChange={(val) => setFormData({ ...formData, isFeatured: val })}
-                  activeColor="#A44F37"
-                />
-              </div>
-              <p className="text-[11px] text-amber-900/80 leading-relaxed">
-                Featured categories are highlighted on the homepage category carousel and top navigation bar.
-              </p>
-            </div>
-          </div>
-
-          {/* Form Action Footer */}
-          <div className="flex items-center justify-end space-x-3 pt-2">
-            <Button type="button" variant="outline" size="md" onClick={onBack}>
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              size="md"
-              icon={<FontAwesomeIcon icon={faFloppyDisk} className="text-xs" />}
-            >
-              Save Changes
-            </Button>
-          </div>
+        {/* Form Action Buttons */}
+        <div className="pt-4 border-t border-slate-100 flex items-center justify-end space-x-3">
+          <Button type="button" variant="outline" size="md" onClick={onBack}>
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            variant="primary"
+            size="md"
+            icon={<FontAwesomeIcon icon={faFloppyDisk} className="text-xs" />}
+          >
+            Save Changes
+          </Button>
         </div>
       </form>
     </div>
