@@ -3,15 +3,13 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faBars,
   faMagnifyingGlass,
-  faBell,
-  faArrowRightFromBracket,
-  faUser
+  faArrowRightFromBracket
 } from '@fortawesome/free-solid-svg-icons'
 
 export default function Header({
   onMenuToggle,
   title = '',
-  user = { name: 'Admin User', email: 'admin@bazario.com', avatar: 'AD' },
+  user = { name: 'Admin User', email: 'admin@bazario.com', avatar: 'BA' },
   onLogout,
   actions = null,
 }) {
@@ -23,7 +21,7 @@ export default function Header({
           <button
             type="button"
             onClick={onMenuToggle}
-            className="lg:hidden text-slate-600 hover:text-slate-900 p-2 rounded-xl hover:bg-slate-100 transition-colors focus:outline-none"
+            className="lg:hidden text-slate-600 hover:text-slate-900 p-2 rounded-xl hover:bg-slate-100 transition-colors focus:outline-none cursor-pointer"
             aria-label="Toggle navigation menu"
           >
             <FontAwesomeIcon icon={faBars} className="text-lg" />
@@ -46,24 +44,14 @@ export default function Header({
         )}
       </div>
 
-      {/* Right side: Actions, Notifications, User */}
+      {/* Right side: Actions & User Profile */}
       <div className="flex items-center space-x-3">
         {actions}
 
-        {/* Notifications */}
-        <button
-          type="button"
-          className="relative p-2 text-slate-500 hover:text-[#064C23] hover:bg-slate-100 rounded-xl transition-colors focus:outline-none"
-          title="Notifications"
-        >
-          <FontAwesomeIcon icon={faBell} className="text-base" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#A44F37] rounded-full ring-2 ring-white"></span>
-        </button>
-
         {/* User Pill / Profile */}
-        <div className="flex items-center space-x-2.5 pl-2 border-l border-slate-200">
-          <div className="w-8 h-8 rounded-full bg-[#064C23] text-white flex items-center justify-center font-bold text-xs shadow-xs">
-            {user.avatar || 'AD'}
+        <div className="flex items-center space-x-2.5 pl-2">
+          <div className="w-9 h-9 rounded-full bg-[#064C23] text-white flex items-center justify-center font-bold text-xs shadow-xs">
+            {user.avatar || 'BA'}
           </div>
           <div className="hidden sm:block text-left">
             <p className="text-xs font-bold text-slate-800 leading-tight">{user.name}</p>

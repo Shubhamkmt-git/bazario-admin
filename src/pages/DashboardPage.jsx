@@ -220,18 +220,6 @@ export default function DashboardPage({ onLogout }) {
         <Header
           onMenuToggle={() => setSidebarOpen(true)}
           onLogout={onLogout}
-          actions={
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="primary"
-                size="sm"
-                icon={<FontAwesomeIcon icon={faPlus} className="text-xs" />}
-                onClick={() => setIsAddProductOpen(true)}
-              >
-                <span className="hidden sm:inline">Add Product</span>
-              </Button>
-            </div>
-          }
         />
 
         {/* Main Body */}
