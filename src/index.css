@@ -8,8 +8,12 @@
     --color-secondary: #A44F37;
   }
   body {
-    @apply font-roboto text-slate-800 bg-slate-50 min-h-screen selection:bg-primary-900 selection:text-white;
+    @apply font-roboto text-slate-800 bg-slate-50 min-h-screen;
     font-family: 'Roboto', sans-serif;
+  }
+  ::selection {
+    background-color: #064C23;
+    color: #ffffff;
   }
 }
 
