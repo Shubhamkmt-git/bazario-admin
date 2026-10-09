@@ -4,15 +4,11 @@ import {
   faCircleInfo,
   faFloppyDisk,
   faRotateLeft,
-  faEye,
   faArrowRight,
   faArrowLeft,
   faPlus,
   faTrashCan,
-  faImage,
   faCheck,
-  faBullseye,
-  faLightbulb,
   faLeaf,
   faTruckFast,
   faShieldHalved,
@@ -22,226 +18,125 @@ import {
   faHeart,
   faCheckDouble,
   faHandHoldingHeart,
-  faBagShopping,
-  faClock,
-  faPhone,
-  faArrowsUpDown
+  faBagShopping
 } from '@fortawesome/free-solid-svg-icons'
 import {
   Button,
-  ActionButton,
   InputField,
   ImageUploadFrame,
-  ToggleButton,
-  Modal,
-  AlertModal
+  ToggleButton
 } from '../../components'
 import { useToast } from '../../context/ToastContext'
 
-const ICON_OPTIONS = [
-  { id: 'leaf', name: 'Fresh Leaf', icon: faLeaf },
-  { id: 'truck', name: 'Fast Delivery', icon: faTruckFast },
-  { id: 'shield', name: 'Quality Shield', icon: faShieldHalved },
-  { id: 'tags', name: 'Best Price', icon: faTags },
-  { id: 'store', name: 'Superstore', icon: faStore },
-  { id: 'award', name: 'Award / Trust', icon: faAward },
-  { id: 'heart', name: 'Care / Organic', icon: faHeart },
-  { id: 'check', name: 'Verified', icon: faCheckDouble },
-  { id: 'care', name: 'Community', icon: faHandHoldingHeart },
-  { id: 'bag', name: 'Shopping Bag', icon: faBagShopping }
+const ICONS = [
+  { id: 'leaf', name: 'Leaf / Organic' },
+  { id: 'truck', name: 'Fast Delivery' },
+  { id: 'shield', name: 'Quality Shield' },
+  { id: 'tags', name: 'Best Price' },
+  { id: 'store', name: 'Retail Store' },
+  { id: 'award', name: 'Trust Award' },
+  { id: 'heart', name: 'Customer Care' },
+  { id: 'check', name: 'Quality Check' },
+  { id: 'care', name: 'Community' },
+  { id: 'bag', name: 'Shopping Bag' }
 ]
 
-const getIconByName = (name) => {
-  const found = ICON_OPTIONS.find((i) => i.id === name)
-  return found ? found.icon : faLeaf
-}
-
-const INITIAL_ABOUT_FORM = {
-  // Step 1: Hero Banner
+const INITIAL_FORM = {
+  // 1. Hero Banner
   hero: {
-    isActive: true,
+    status: true,
     bannerImage: '/logo.png',
     titleLine1: 'Bill Halka, Dil Halka',
-    titleLine2: 'Fresh Grocery & Daily Essentials For Every Home',
-    subtitle:
-      'Bazario is your trusted neighbourhood supermarket offering farm-fresh produce, authentic staples, and honest pricing with smile-first service.'
+    titleLine2: 'Fresh Grocery & Daily Essentials',
+    subtitle: 'Bazario is your trusted neighbourhood supermarket for fresh produce and staples.'
   },
 
-  // Step 2: Stats (4 Cards)
-  stats: {
-    isActive: true,
-    items: [
-      {
-        prefix: '',
-        value: '50',
-        suffix: 'K+',
-        label: 'Happy Shoppers',
-        description: 'Trusted by households across Delhi NCR daily'
-      },
-      {
-        prefix: '',
-        value: '15',
-        suffix: 'K+',
-        label: 'Quality Products',
-        description: 'From organic greens to pantry staples'
-      },
-      {
-        prefix: '',
-        value: '4',
-        suffix: ' Branches',
-        label: 'Retail Outlets',
-        description: 'Modern, air-conditioned physical superstores'
-      },
-      {
-        prefix: '',
-        value: '99.8',
-        suffix: '%',
-        label: 'On-Time Express',
-        description: 'Fast fulfillment and friendly home delivery'
-      }
+  // 2. States (4)
+  states: {
+    status: true,
+    cards: [
+      { prefix: '', suffix: 'K+', label: 'Happy Shoppers', description: 'Trusted by households across city branches' },
+      { prefix: '', suffix: 'K+', label: 'Fresh Products', description: 'From farm produce to daily staples' },
+      { prefix: '', suffix: ' Stores', label: 'Retail Outlets', description: 'Modern physical retail supermarkets' },
+      { prefix: '', suffix: '%', label: 'On-Time Delivery', description: 'Express delivery and friendly service' }
     ]
   },
 
-  // Step 3: Section 1 (Mission & Vision)
+  // 3. Section One
   section1: {
-    isActive: true,
+    status: true,
     label: 'WHO WE ARE',
-    title: 'Our Purpose, Core Mission & Long-Term Vision',
+    title: 'Our Purpose, Mission & Vision',
     mission: {
       label: 'OUR MISSION',
-      title: 'Farm-Fresh Groceries for Every Indian Household',
-      subtitle:
-        'To make fresh produce, daily dairy, and essential staples accessible, hygienic, and affordable without compromising on farmer dignity or customer trust.',
-      image: '/logo.png'
+      title: 'Farm-Fresh Groceries for Every Home',
+      subtitle: 'To provide high-quality fresh produce and daily essentials at affordable prices.'
     },
     vision: {
       label: 'OUR VISION',
-      title: 'Building India’s Most Loved Supermarket Network',
-      subtitle:
-        'To become the gold standard of omnichannel grocery shopping with sustainable local sourcing, zero-waste supply chains, and seamless customer joy.',
-      image: '/logo.png'
+      title: 'India’s Most Loved Supermarket Network',
+      subtitle: 'To build a trusted, reliable, and farmer-connected retail grocery chain.'
     }
   },
 
-  // Step 4: Section 2 (4 Feature / Value Cards)
+  // 4. Section 2
   section2: {
-    isActive: true,
-    label: 'OUR CORE VALUES',
-    title: 'The Four Pillars That Define The Bazario Promise',
+    status: true,
+    label: 'WHY CHOOSE US',
+    title: 'The Bazario Quality Promise',
     cards: [
-      {
-        icon: 'leaf',
-        label: 'FRESHNESS FIRST',
-        title: '100% Farm-Fresh Daily',
-        subtitle: 'Harvested at dawn and delivered to branch shelves within hours of picking.',
-        baseline: 'Direct farm-to-shelf traceability'
-      },
-      {
-        icon: 'tags',
-        label: 'HONEST PRICING',
-        title: 'Guaranteed Everyday Savings',
-        subtitle: 'Zero middlemen margins mean higher savings for your monthly grocery budget.',
-        baseline: 'Wholesale rates on daily staples'
-      },
-      {
-        icon: 'shield',
-        label: 'QUALITY ASSURANCE',
-        title: 'Strict Multi-Point Quality Checks',
-        subtitle: 'Every batch undergoes rigorous freshness and hygienic grading before shelf placement.',
-        baseline: 'FSSAI compliant handling'
-      },
-      {
-        icon: 'truck',
-        label: 'SPEED & CONVENIENCE',
-        title: '20-Minute Neighborhood Delivery',
-        subtitle: 'Enjoy instant doorstep delivery or quick curbside pick-up at your local outlet.',
-        baseline: 'Free delivery on orders over ₹499'
-      }
+      { icon: 'leaf', label: 'VALUE 1', title: '100% Farm Fresh', subtitle: 'Directly sourced from verified farmers daily', baseline: 'Fresh produce promise' },
+      { icon: 'tags', label: 'VALUE 2', title: 'Honest Pricing', subtitle: 'Lowest prices without middlemen margins', baseline: 'Save up to 20% on bills' },
+      { icon: 'shield', label: 'VALUE 3', title: 'Quality Assurance', subtitle: 'Strict grading and multi-point freshness inspection', baseline: 'FSSAI compliant handling' },
+      { icon: 'truck', label: 'VALUE 4', title: 'Express Delivery', subtitle: 'Fast doorstep delivery from your nearest outlet', baseline: '20-minute delivery' }
     ]
   },
 
-  // Step 5: Section 3 (Gallery Images Multi-Item)
+  // 5. Section 3
   section3: {
-    isActive: true,
-    label: 'OUR STORES & AISLES',
-    title: 'Experience The Joy of Supermarket Shopping',
-    description:
-      'Spacious aisles, sparkling clean display counters, organized category zones, and friendly assistance make every shopping trip seamless.',
+    status: true,
+    label: 'STORE TOUR',
+    title: 'Inside Our Modern Supermarkets',
+    description: 'Clean aisles, well-organized display racks, and hygienic temperature-controlled grocery sections.',
     gallery: [
-      {
-        id: 1,
-        image: '/logo.png',
-        title: 'Central Superstore Flagship Branch',
-        subtitle: '15,000+ sq.ft of organized aisles and live bakery'
-      },
-      {
-        id: 2,
-        image: '/logo.png',
-        title: 'Farm-Fresh Produce Section',
-        subtitle: 'Temperature-controlled misting bins for leafy greens'
-      },
-      {
-        id: 3,
-        image: '/logo.png',
-        title: 'Express POS Checkout Counters',
-        subtitle: 'Zero queue barcode billing with all UPI and card options'
-      }
+      { id: 1, image: '/logo.png', title: 'Flagship Central Store', subtitle: 'Spacious aisles with 15,000+ products' },
+      { id: 2, image: '/logo.png', title: 'Fresh Produce Bins', subtitle: 'Temperature controlled fresh greens section' }
     ]
   },
 
-  // Step 6: Section 4 (3 Cards Manage)
+  // 6. Section 4
   section4: {
-    isActive: true,
-    label: 'CUSTOMER COMMITMENT',
-    title: 'Built on Trust, Hygiene & Unmatched Convenience',
+    status: true,
+    label: 'OUR COMMITMENT',
+    title: 'Built on Trust & Hygiene',
     cards: [
-      {
-        icon: 'heart',
-        label: 'HYGIENE GUARANTEE',
-        title: 'Sanitized & Clean Touchpoints',
-        subtitle: 'Every shelf, shopping trolley, and billing station is sanitized regularly throughout the day.',
-        baseline: 'Certified clean retail environment'
-      },
-      {
-        icon: 'care',
-        label: 'COMMUNITY IMPACT',
-        title: 'Supporting 500+ Local Farmers',
-        subtitle: 'Direct fair-trade procurement directly supports local agricultural families in our region.',
-        baseline: '100% locally sourced produce'
-      },
-      {
-        icon: 'award',
-        label: 'HASSLE-FREE RETURNS',
-        title: 'No-Questions-Asked Replacements',
-        subtitle: 'Not satisfied with freshness? Instant replacement or full wallet refund guaranteed on the spot.',
-        baseline: '100% customer satisfaction promise'
-      }
+      { icon: 'heart', label: 'PILLAR 1', title: 'Sanitized Facilities', subtitle: 'Regular sanitization of shopping carts, racks and billing stations', baseline: 'Hygienic touchpoints' },
+      { icon: 'care', label: 'PILLAR 2', title: 'Farmer First', subtitle: 'Supporting 500+ local agricultural families with fair wages', baseline: '100% local procurement' },
+      { icon: 'award', label: 'PILLAR 3', title: 'Instant Replacements', subtitle: 'No-questions-asked item replacement or refund policy', baseline: 'Satisfaction guaranteed' }
     ]
   },
 
-  // Step 7: About CTA Manage
+  // 7. About CTA Manage
   cta: {
-    isActive: true,
-    label: 'START SAVING TODAY',
-    title: 'Step Into Your Nearest Bazario Supermarket',
-    subtitle:
-      'Discover huge weekly discounts on fresh vegetables, dairy, and household essentials. Visit our stores or order online!',
-    primaryButtonLabel: 'Find Nearest Outlet',
+    status: true,
+    label: 'VISIT US TODAY',
+    title: 'Ready to Experience Fresh Grocery Shopping?',
+    subtitle: 'Walk into your nearest Bazario branch or order through our online app.',
+    primaryButtonLabel: 'Find Nearest Store',
     primaryButtonUrl: '/stores',
-    secondaryButtonLabel: 'Download Mobile App',
-    secondaryButtonUrl: '/download',
-    ctaBgImage: '/logo.png'
+    secondaryButtonLabel: 'Download App',
+    secondaryButtonUrl: '/download'
   }
 }
 
 const STEPS = [
-  { id: 1, name: 'Hero Banner', tag: 'Banner & Headlines' },
-  { id: 2, name: 'Stats (4)', tag: 'Counters & Milestones' },
-  { id: 3, name: 'Section 1', tag: 'Mission & Vision' },
-  { id: 4, name: 'Section 2', tag: '4 Value Cards' },
-  { id: 5, name: 'Section 3', tag: 'Gallery (Multiple)' },
-  { id: 6, name: 'Section 4', tag: '3 Commitments' },
-  { id: 7, name: 'About CTA', tag: 'Call-To-Action Block' }
+  { id: 1, name: 'Hero Banner' },
+  { id: 2, name: 'States (4)' },
+  { id: 3, name: 'Section 1' },
+  { id: 4, name: 'Section 2' },
+  { id: 5, name: 'Section 3' },
+  { id: 6, name: 'Section 4' },
+  { id: 7, name: 'About CTA' }
 ]
 
 export default function AboutManageView() {
@@ -252,19 +147,18 @@ export default function AboutManageView() {
   const [formData, setFormData] = useState(() => {
     try {
       const saved = localStorage.getItem('bazario_web_about_form')
-      return saved ? JSON.parse(saved) : INITIAL_ABOUT_FORM
+      return saved ? JSON.parse(saved) : INITIAL_FORM
     } catch {
-      return INITIAL_ABOUT_FORM
+      return INITIAL_FORM
     }
   })
 
-  // Deep update helper
-  const handleUpdate = (sectionKey, field, value) => {
+  const updateSection = (sectionKey, field, val) => {
     setFormData((prev) => ({
       ...prev,
       [sectionKey]: {
         ...prev[sectionKey],
-        [field]: value
+        [field]: val
       }
     }))
   }
@@ -276,225 +170,160 @@ export default function AboutManageView() {
       localStorage.setItem('bazario_web_about_form', JSON.stringify(formData))
       setTimeout(() => {
         setSaving(false)
-        toast.success('About Page Saved', 'All 7 about sections and layouts saved successfully.')
-      }, 400)
-    } catch (err) {
+        toast.success('About Form Saved', 'All section inputs saved successfully.')
+      }, 300)
+    } catch {
       setSaving(false)
-      toast.error('Save Failed', 'Could not save About Page content.')
+      toast.error('Save Failed', 'Could not save settings.')
     }
   }
 
   const handleReset = () => {
-    setFormData(INITIAL_ABOUT_FORM)
-    localStorage.setItem('bazario_web_about_form', JSON.stringify(INITIAL_ABOUT_FORM))
-    toast.info('Restored Defaults', 'About Us form data reset to factory template.')
+    setFormData(INITIAL_FORM)
+    localStorage.setItem('bazario_web_about_form', JSON.stringify(INITIAL_FORM))
+    toast.info('Form Reset', 'Restored initial clean form values.')
   }
 
-  // Gallery dynamic functions
-  const handleAddGalleryItem = () => {
+  // Gallery dynamic add/remove
+  const addGalleryItem = () => {
     const newItem = {
       id: Date.now(),
       image: '/logo.png',
-      title: 'New Store Section',
-      subtitle: 'Description of this section or aisle display'
+      title: '',
+      subtitle: ''
     }
-    const updated = [...formData.section3.gallery, newItem]
-    handleUpdate('section3', 'gallery', updated)
-    toast.success('Gallery Item Added', 'New image slot ready for configuration.')
+    updateSection('section3', 'gallery', [...formData.section3.gallery, newItem])
   }
 
-  const handleRemoveGalleryItem = (id) => {
+  const removeGalleryItem = (id) => {
     const updated = formData.section3.gallery.filter((g) => g.id !== id)
-    handleUpdate('section3', 'gallery', updated)
-    toast.info('Item Removed', 'Gallery item deleted.')
+    updateSection('section3', 'gallery', updated)
   }
 
-  const handleUpdateGalleryItem = (id, field, val) => {
+  const updateGalleryItem = (id, field, val) => {
     const updated = formData.section3.gallery.map((g) =>
       g.id === id ? { ...g, [field]: val } : g
     )
-    handleUpdate('section3', 'gallery', updated)
+    updateSection('section3', 'gallery', updated)
   }
 
   return (
-    <div className="space-y-6 pb-16">
-      {/* Top Header Card */}
-      <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center space-x-4">
-          <div className="w-12 h-12 rounded-2xl bg-[#064C23]/10 text-[#064C23] flex items-center justify-center text-xl shrink-0">
+    <div className="space-y-6 pb-16 max-w-6xl mx-auto">
+      {/* Header Banner */}
+      <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center space-x-3.5">
+          <div className="w-11 h-11 rounded-2xl bg-[#064C23]/10 text-[#064C23] flex items-center justify-center text-lg shrink-0">
             <FontAwesomeIcon icon={faCircleInfo} />
           </div>
           <div>
-            <div className="flex items-center space-x-2">
-              <h1 className="text-xl sm:text-2xl font-black text-slate-900">About Page Manager</h1>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                7 Sections Form
-              </span>
-            </div>
-            <p className="text-xs sm:text-sm text-slate-500">
-              Stepped hierarchical form to manage hero banners, stats, mission/vision, cards, galleries, and CTA blocks.
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900">About Page Manage</h1>
+            <p className="text-xs text-slate-500">
+              Configure hero banner, states, mission/vision, value cards, gallery, and CTA.
             </p>
           </div>
         </div>
 
-        <div className="flex items-center space-x-3 self-end sm:self-auto">
-          <Button
-            variant="outline"
-            onClick={handleReset}
-            icon={<FontAwesomeIcon icon={faRotateLeft} />}
-          >
+        <div className="flex items-center space-x-2.5 self-end sm:self-auto">
+          <Button type="button" variant="outline" size="sm" onClick={handleReset} icon={<FontAwesomeIcon icon={faRotateLeft} />}>
             Reset
           </Button>
-          <Button
-            variant="primary"
-            onClick={handleSave}
-            loading={saving}
-            icon={<FontAwesomeIcon icon={faFloppyDisk} />}
-          >
-            Save About Page
+          <Button type="button" variant="primary" size="sm" onClick={handleSave} loading={saving} icon={<FontAwesomeIcon icon={faFloppyDisk} />}>
+            Save All
           </Button>
         </div>
       </div>
 
-      {/* STEPPER NAVIGATION TABS */}
-      <div className="bg-white rounded-3xl p-3 border border-slate-200 shadow-xs">
-        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
-          {STEPS.map((step) => {
-            const isCurrent = activeStep === step.id
-            return (
-              <button
-                key={step.id}
-                type="button"
-                onClick={() => setActiveStep(step.id)}
-                className={`p-3 rounded-2xl text-left transition-all cursor-pointer flex flex-col justify-between relative group ${
-                  isCurrent
-                    ? 'bg-[#064C23] text-white shadow-md shadow-[#064C23]/20 ring-2 ring-[#064C23]/30'
-                    : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/80'
-                }`}
-              >
-                <div className="flex items-center justify-between mb-1.5">
-                  <span
-                    className={`w-6 h-6 rounded-lg text-xs font-black flex items-center justify-center ${
-                      isCurrent
-                        ? 'bg-white text-[#064C23]'
-                        : 'bg-slate-200 text-slate-700'
-                    }`}
-                  >
-                    {step.id}
-                  </span>
-                  <span
-                    className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${
-                      isCurrent
-                        ? 'bg-white/20 text-white'
-                        : 'bg-slate-200/70 text-slate-500'
-                    }`}
-                  >
-                    Step {step.id}
-                  </span>
-                </div>
-                <div>
-                  <p
-                    className={`text-xs font-black truncate ${
-                      isCurrent ? 'text-white' : 'text-slate-900'
-                    }`}
-                  >
-                    {step.name}
-                  </p>
-                  <p
-                    className={`text-[10px] truncate ${
-                      isCurrent ? 'text-emerald-100' : 'text-slate-400'
-                    }`}
-                  >
-                    {step.tag}
-                  </p>
-                </div>
-              </button>
-            )
-          })}
-        </div>
+      {/* Step Navigation Tabs */}
+      <div className="bg-white rounded-2xl p-2 border border-slate-200/90 shadow-xs flex items-center overflow-x-auto no-scrollbar gap-1.5">
+        {STEPS.map((step) => {
+          const isCurrent = activeStep === step.id
+          return (
+            <button
+              key={step.id}
+              type="button"
+              onClick={() => setActiveStep(step.id)}
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer flex items-center space-x-2 ${
+                isCurrent
+                  ? 'bg-[#064C23] text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+              }`}
+            >
+              <span className={`w-5 h-5 rounded-md flex items-center justify-center text-[11px] font-black ${
+                isCurrent ? 'bg-white text-[#064C23]' : 'bg-slate-200 text-slate-700'
+              }`}>
+                {step.id}
+              </span>
+              <span>{step.name}</span>
+            </button>
+          )
+        })}
       </div>
 
-      {/* STEP CONTENT CONTAINER */}
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
+      {/* Form Container */}
+      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-xs overflow-hidden">
         
         {/* ==========================================================
             STEP 1: HERO BANNER
             ========================================================== */}
         {activeStep === 1 && (
           <div className="p-6 sm:p-8 space-y-6">
-            {/* Step Header with Toggle */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-5 border-b border-slate-200 gap-4">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
               <div>
-                <span className="text-xs font-bold text-[#064C23] uppercase tracking-wider">
-                  Step 1 of 7
-                </span>
-                <h2 className="text-lg sm:text-xl font-black text-slate-900">
-                  Hero Banner & Primary Headline
-                </h2>
-                <p className="text-xs text-slate-500">
-                  Configure top hero banner image, title lines, and opening story subtitle.
-                </p>
+                <h2 className="text-base font-black text-slate-900">Hero Banner</h2>
+                <p className="text-xs text-slate-500">Banner image, titles line 1 & 2, and subtitle</p>
               </div>
-
-              <div className="flex items-center space-x-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-700 self-start sm:self-auto">
-                <span>Section Status:</span>
+              <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold">
+                <span className="text-slate-600">Status:</span>
                 <ToggleButton
                   size="sm"
-                  checked={formData.hero.isActive}
-                  onChange={(val) => {
-                    handleUpdate('hero', 'isActive', val)
-                    toast.info('Hero Status', `Hero section is now ${val ? 'Active' : 'Inactive'}`)
-                  }}
+                  checked={formData.hero.status}
+                  onChange={(val) => updateSection('hero', 'status', val)}
                   activeColor="#064C23"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Left 2 Cols: Titles */}
-              <div className="lg:col-span-2 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="md:col-span-2 space-y-4">
                 <InputField
                   label="BANNER TITLE LINE 1"
+                  placeholder="Enter banner title line 1"
                   value={formData.hero.titleLine1}
-                  onChange={(e) => handleUpdate('hero', 'titleLine1', e.target.value)}
-                  placeholder="e.g. Bill Halka, Dil Halka"
-                  helperText="First prominent line of the main hero header"
+                  onChange={(e) => updateSection('hero', 'titleLine1', e.target.value)}
                   required
                 />
 
                 <InputField
-                  label="BANNER TITLE LINE 2"
+                  label="TITLE LINE 2"
+                  placeholder="Enter title line 2"
                   value={formData.hero.titleLine2}
-                  onChange={(e) => handleUpdate('hero', 'titleLine2', e.target.value)}
-                  placeholder="e.g. Fresh Grocery & Daily Essentials"
-                  helperText="Second accent line displayed directly beneath Line 1"
+                  onChange={(e) => updateSection('hero', 'titleLine2', e.target.value)}
                   required
                 />
 
                 <div className="space-y-1.5">
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                    HERO SUBTITLE / PARAGRAPH STORY
+                    SUBTITLE
                   </label>
                   <textarea
-                    rows={4}
+                    rows={3}
+                    placeholder="Enter hero subtitle"
                     value={formData.hero.subtitle}
-                    onChange={(e) => handleUpdate('hero', 'subtitle', e.target.value)}
-                    placeholder="Provide an overview of Bazario's supermarket promise..."
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 outline-none transition-all"
+                    onChange={(e) => updateSection('hero', 'subtitle', e.target.value)}
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 outline-none focus:bg-white focus:border-[#064C23]"
                   />
                 </div>
               </div>
 
-              {/* Right 1 Col: Hero Banner Image Upload in Frame */}
-              <div className="space-y-2">
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                  HERO BANNER IMAGE (FRAME UPLOAD)
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                  HERO BANNER IMAGE
                 </label>
                 <ImageUploadFrame
                   label="Hero Banner Image"
                   aspectRatio="video"
                   previewUrl={formData.hero.bannerImage}
-                  onImageSelect={(file, url) => handleUpdate('hero', 'bannerImage', url)}
+                  onImageSelect={(file, url) => updateSection('hero', 'bannerImage', url)}
                 />
               </div>
             </div>
@@ -502,96 +331,70 @@ export default function AboutManageView() {
         )}
 
         {/* ==========================================================
-            STEP 2: STATS (4 CARDS)
+            STEP 2: STATES (4)
             ========================================================== */}
         {activeStep === 2 && (
           <div className="p-6 sm:p-8 space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-5 border-b border-slate-200 gap-4">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
               <div>
-                <span className="text-xs font-bold text-[#064C23] uppercase tracking-wider">
-                  Step 2 of 7
-                </span>
-                <h2 className="text-lg sm:text-xl font-black text-slate-900">
-                  Milestones & Statistics (4 Cards)
-                </h2>
-                <p className="text-xs text-slate-500">
-                  Manage numerical counters, prefixes, suffixes, labels, and descriptions.
-                </p>
+                <h2 className="text-base font-black text-slate-900">States (4 Cards)</h2>
+                <p className="text-xs text-slate-500">Prefix, suffix, label and description for 4 state cards</p>
               </div>
-
-              <div className="flex items-center space-x-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-700 self-start sm:self-auto">
-                <span>Section Status:</span>
+              <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold">
+                <span className="text-slate-600">Status:</span>
                 <ToggleButton
                   size="sm"
-                  checked={formData.stats.isActive}
-                  onChange={(val) => {
-                    handleUpdate('stats', 'isActive', val)
-                    toast.info('Stats Status', `Stats section is now ${val ? 'Active' : 'Inactive'}`)
-                  }}
+                  checked={formData.states.status}
+                  onChange={(val) => updateSection('states', 'status', val)}
                   activeColor="#064C23"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {formData.stats.items.map((stat, idx) => {
-                const handleStatChange = (field, val) => {
-                  const updated = [...formData.stats.items]
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {formData.states.cards.map((card, idx) => {
+                const updateCard = (field, val) => {
+                  const updated = [...formData.states.cards]
                   updated[idx] = { ...updated[idx], [field]: val }
-                  handleUpdate('stats', 'items', updated)
+                  updateSection('states', 'cards', updated)
                 }
 
                 return (
-                  <div
-                    key={idx}
-                    className="p-5 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-3 relative flex flex-col justify-between"
-                  >
-                    <div className="flex items-center justify-between pb-2 border-b border-slate-200">
-                      <span className="w-6 h-6 rounded-lg bg-[#064C23] text-white text-xs font-black flex items-center justify-center">
-                        #{idx + 1}
-                      </span>
-                      <span className="text-xs font-bold text-slate-500">Stat Card {idx + 1}</span>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-2">
+                  <div key={idx} className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-3">
+                    <div className="text-xs font-black text-[#064C23]">Card #{idx + 1}</div>
+                    
+                    <div className="grid grid-cols-2 gap-2">
                       <InputField
                         label="PREFIX"
                         placeholder="e.g. +"
-                        value={stat.prefix}
-                        onChange={(e) => handleStatChange('prefix', e.target.value)}
-                      />
-                      <InputField
-                        label="VALUE"
-                        placeholder="50"
-                        value={stat.value}
-                        onChange={(e) => handleStatChange('value', e.target.value)}
-                        required
+                        value={card.prefix}
+                        onChange={(e) => updateCard('prefix', e.target.value)}
                       />
                       <InputField
                         label="SUFFIX"
-                        placeholder="K+"
-                        value={stat.suffix}
-                        onChange={(e) => handleStatChange('suffix', e.target.value)}
+                        placeholder="e.g. K+"
+                        value={card.suffix}
+                        onChange={(e) => updateCard('suffix', e.target.value)}
                       />
                     </div>
 
                     <InputField
-                      label="STAT LABEL"
+                      label="LABLE"
                       placeholder="e.g. Happy Shoppers"
-                      value={stat.label}
-                      onChange={(e) => handleStatChange('label', e.target.value)}
+                      value={card.label}
+                      onChange={(e) => updateCard('label', e.target.value)}
                       required
                     />
 
                     <div className="space-y-1">
-                      <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-600">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
                         DESCRIPTION
                       </label>
                       <textarea
                         rows={2}
-                        value={stat.description}
-                        onChange={(e) => handleStatChange('description', e.target.value)}
-                        placeholder="Short summary..."
+                        placeholder="Description text"
+                        value={card.description}
+                        onChange={(e) => updateCard('description', e.target.value)}
                         className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-800 outline-none focus:border-[#064C23]"
                       />
                     </div>
@@ -603,255 +406,184 @@ export default function AboutManageView() {
         )}
 
         {/* ==========================================================
-            STEP 3: SECTION 1 (MISSION & VISION)
+            STEP 3: SECTION ONE (MISSION & VISSION CARDS)
             ========================================================== */}
         {activeStep === 3 && (
           <div className="p-6 sm:p-8 space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-5 border-b border-slate-200 gap-4">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
               <div>
-                <span className="text-xs font-bold text-[#064C23] uppercase tracking-wider">
-                  Step 3 of 7
-                </span>
-                <h2 className="text-lg sm:text-xl font-black text-slate-900">
-                  Section 1: Mission & Vision Cards
-                </h2>
-                <p className="text-xs text-slate-500">
-                  Manage section header label, main title, and dual Mission / Vision cards.
-                </p>
+                <h2 className="text-base font-black text-slate-900">Section One</h2>
+                <p className="text-xs text-slate-500">Label, title, mission card, and vision card</p>
               </div>
-
-              <div className="flex items-center space-x-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-700 self-start sm:self-auto">
-                <span>Section Status:</span>
+              <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold">
+                <span className="text-slate-600">Status:</span>
                 <ToggleButton
                   size="sm"
-                  checked={formData.section1.isActive}
-                  onChange={(val) => {
-                    handleUpdate('section1', 'isActive', val)
-                    toast.info('Section 1 Status', `Section 1 is now ${val ? 'Active' : 'Inactive'}`)
-                  }}
+                  checked={formData.section1.status}
+                  onChange={(val) => updateSection('section1', 'status', val)}
                   activeColor="#064C23"
                 />
               </div>
             </div>
 
-            {/* Section Header Controls */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InputField
-                label="SECTION 1 LABEL"
-                value={formData.section1.label}
-                onChange={(e) => handleUpdate('section1', 'label', e.target.value)}
+                label="LABLE"
                 placeholder="e.g. WHO WE ARE"
+                value={formData.section1.label}
+                onChange={(e) => updateSection('section1', 'label', e.target.value)}
               />
               <InputField
-                label="SECTION 1 MAIN TITLE"
+                label="TITLE"
+                placeholder="e.g. Our Purpose, Mission & Vision"
                 value={formData.section1.title}
-                onChange={(e) => handleUpdate('section1', 'title', e.target.value)}
-                placeholder="e.g. Our Purpose, Core Mission & Long-Term Vision"
+                onChange={(e) => updateSection('section1', 'title', e.target.value)}
                 required
               />
             </div>
 
-            {/* Mission Card & Vision Card Dual Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
               {/* Mission Card */}
-              <div className="p-6 rounded-3xl bg-slate-50/80 border border-slate-200 space-y-4">
-                <div className="flex items-center space-x-2.5 pb-2 border-b border-slate-200">
-                  <div className="w-8 h-8 rounded-xl bg-[#064C23] text-white flex items-center justify-center text-sm">
-                    <FontAwesomeIcon icon={faBullseye} />
-                  </div>
-                  <h3 className="text-sm font-black text-slate-900">Mission Card</h3>
-                </div>
-
+              <div className="p-5 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-3.5">
+                <h3 className="text-xs font-black uppercase tracking-wider text-[#064C23]">Mission Card</h3>
                 <InputField
-                  label="MISSION CARD LABEL"
+                  label="LABLE"
+                  placeholder="e.g. OUR MISSION"
                   value={formData.section1.mission.label}
                   onChange={(e) => {
-                    const updated = { ...formData.section1.mission, label: e.target.value }
-                    handleUpdate('section1', 'mission', updated)
+                    const mission = { ...formData.section1.mission, label: e.target.value }
+                    updateSection('section1', 'mission', mission)
                   }}
-                  placeholder="e.g. OUR MISSION"
                 />
-
                 <InputField
-                  label="MISSION TITLE"
+                  label="TITLE"
+                  placeholder="e.g. Farm-Fresh Groceries for Every Home"
                   value={formData.section1.mission.title}
                   onChange={(e) => {
-                    const updated = { ...formData.section1.mission, title: e.target.value }
-                    handleUpdate('section1', 'mission', updated)
+                    const mission = { ...formData.section1.mission, title: e.target.value }
+                    updateSection('section1', 'mission', mission)
                   }}
-                  placeholder="e.g. Farm-Fresh Groceries for Every Home"
                   required
                 />
-
                 <div className="space-y-1">
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                    MISSION SUBTITLE / DESCRIPTION
+                    SUUBTITLE
                   </label>
                   <textarea
                     rows={3}
+                    placeholder="Enter mission subtitle..."
                     value={formData.section1.mission.subtitle}
                     onChange={(e) => {
-                      const updated = { ...formData.section1.mission, subtitle: e.target.value }
-                      handleUpdate('section1', 'mission', updated)
+                      const mission = { ...formData.section1.mission, subtitle: e.target.value }
+                      updateSection('section1', 'mission', mission)
                     }}
-                    placeholder="Describe mission commitment..."
                     className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-800 outline-none focus:border-[#064C23]"
                   />
                 </div>
-
-                <ImageUploadFrame
-                  label="Mission Card Image"
-                  aspectRatio="video"
-                  previewUrl={formData.section1.mission.image}
-                  onImageSelect={(file, url) => {
-                    const updated = { ...formData.section1.mission, image: url }
-                    handleUpdate('section1', 'mission', updated)
-                  }}
-                />
               </div>
 
-              {/* Vision Card */}
-              <div className="p-6 rounded-3xl bg-slate-50/80 border border-slate-200 space-y-4">
-                <div className="flex items-center space-x-2.5 pb-2 border-b border-slate-200">
-                  <div className="w-8 h-8 rounded-xl bg-[#A44F37] text-white flex items-center justify-center text-sm">
-                    <FontAwesomeIcon icon={faLightbulb} />
-                  </div>
-                  <h3 className="text-sm font-black text-slate-900">Vision Card</h3>
-                </div>
-
+              {/* Vission Card */}
+              <div className="p-5 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-3.5">
+                <h3 className="text-xs font-black uppercase tracking-wider text-[#A44F37]">Vission Card</h3>
                 <InputField
-                  label="VISION CARD LABEL"
+                  label="LABLE"
+                  placeholder="e.g. OUR VISION"
                   value={formData.section1.vision.label}
                   onChange={(e) => {
-                    const updated = { ...formData.section1.vision, label: e.target.value }
-                    handleUpdate('section1', 'vision', updated)
+                    const vision = { ...formData.section1.vision, label: e.target.value }
+                    updateSection('section1', 'vision', vision)
                   }}
-                  placeholder="e.g. OUR VISION"
                 />
-
                 <InputField
-                  label="VISION TITLE"
+                  label="TITLE"
+                  placeholder="e.g. India's Most Loved Supermarket"
                   value={formData.section1.vision.title}
                   onChange={(e) => {
-                    const updated = { ...formData.section1.vision, title: e.target.value }
-                    handleUpdate('section1', 'vision', updated)
+                    const vision = { ...formData.section1.vision, title: e.target.value }
+                    updateSection('section1', 'vision', vision)
                   }}
-                  placeholder="e.g. Building India's Most Loved Supermarket"
                   required
                 />
-
                 <div className="space-y-1">
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                    VISION SUBTITLE / DESCRIPTION
+                    SUUBTITLE
                   </label>
                   <textarea
                     rows={3}
+                    placeholder="Enter vision subtitle..."
                     value={formData.section1.vision.subtitle}
                     onChange={(e) => {
-                      const updated = { ...formData.section1.vision, subtitle: e.target.value }
-                      handleUpdate('section1', 'vision', updated)
+                      const vision = { ...formData.section1.vision, subtitle: e.target.value }
+                      updateSection('section1', 'vision', vision)
                     }}
-                    placeholder="Describe long-term vision..."
                     className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-800 outline-none focus:border-[#064C23]"
                   />
                 </div>
-
-                <ImageUploadFrame
-                  label="Vision Card Image"
-                  aspectRatio="video"
-                  previewUrl={formData.section1.vision.image}
-                  onImageSelect={(file, url) => {
-                    const updated = { ...formData.section1.vision, image: url }
-                    handleUpdate('section1', 'vision', updated)
-                  }}
-                />
               </div>
             </div>
           </div>
         )}
 
         {/* ==========================================================
-            STEP 4: SECTION 2 (4 CARDS: ICON, LABEL, TITLE, SUBTITLE, BASELINE)
+            STEP 4: SECTION 2 (4 CARDS: ICON, LABLE, TITLE, SUBTITLE, BASE LINE)
             ========================================================== */}
         {activeStep === 4 && (
           <div className="p-6 sm:p-8 space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-5 border-b border-slate-200 gap-4">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
               <div>
-                <span className="text-xs font-bold text-[#064C23] uppercase tracking-wider">
-                  Step 4 of 7
-                </span>
-                <h2 className="text-lg sm:text-xl font-black text-slate-900">
-                  Section 2: Core Value Cards (4 Cards)
-                </h2>
-                <p className="text-xs text-slate-500">
-                  Configure section label, title, and 4 feature cards with icon selector, label, title, subtitle, and baseline.
-                </p>
+                <h2 className="text-base font-black text-slate-900">Section 2</h2>
+                <p className="text-xs text-slate-500">Label, title, and 4 cards (icon select, lable, title, subtitle, base line)</p>
               </div>
-
-              <div className="flex items-center space-x-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-700 self-start sm:self-auto">
-                <span>Section Status:</span>
+              <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold">
+                <span className="text-slate-600">Status:</span>
                 <ToggleButton
                   size="sm"
-                  checked={formData.section2.isActive}
-                  onChange={(val) => {
-                    handleUpdate('section2', 'isActive', val)
-                    toast.info('Section 2 Status', `Section 2 is now ${val ? 'Active' : 'Inactive'}`)
-                  }}
+                  checked={formData.section2.status}
+                  onChange={(val) => updateSection('section2', 'status', val)}
                   activeColor="#064C23"
                 />
               </div>
             </div>
 
-            {/* Section Header Controls */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InputField
-                label="SECTION 2 LABEL"
+                label="LABLE"
+                placeholder="e.g. WHY CHOOSE US"
                 value={formData.section2.label}
-                onChange={(e) => handleUpdate('section2', 'label', e.target.value)}
-                placeholder="e.g. OUR CORE VALUES"
+                onChange={(e) => updateSection('section2', 'label', e.target.value)}
               />
               <InputField
-                label="SECTION 2 TITLE"
+                label="TITLE"
+                placeholder="e.g. The Bazario Quality Promise"
                 value={formData.section2.title}
-                onChange={(e) => handleUpdate('section2', 'title', e.target.value)}
-                placeholder="e.g. The Four Pillars That Define The Bazario Promise"
+                onChange={(e) => updateSection('section2', 'title', e.target.value)}
                 required
               />
             </div>
 
-            {/* 4 Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {formData.section2.cards.map((card, idx) => {
-                const handleCardChange = (field, val) => {
+                const updateCard = (field, val) => {
                   const updated = [...formData.section2.cards]
                   updated[idx] = { ...updated[idx], [field]: val }
-                  handleUpdate('section2', 'cards', updated)
+                  updateSection('section2', 'cards', updated)
                 }
 
                 return (
-                  <div
-                    key={idx}
-                    className="p-6 rounded-3xl bg-slate-50/80 border border-slate-200 space-y-4"
-                  >
-                    <div className="flex items-center justify-between pb-2 border-b border-slate-200">
-                      <div className="flex items-center space-x-2.5">
-                        <div className="w-8 h-8 rounded-xl bg-[#064C23] text-white flex items-center justify-center text-sm">
-                          <FontAwesomeIcon icon={getIconByName(card.icon)} />
-                        </div>
-                        <span className="text-sm font-black text-slate-900">Value Card #{idx + 1}</span>
-                      </div>
-
-                      {/* Icon Selector */}
-                      <div className="flex items-center space-x-1.5">
-                        <span className="text-[10px] font-bold text-slate-500 uppercase">Icon:</span>
+                  <div key={idx} className="p-5 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-black text-[#064C23]">Card #{idx + 1}</span>
+                      
+                      <div className="flex items-center space-x-2">
+                        <span className="text-[11px] font-bold text-slate-500">ICON:</span>
                         <select
                           value={card.icon}
-                          onChange={(e) => handleCardChange('icon', e.target.value)}
-                          className="px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-800 outline-none"
+                          onChange={(e) => updateCard('icon', e.target.value)}
+                          className="px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-800 outline-none"
                         >
-                          {ICON_OPTIONS.map((opt) => (
-                            <option key={opt.id} value={opt.id}>
-                              {opt.name}
+                          {ICONS.map((i) => (
+                            <option key={i.id} value={i.id}>
+                              {i.name}
                             </option>
                           ))}
                         </select>
@@ -859,39 +591,38 @@ export default function AboutManageView() {
                     </div>
 
                     <InputField
-                      label="CARD LABEL"
+                      label="LABLE"
+                      placeholder="e.g. VALUE 1"
                       value={card.label}
-                      onChange={(e) => handleCardChange('label', e.target.value)}
-                      placeholder="e.g. FRESHNESS FIRST"
+                      onChange={(e) => updateCard('label', e.target.value)}
                     />
 
                     <InputField
-                      label="CARD TITLE"
+                      label="TITLE"
+                      placeholder="e.g. 100% Farm Fresh"
                       value={card.title}
-                      onChange={(e) => handleCardChange('title', e.target.value)}
-                      placeholder="e.g. 100% Farm-Fresh Daily"
+                      onChange={(e) => updateCard('title', e.target.value)}
                       required
                     />
 
                     <div className="space-y-1">
                       <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                        CARD SUBTITLE
+                        SUBTITLE
                       </label>
                       <textarea
                         rows={2}
+                        placeholder="Enter card subtitle..."
                         value={card.subtitle}
-                        onChange={(e) => handleCardChange('subtitle', e.target.value)}
-                        placeholder="Detailed explanation..."
-                        className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-800 outline-none focus:border-[#064C23]"
+                        onChange={(e) => updateCard('subtitle', e.target.value)}
+                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-800 outline-none focus:border-[#064C23]"
                       />
                     </div>
 
                     <InputField
-                      label="CARD BASELINE (KEY HIGHLIGHT)"
+                      label="BASE LINE"
+                      placeholder="e.g. Fresh produce guarantee"
                       value={card.baseline}
-                      onChange={(e) => handleCardChange('baseline', e.target.value)}
-                      placeholder="e.g. Direct farm-to-shelf traceability"
-                      helperText="Small bottom badge tag / baseline promise"
+                      onChange={(e) => updateCard('baseline', e.target.value)}
                     />
                   </div>
                 )
@@ -901,100 +632,76 @@ export default function AboutManageView() {
         )}
 
         {/* ==========================================================
-            STEP 5: SECTION 3 (GALLERY IMAGES MULTIPLE DYNAMIC)
+            STEP 5: SECTION 3 (GALLERY IMAGES MULTIPLE)
             ========================================================== */}
         {activeStep === 5 && (
           <div className="p-6 sm:p-8 space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-5 border-b border-slate-200 gap-4">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
               <div>
-                <span className="text-xs font-bold text-[#064C23] uppercase tracking-wider">
-                  Step 5 of 7
-                </span>
-                <h2 className="text-lg sm:text-xl font-black text-slate-900">
-                  Section 3: Gallery & Store Tour (Multiple Images)
-                </h2>
-                <p className="text-xs text-slate-500">
-                  Manage section label, title, description, and multiple gallery images with title & subtitle.
-                </p>
+                <h2 className="text-base font-black text-slate-900">Section 3</h2>
+                <p className="text-xs text-slate-500">Lable, title, description, and gallery images (multiple can add/remove)</p>
               </div>
-
-              <div className="flex items-center space-x-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-700 self-start sm:self-auto">
-                <span>Section Status:</span>
+              <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold">
+                <span className="text-slate-600">Status:</span>
                 <ToggleButton
                   size="sm"
-                  checked={formData.section3.isActive}
-                  onChange={(val) => {
-                    handleUpdate('section3', 'isActive', val)
-                    toast.info('Section 3 Status', `Section 3 is now ${val ? 'Active' : 'Inactive'}`)
-                  }}
+                  checked={formData.section3.status}
+                  onChange={(val) => updateSection('section3', 'status', val)}
                   activeColor="#064C23"
                 />
               </div>
             </div>
 
-            {/* Header Controls */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InputField
-                label="SECTION 3 LABEL"
+                label="LABLE"
+                placeholder="e.g. STORE TOUR"
                 value={formData.section3.label}
-                onChange={(e) => handleUpdate('section3', 'label', e.target.value)}
-                placeholder="e.g. OUR STORES & AISLES"
+                onChange={(e) => updateSection('section3', 'label', e.target.value)}
               />
               <InputField
-                label="SECTION 3 TITLE"
+                label="TITLE"
+                placeholder="e.g. Inside Our Modern Supermarkets"
                 value={formData.section3.title}
-                onChange={(e) => handleUpdate('section3', 'title', e.target.value)}
-                placeholder="e.g. Experience The Joy of Supermarket Shopping"
+                onChange={(e) => updateSection('section3', 'title', e.target.value)}
                 required
               />
             </div>
 
             <div className="space-y-1.5">
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                SECTION 3 DESCRIPTION
+                DESCRIPTION
               </label>
               <textarea
                 rows={2}
+                placeholder="Enter description..."
                 value={formData.section3.description}
-                onChange={(e) => handleUpdate('section3', 'description', e.target.value)}
-                placeholder="Describe your retail stores and customer experience..."
+                onChange={(e) => updateSection('section3', 'description', e.target.value)}
                 className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 outline-none focus:bg-white focus:border-[#064C23]"
               />
             </div>
 
-            {/* Gallery Dynamic Items */}
+            {/* Gallery Multi-Items */}
             <div className="space-y-4 pt-2">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">
-                  Gallery Image Cards ({formData.section3.gallery.length} Items)
-                </h3>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleAddGalleryItem}
-                  icon={<FontAwesomeIcon icon={faPlus} />}
-                >
-                  Add Gallery Item
+                <span className="text-xs font-black uppercase tracking-wider text-slate-700">
+                  GALLERY IMAGES ({formData.section3.gallery.length})
+                </span>
+                <Button type="button" variant="outline" size="sm" onClick={addGalleryItem} icon={<FontAwesomeIcon icon={faPlus} />}>
+                  Add Gallery Image
                 </Button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {formData.section3.gallery.map((item, idx) => (
-                  <div
-                    key={item.id}
-                    className="p-5 rounded-3xl bg-slate-50/80 border border-slate-200 space-y-3.5 relative flex flex-col justify-between"
-                  >
-                    <div className="flex items-center justify-between pb-2 border-b border-slate-200">
-                      <span className="text-xs font-black text-[#064C23]">
-                        Gallery Card #{idx + 1}
-                      </span>
+                  <div key={item.id} className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-3 relative">
+                    <div className="flex items-center justify-between pb-1 border-b border-slate-200">
+                      <span className="text-xs font-black text-[#064C23]">Image #{idx + 1}</span>
                       {formData.section3.gallery.length > 1 && (
                         <button
                           type="button"
-                          onClick={() => handleRemoveGalleryItem(item.id)}
-                          className="text-rose-500 hover:text-rose-700 text-xs font-bold cursor-pointer transition-colors"
-                          title="Delete image"
+                          onClick={() => removeGalleryItem(item.id)}
+                          className="text-rose-500 hover:text-rose-700 text-xs cursor-pointer"
                         >
                           <FontAwesomeIcon icon={faTrashCan} />
                         </button>
@@ -1005,22 +712,22 @@ export default function AboutManageView() {
                       label="Gallery Image"
                       aspectRatio="video"
                       previewUrl={item.image}
-                      onImageSelect={(file, url) => handleUpdateGalleryItem(item.id, 'image', url)}
+                      onImageSelect={(file, url) => updateGalleryItem(item.id, 'image', url)}
                     />
 
                     <InputField
-                      label="IMAGE TITLE"
+                      label="TITLE"
+                      placeholder="Image title"
                       value={item.title}
-                      onChange={(e) => handleUpdateGalleryItem(item.id, 'title', e.target.value)}
-                      placeholder="e.g. Fresh Produce Section"
+                      onChange={(e) => updateGalleryItem(item.id, 'title', e.target.value)}
                       required
                     />
 
                     <InputField
-                      label="IMAGE SUBTITLE"
+                      label="SUBTITLE"
+                      placeholder="Image subtitle"
                       value={item.subtitle}
-                      onChange={(e) => handleUpdateGalleryItem(item.id, 'subtitle', e.target.value)}
-                      placeholder="e.g. Temperature controlled display bins"
+                      onChange={(e) => updateGalleryItem(item.id, 'subtitle', e.target.value)}
                     />
                   </div>
                 ))}
@@ -1030,123 +737,100 @@ export default function AboutManageView() {
         )}
 
         {/* ==========================================================
-            STEP 6: SECTION 4 (3 CARDS: ICON, LABEL, TITLE, SUBTITLE, BASELINE)
+            STEP 6: SECTION 4 (3 CARDS: ICON, LABLE, TITLE, SUBTITLE, BASELINE)
             ========================================================== */}
         {activeStep === 6 && (
           <div className="p-6 sm:p-8 space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-5 border-b border-slate-200 gap-4">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
               <div>
-                <span className="text-xs font-bold text-[#064C23] uppercase tracking-wider">
-                  Step 6 of 7
-                </span>
-                <h2 className="text-lg sm:text-xl font-black text-slate-900">
-                  Section 4: Commitments & Pillars (3 Cards)
-                </h2>
-                <p className="text-xs text-slate-500">
-                  Manage section label, title, and 3 key customer commitment cards.
-                </p>
+                <h2 className="text-base font-black text-slate-900">Section 4</h2>
+                <p className="text-xs text-slate-500">Lable, title, and 3 cards manage (title, subtitle, icon, lable, baseline)</p>
               </div>
-
-              <div className="flex items-center space-x-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-700 self-start sm:self-auto">
-                <span>Section Status:</span>
+              <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold">
+                <span className="text-slate-600">Status:</span>
                 <ToggleButton
                   size="sm"
-                  checked={formData.section4.isActive}
-                  onChange={(val) => {
-                    handleUpdate('section4', 'isActive', val)
-                    toast.info('Section 4 Status', `Section 4 is now ${val ? 'Active' : 'Inactive'}`)
-                  }}
+                  checked={formData.section4.status}
+                  onChange={(val) => updateSection('section4', 'status', val)}
                   activeColor="#064C23"
                 />
               </div>
             </div>
 
-            {/* Header Controls */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InputField
-                label="SECTION 4 LABEL"
+                label="LABLE"
+                placeholder="e.g. OUR COMMITMENT"
                 value={formData.section4.label}
-                onChange={(e) => handleUpdate('section4', 'label', e.target.value)}
-                placeholder="e.g. CUSTOMER COMMITMENT"
+                onChange={(e) => updateSection('section4', 'label', e.target.value)}
               />
               <InputField
-                label="SECTION 4 TITLE"
+                label="TITLE"
+                placeholder="e.g. Built on Trust & Hygiene"
                 value={formData.section4.title}
-                onChange={(e) => handleUpdate('section4', 'title', e.target.value)}
-                placeholder="e.g. Built on Trust, Hygiene & Unmatched Convenience"
+                onChange={(e) => updateSection('section4', 'title', e.target.value)}
                 required
               />
             </div>
 
-            {/* 3 Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               {formData.section4.cards.map((card, idx) => {
-                const handleCardChange = (field, val) => {
+                const updateCard = (field, val) => {
                   const updated = [...formData.section4.cards]
                   updated[idx] = { ...updated[idx], [field]: val }
-                  handleUpdate('section4', 'cards', updated)
+                  updateSection('section4', 'cards', updated)
                 }
 
                 return (
-                  <div
-                    key={idx}
-                    className="p-6 rounded-3xl bg-slate-50/80 border border-slate-200 space-y-4 flex flex-col justify-between"
-                  >
-                    <div className="flex items-center justify-between pb-2 border-b border-slate-200">
-                      <div className="flex items-center space-x-2.5">
-                        <div className="w-8 h-8 rounded-xl bg-[#064C23] text-white flex items-center justify-center text-sm">
-                          <FontAwesomeIcon icon={getIconByName(card.icon)} />
-                        </div>
-                        <span className="text-sm font-black text-slate-900">Pillar #{idx + 1}</span>
-                      </div>
-
-                      {/* Icon Selector */}
+                  <div key={idx} className="p-4 rounded-2xl bg-slate-50/80 border border-slate-200 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-black text-[#064C23]">Card #{idx + 1}</span>
                       <select
                         value={card.icon}
-                        onChange={(e) => handleCardChange('icon', e.target.value)}
+                        onChange={(e) => updateCard('icon', e.target.value)}
                         className="px-2 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-800 outline-none"
                       >
-                        {ICON_OPTIONS.map((opt) => (
-                          <option key={opt.id} value={opt.id}>
-                            {opt.name}
+                        {ICONS.map((i) => (
+                          <option key={i.id} value={i.id}>
+                            {i.name}
                           </option>
                         ))}
                       </select>
                     </div>
 
                     <InputField
-                      label="CARD LABEL"
+                      label="LABLE"
+                      placeholder="e.g. PILLAR 1"
                       value={card.label}
-                      onChange={(e) => handleCardChange('label', e.target.value)}
-                      placeholder="e.g. HYGIENE GUARANTEE"
+                      onChange={(e) => updateCard('label', e.target.value)}
                     />
 
                     <InputField
-                      label="CARD TITLE"
+                      label="TITLE"
+                      placeholder="e.g. Sanitized Facilities"
                       value={card.title}
-                      onChange={(e) => handleCardChange('title', e.target.value)}
-                      placeholder="e.g. Sanitized & Clean Touchpoints"
+                      onChange={(e) => updateCard('title', e.target.value)}
                       required
                     />
 
                     <div className="space-y-1">
                       <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                        CARD SUBTITLE
+                        SUBTITLE
                       </label>
                       <textarea
-                        rows={3}
+                        rows={2}
+                        placeholder="Enter card subtitle..."
                         value={card.subtitle}
-                        onChange={(e) => handleCardChange('subtitle', e.target.value)}
-                        placeholder="Detailed pillar guarantee..."
-                        className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-800 outline-none focus:border-[#064C23]"
+                        onChange={(e) => updateCard('subtitle', e.target.value)}
+                        className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium text-slate-800 outline-none focus:border-[#064C23]"
                       />
                     </div>
 
                     <InputField
-                      label="CARD BASELINE"
+                      label="BASELINE"
+                      placeholder="e.g. Hygienic touchpoints"
                       value={card.baseline}
-                      onChange={(e) => handleCardChange('baseline', e.target.value)}
-                      placeholder="e.g. Certified clean retail environment"
+                      onChange={(e) => updateCard('baseline', e.target.value)}
                     />
                   </div>
                 )
@@ -1156,171 +840,141 @@ export default function AboutManageView() {
         )}
 
         {/* ==========================================================
-            STEP 7: ABOUT CTA MANAGE (LABEL, TITLE, SUBTITLE, BUTTONS, BG)
+            STEP 7: ABOUT CTA MANAGE
             ========================================================== */}
         {activeStep === 7 && (
           <div className="p-6 sm:p-8 space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-5 border-b border-slate-200 gap-4">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
               <div>
-                <span className="text-xs font-bold text-[#064C23] uppercase tracking-wider">
-                  Step 7 of 7
-                </span>
-                <h2 className="text-lg sm:text-xl font-black text-slate-900">
-                  About CTA Block (Call-To-Action)
-                </h2>
-                <p className="text-xs text-slate-500">
-                  Configure bottom call-to-action banner, primary and secondary redirect buttons.
-                </p>
+                <h2 className="text-base font-black text-slate-900">About CTA Manage</h2>
+                <p className="text-xs text-slate-500">Lable, title, subtitle, primary button label & url, secondary button label & url</p>
               </div>
-
-              <div className="flex items-center space-x-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-xl text-xs font-bold text-slate-700 self-start sm:self-auto">
-                <span>Section Status:</span>
+              <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold">
+                <span className="text-slate-600">Status:</span>
                 <ToggleButton
                   size="sm"
-                  checked={formData.cta.isActive}
-                  onChange={(val) => {
-                    handleUpdate('cta', 'isActive', val)
-                    toast.info('CTA Status', `About CTA block is now ${val ? 'Active' : 'Inactive'}`)
-                  }}
+                  checked={formData.cta.status}
+                  onChange={(val) => updateSection('cta', 'status', val)}
                   activeColor="#064C23"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Left 2 Cols: Content & Button links */}
-              <div className="lg:col-span-2 space-y-4">
-                <InputField
-                  label="CTA BADGE / LABEL"
-                  value={formData.cta.label}
-                  onChange={(e) => handleUpdate('cta', 'label', e.target.value)}
-                  placeholder="e.g. START SAVING TODAY"
-                />
+            <div className="space-y-4">
+              <InputField
+                label="LABLE"
+                placeholder="e.g. VISIT US TODAY"
+                value={formData.cta.label}
+                onChange={(e) => updateSection('cta', 'label', e.target.value)}
+              />
 
-                <InputField
-                  label="CTA MAIN TITLE"
-                  value={formData.cta.title}
-                  onChange={(e) => handleUpdate('cta', 'title', e.target.value)}
-                  placeholder="e.g. Step Into Your Nearest Bazario Supermarket"
-                  required
-                />
+              <InputField
+                label="TITLE"
+                placeholder="e.g. Ready to Experience Fresh Grocery Shopping?"
+                value={formData.cta.title}
+                onChange={(e) => updateSection('cta', 'title', e.target.value)}
+                required
+              />
 
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                    CTA SUBTITLE
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={formData.cta.subtitle}
-                    onChange={(e) => handleUpdate('cta', 'subtitle', e.target.value)}
-                    placeholder="Invitation text..."
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 outline-none focus:bg-white focus:border-[#064C23]"
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                  SUBTITLE
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="Enter subtitle..."
+                  value={formData.cta.subtitle}
+                  onChange={(e) => updateSection('cta', 'subtitle', e.target.value)}
+                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 outline-none focus:bg-white focus:border-[#064C23]"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                <div className="p-4 bg-emerald-50/70 border border-emerald-200 rounded-2xl space-y-3">
+                  <span className="text-xs font-black text-[#064C23] uppercase">Primary Button</span>
+                  <InputField
+                    label="PRIMAARY BUTTON LABLE"
+                    placeholder="e.g. Find Nearest Store"
+                    value={formData.cta.primaryButtonLabel}
+                    onChange={(e) => updateSection('cta', 'primaryButtonLabel', e.target.value)}
+                    required
+                  />
+                  <InputField
+                    label="PRIMAARY BUTTON URL"
+                    placeholder="e.g. /stores"
+                    value={formData.cta.primaryButtonUrl}
+                    onChange={(e) => updateSection('cta', 'primaryButtonUrl', e.target.value)}
+                    required
                   />
                 </div>
 
-                {/* Primary and Secondary Buttons */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                  <div className="p-4 bg-emerald-50/70 border border-emerald-200 rounded-2xl space-y-3">
-                    <span className="text-xs font-black text-[#064C23] uppercase block">
-                      Primary Action Button
-                    </span>
-                    <InputField
-                      label="BUTTON LABEL"
-                      value={formData.cta.primaryButtonLabel}
-                      onChange={(e) => handleUpdate('cta', 'primaryButtonLabel', e.target.value)}
-                      placeholder="e.g. Find Nearest Outlet"
-                      required
-                    />
-                    <InputField
-                      label="REDIRECT TARGET URL"
-                      value={formData.cta.primaryButtonUrl}
-                      onChange={(e) => handleUpdate('cta', 'primaryButtonUrl', e.target.value)}
-                      placeholder="/stores"
-                      required
-                    />
-                  </div>
-
-                  <div className="p-4 bg-amber-50/70 border border-amber-200 rounded-2xl space-y-3">
-                    <span className="text-xs font-black text-[#A44F37] uppercase block">
-                      Secondary Action Button
-                    </span>
-                    <InputField
-                      label="BUTTON LABEL"
-                      value={formData.cta.secondaryButtonLabel}
-                      onChange={(e) => handleUpdate('cta', 'secondaryButtonLabel', e.target.value)}
-                      placeholder="e.g. Download Mobile App"
-                    />
-                    <InputField
-                      label="REDIRECT TARGET URL"
-                      value={formData.cta.secondaryButtonUrl}
-                      onChange={(e) => handleUpdate('cta', 'secondaryButtonUrl', e.target.value)}
-                      placeholder="/download"
-                    />
-                  </div>
+                <div className="p-4 bg-amber-50/70 border border-amber-200 rounded-2xl space-y-3">
+                  <span className="text-xs font-black text-[#A44F37] uppercase">Secondary Button</span>
+                  <InputField
+                    label="SECONDAARY BUTTON LABLE"
+                    placeholder="e.g. Download App"
+                    value={formData.cta.secondaryButtonLabel}
+                    onChange={(e) => updateSection('cta', 'secondaryButtonLabel', e.target.value)}
+                  />
+                  <InputField
+                    label="SECONDAARY BUTTON URL"
+                    placeholder="e.g. /download"
+                    value={formData.cta.secondaryButtonUrl}
+                    onChange={(e) => updateSection('cta', 'secondaryButtonUrl', e.target.value)}
+                  />
                 </div>
-              </div>
-
-              {/* Right 1 Col: CTA Background Image Upload */}
-              <div className="space-y-2">
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                  CTA BANNER BACKGROUND IMAGE
-                </label>
-                <ImageUploadFrame
-                  label="CTA Background Image"
-                  aspectRatio="video"
-                  previewUrl={formData.cta.ctaBgImage}
-                  onImageSelect={(file, url) => handleUpdate('cta', 'ctaBgImage', url)}
-                />
               </div>
             </div>
           </div>
         )}
 
-        {/* STEPPER BOTTOM NAVIGATION FOOTER */}
-        <div className="p-5 sm:px-8 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div>
-            {activeStep > 1 ? (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setActiveStep((prev) => prev - 1)}
-                icon={<FontAwesomeIcon icon={faArrowLeft} />}
-              >
-                Previous Step
-              </Button>
-            ) : (
-              <span className="text-xs font-bold text-slate-400">Step 1 of 7</span>
-            )}
-          </div>
-
-          <div className="flex items-center space-x-3 w-full sm:w-auto justify-end">
+        {/* Stepper Footer Controls */}
+        <div className="p-4 sm:px-8 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
+          {activeStep > 1 ? (
             <Button
               type="button"
               variant="outline"
+              size="sm"
+              onClick={() => setActiveStep((prev) => prev - 1)}
+              icon={<FontAwesomeIcon icon={faArrowLeft} />}
+            >
+              Previous
+            </Button>
+          ) : (
+            <span className="text-xs font-bold text-slate-400">Step 1 of 7</span>
+          )}
+
+          <div className="flex items-center space-x-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
               onClick={handleSave}
               loading={saving}
               icon={<FontAwesomeIcon icon={faFloppyDisk} />}
             >
-              Save Progress
+              Save Form
             </Button>
 
             {activeStep < 7 ? (
               <Button
                 type="button"
                 variant="primary"
+                size="sm"
                 onClick={() => setActiveStep((prev) => prev + 1)}
               >
-                Next Step ({STEPS[activeStep]?.name}) →
+                Next Step →
               </Button>
             ) : (
               <Button
                 type="button"
                 variant="primary"
+                size="sm"
                 onClick={handleSave}
                 loading={saving}
                 icon={<FontAwesomeIcon icon={faCheck} />}
               >
-                Save & Publish Complete About Page
+                Save All
               </Button>
             )}
           </div>
