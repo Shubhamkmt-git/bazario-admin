@@ -36,7 +36,7 @@ export default function App() {
 
       {/* Main Content Grid: Left Logo + Right Login Card */}
       <div className="relative z-10 w-full max-w-6xl mx-auto px-6 sm:px-10 lg:px-12 py-10 flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-16">
-        
+
         {/* Left Side: Exact Bazario Logo */}
         <div className="w-full lg:w-1/2 flex items-center justify-center lg:justify-start">
           <div className="w-full max-w-[420px] sm:max-w-[480px] lg:max-w-[520px]">
@@ -47,10 +47,10 @@ export default function App() {
         {/* Right Side: Store Login Card */}
         <div className="w-full lg:w-1/2 flex justify-center lg:justify-end">
           <div className="w-full max-w-[430px] bg-white rounded-[32px] p-8 sm:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.35)] transition-all duration-300">
-            
+
             {/* Heading */}
             <div className="mb-7">
-              <h1 className="text-[28px] sm:text-[32px] font-extrabold text-[#111827] tracking-tight leading-tight">
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-[#064C23] tracking-tight leading-tight">
                 Admin Login
               </h1>
             </div>
@@ -128,7 +128,7 @@ export default function App() {
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full bg-[#064C23] hover:bg-[#095f2d] active:bg-[#043b1b] text-white font-bold py-3.5 px-4 rounded-xl text-sm transition-colors duration-150 shadow-md flex items-center justify-center space-x-2 disabled:opacity-80 disabled:cursor-not-allowed cursor-pointer"
+                    className="w-full bg-[#064C23] hover:bg-[#9D3E22] active:bg-[#043b1b] text-white font-bold py-3.5 px-4 rounded-xl text-sm transition-colors duration-150 shadow-md flex items-center justify-center space-x-2 disabled:opacity-80 disabled:cursor-not-allowed cursor-pointer"
                   >
                     {isLoading ? (
                       <>
