@@ -9,15 +9,18 @@ import {
   faTrashCan,
   faFloppyDisk,
   faEye,
-  faGlobe
+  faGlobe,
+  faArrowLeft,
+  faUserTie,
+  faIndianRupeeSign
 } from '@fortawesome/free-solid-svg-icons'
 import {
   Button,
   ActionButton,
   ToggleButton,
   InputField,
-  Modal,
-  AlertModal
+  AlertModal,
+  BackButton
 } from '../../components'
 import { useToast } from '../../context/ToastContext'
 
@@ -112,13 +115,12 @@ export default function CareerManageView() {
     }
   })
 
+  // Page Routing Mode: 'index' | 'add' | 'edit' | 'view' (No popups!)
+  const [pageMode, setPageMode] = useState('index')
+  const [activeJob, setActiveJob] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
 
-  // Modals state
-  const [modalOpen, setModalOpen] = useState(false)
-  const [editingJob, setEditingJob] = useState(null)
-  const [viewModalOpen, setViewModalOpen] = useState(false)
-  const [viewingJob, setViewingJob] = useState(null)
+  // Delete Alert Modal
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [jobToDelete, setJobToDelete] = useState(null)
 
@@ -143,10 +145,10 @@ export default function CareerManageView() {
     localStorage.setItem('bazario_web_careers', JSON.stringify(updated))
   }
 
-  // Open Add Modal
+  // Open Dedicated Add Page
   const handleOpenAdd = () => {
-    setEditingJob(null)
     const nextOrder = jobs.length > 0 ? Math.max(...jobs.map((j) => Number(j.sortingOrder) || 0)) + 1 : 1
+    setActiveJob(null)
     setFormData({
       sortingOrder: nextOrder,
       title: '',
@@ -161,12 +163,12 @@ export default function CareerManageView() {
       seoKeywords: '',
       seoDescription: ''
     })
-    setModalOpen(true)
+    setPageMode('add')
   }
 
-  // Open Edit Modal
+  // Open Dedicated Edit Page
   const handleOpenEdit = (job) => {
-    setEditingJob(job)
+    setActiveJob(job)
     setFormData({
       sortingOrder: job.sortingOrder || 1,
       title: job.title || '',
@@ -181,13 +183,13 @@ export default function CareerManageView() {
       seoKeywords: job.seoKeywords || '',
       seoDescription: job.seoDescription || ''
     })
-    setModalOpen(true)
+    setPageMode('edit')
   }
 
-  // Open View Modal
+  // Open Dedicated View Page
   const handleOpenView = (job) => {
-    setViewingJob(job)
-    setViewModalOpen(true)
+    setActiveJob(job)
+    setPageMode('view')
   }
 
   // Toggle Status inline
@@ -209,9 +211,9 @@ export default function CareerManageView() {
 
     const orderNum = parseInt(formData.sortingOrder, 10) || 1
 
-    if (editingJob) {
+    if (pageMode === 'edit' && activeJob) {
       const updated = jobs.map((j) =>
-        j.id === editingJob.id
+        j.id === activeJob.id
           ? {
               ...j,
               ...formData,
@@ -222,7 +224,9 @@ export default function CareerManageView() {
       )
       saveToStorage(updated)
       toast.success('Career Updated', `"${formData.title}" details updated.`)
-    } else {
+      setPageMode('index')
+      setActiveJob(null)
+    } else if (pageMode === 'add') {
       const newJob = {
         id: Date.now(),
         ...formData,
@@ -231,8 +235,8 @@ export default function CareerManageView() {
       }
       saveToStorage([...jobs, newJob])
       toast.success('Career Published', `"${formData.title}" added to career openings.`)
+      setPageMode('index')
     }
-    setModalOpen(false)
   }
 
   // Delete Confirm
@@ -241,8 +245,12 @@ export default function CareerManageView() {
     const updated = jobs.filter((j) => j.id !== jobToDelete.id)
     saveToStorage(updated)
     setDeleteModalOpen(false)
-    setJobToDelete(null)
+    setItemToDelete(null)
     toast.success('Career Deleted', 'The job vacancy has been permanently removed.')
+    if (pageMode === 'view' || pageMode === 'edit') {
+      setPageMode('index')
+      setActiveJob(null)
+    }
   }
 
   // Filtered and sorted list
@@ -262,426 +270,492 @@ export default function CareerManageView() {
 
   return (
     <div className="space-y-6 w-full pb-20">
-      {/* Header Banner */}
-      <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center space-x-4">
-          <div className="w-12 h-12 rounded-2xl bg-[#064C23]/10 text-[#064C23] flex items-center justify-center text-xl shrink-0">
-            <FontAwesomeIcon icon={faBriefcase} />
-          </div>
-          <div>
-            <div className="flex items-center space-x-2">
-              <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                Carrier Manage
-              </h1>
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                {jobs.filter((j) => j.status === 'Active').length} Active
-              </span>
+      {/* ==========================================================
+          PAGE 1: INDEX / LIST PAGE
+          ========================================================== */}
+      {pageMode === 'index' && (
+        <>
+          {/* Header Banner */}
+          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 rounded-2xl bg-[#064C23]/10 text-[#064C23] flex items-center justify-center text-xl shrink-0">
+                <FontAwesomeIcon icon={faBriefcase} />
+              </div>
+              <div>
+                <div className="flex items-center space-x-2">
+                  <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                    Carrier Manage
+                  </h1>
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    {jobs.filter((j) => j.status === 'Active').length} Active
+                  </span>
+                </div>
+                <p className="text-xs sm:text-sm text-slate-500">
+                  Manage website career listings, sorting order, job roles, experience, locations, salaries, and SEO meta.
+                </p>
+              </div>
             </div>
-            <p className="text-xs sm:text-sm text-slate-500">
-              Manage website career listings, sorting order, job roles, experience, locations, salaries, and SEO meta.
-            </p>
+
+            <Button
+              variant="primary"
+              onClick={handleOpenAdd}
+              icon={<FontAwesomeIcon icon={faPlus} className="text-xs" />}
+            >
+              Post New Vacancy
+            </Button>
           </div>
-        </div>
 
-        <Button
-          variant="primary"
-          onClick={handleOpenAdd}
-          icon={<FontAwesomeIcon icon={faPlus} className="text-xs" />}
-        >
-          Post New Vacancy
-        </Button>
-      </div>
+          {/* Search Bar */}
+          <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="relative w-full md:w-96">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search job title, subtitle, location, experience..."
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 placeholder-slate-400 focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 outline-none transition-all"
+              />
+              <FontAwesomeIcon
+                icon={faMagnifyingGlass}
+                className="absolute left-3.5 top-3.5 text-slate-400 text-xs"
+              />
+            </div>
+          </div>
 
-      {/* Search Bar */}
-      <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="relative w-full md:w-96">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search job title, subtitle, location, experience..."
-            className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 placeholder-slate-400 focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 outline-none transition-all"
-          />
-          <FontAwesomeIcon
-            icon={faMagnifyingGlass}
-            className="absolute left-3.5 top-3.5 text-slate-400 text-xs"
-          />
-        </div>
-      </div>
-
-      {/* Jobs Table */}
-      <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-slate-600">
-            <thead className="bg-slate-50/80 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
-              <tr>
-                <th className="px-6 py-4 w-28 text-center">Sorting Order</th>
-                <th className="px-6 py-4 min-w-[240px]">Job Title & Subtitle</th>
-                <th className="px-6 py-4">Type & Exp</th>
-                <th className="px-6 py-4">Location</th>
-                <th className="px-6 py-4">Sallary</th>
-                <th className="px-6 py-4 w-28">Status</th>
-                <th className="px-6 py-4 text-right w-32">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filteredJobs.length > 0 ? (
-                filteredJobs.map((job) => (
-                  <tr key={job.id} className="hover:bg-slate-50/75 transition-colors">
-                    <td className="px-6 py-4 text-center">
-                      <span className="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-slate-100 font-mono font-black text-xs text-[#064C23] border border-slate-200 shadow-2xs">
-                        #{job.sortingOrder || 1}
-                      </span>
-                    </td>
-
-                    <td className="px-6 py-4">
-                      <div>
-                        <span className="font-bold text-slate-900 block text-sm">
-                          {job.title}
-                        </span>
-                        {job.subtitle && (
-                          <span className="text-xs text-slate-500 block mt-0.5">
-                            {job.subtitle}
-                          </span>
-                        )}
-                      </div>
-                    </td>
-
-                    <td className="px-6 py-4">
-                      <div className="space-y-1">
-                        <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200 inline-block">
-                          {job.type}
-                        </span>
-                        {job.experience && (
-                          <span className="text-[11px] text-slate-500 font-semibold block">
-                            Exp: {job.experience}
-                          </span>
-                        )}
-                      </div>
-                    </td>
-
-                    <td className="px-6 py-4 text-xs font-medium text-slate-700">
-                      <div className="flex items-center space-x-1.5">
-                        <FontAwesomeIcon icon={faLocationDot} className="text-[#A44F37] text-xs" />
-                        <span>{job.location || 'All Outlets'}</span>
-                      </div>
-                    </td>
-
-                    <td className="px-6 py-4 text-xs font-mono font-bold text-slate-900">
-                      {job.salary || 'Not specified'}
-                    </td>
-
-                    <td className="px-6 py-4">
-                      <ToggleButton
-                        size="sm"
-                        checked={job.status === 'Active'}
-                        onChange={() => handleToggleStatus(job)}
-                        activeColor="#064C23"
-                      />
-                    </td>
-
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end space-x-1.5">
-                        <ActionButton
-                          action="view"
-                          tooltip="View Details"
-                          onClick={() => handleOpenView(job)}
-                        />
-                        <ActionButton
-                          action="edit"
-                          tooltip="Edit Career"
-                          onClick={() => handleOpenEdit(job)}
-                        />
-                        <ActionButton
-                          action="delete"
-                          tooltip="Delete Career"
-                          onClick={() => {
-                            setJobToDelete(job)
-                            setDeleteModalOpen(true)
-                          }}
-                        />
-                      </div>
-                    </td>
+          {/* Jobs Table */}
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm text-slate-600">
+                <thead className="bg-slate-50/80 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
+                  <tr>
+                    <th className="px-6 py-4 w-28 text-center">Sorting Order</th>
+                    <th className="px-6 py-4 min-w-[240px]">Job Title & Subtitle</th>
+                    <th className="px-6 py-4">Type & Exp</th>
+                    <th className="px-6 py-4">Location</th>
+                    <th className="px-6 py-4">Sallary</th>
+                    <th className="px-6 py-4 w-28">Status</th>
+                    <th className="px-6 py-4 text-right w-32">Actions</th>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-slate-400">
-                    No matching career openings found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {filteredJobs.length > 0 ? (
+                    filteredJobs.map((job) => (
+                      <tr key={job.id} className="hover:bg-slate-50/75 transition-colors">
+                        <td className="px-6 py-4 text-center">
+                          <span className="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-slate-100 font-mono font-black text-xs text-[#064C23] border border-slate-200 shadow-2xs">
+                            #{job.sortingOrder || 1}
+                          </span>
+                        </td>
+
+                        <td className="px-6 py-4">
+                          <div>
+                            <span className="font-bold text-slate-900 block text-sm">
+                              {job.title}
+                            </span>
+                            {job.subtitle && (
+                              <span className="text-xs text-slate-500 block mt-0.5">
+                                {job.subtitle}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+
+                        <td className="px-6 py-4">
+                          <div className="space-y-1">
+                            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200 inline-block">
+                              {job.type}
+                            </span>
+                            {job.experience && (
+                              <span className="text-[11px] text-slate-500 font-semibold block">
+                                Exp: {job.experience}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+
+                        <td className="px-6 py-4 text-xs font-medium text-slate-700">
+                          <div className="flex items-center space-x-1.5">
+                            <FontAwesomeIcon icon={faLocationDot} className="text-[#A44F37] text-xs" />
+                            <span>{job.location || 'All Outlets'}</span>
+                          </div>
+                        </td>
+
+                        <td className="px-6 py-4 text-xs font-mono font-bold text-slate-900">
+                          {job.salary || 'Not specified'}
+                        </td>
+
+                        <td className="px-6 py-4">
+                          <ToggleButton
+                            size="sm"
+                            checked={job.status === 'Active'}
+                            onChange={() => handleToggleStatus(job)}
+                            activeColor="#064C23"
+                          />
+                        </td>
+
+                        <td className="px-6 py-4 text-right">
+                          <div className="flex items-center justify-end space-x-1.5">
+                            <ActionButton
+                              action="view"
+                              tooltip="View Details"
+                              onClick={() => handleOpenView(job)}
+                            />
+                            <ActionButton
+                              action="edit"
+                              tooltip="Edit Career"
+                              onClick={() => handleOpenEdit(job)}
+                            />
+                            <ActionButton
+                              action="delete"
+                              tooltip="Delete Career"
+                              onClick={() => {
+                                setJobToDelete(job)
+                                setDeleteModalOpen(true)
+                              }}
+                            />
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={7} className="px-6 py-12 text-center text-slate-400">
+                        No matching career openings found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* ==========================================================
-          ADD / EDIT MODAL
+          PAGE 2 & 3: DEDICATED ADD / EDIT FULL PAGE (NO POPUPS)
           ========================================================== */}
-      <Modal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        title={editingJob ? 'Edit Career Opening' : 'Post New Career Opening'}
-        size="lg"
-      >
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Row 1: Sorting Order & Status Dropdown */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <InputField
-              label="SORTING ORDER"
-              type="number"
-              min="1"
-              step="1"
-              value={formData.sortingOrder}
-              onChange={(e) => setFormData({ ...formData, sortingOrder: e.target.value })}
-              placeholder="e.g. 1"
-              required
-            />
+      {(pageMode === 'add' || pageMode === 'edit') && (
+        <div className="space-y-6">
+          {/* Header */}
+          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center space-x-4">
+              <BackButton onClick={() => setPageMode('index')} />
+              <div>
+                <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                  {pageMode === 'add' ? 'Post New Career Opening' : 'Edit Career Opening'}
+                </h1>
+                <p className="text-xs sm:text-sm text-slate-500">
+                  Configure job title, subtitle, type, experience, location, status, sallary, and SEO meta.
+                </p>
+              </div>
+            </div>
 
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                STATUS
-              </label>
-              <select
-                value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 outline-none focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 transition-all cursor-pointer"
+            <div className="flex items-center space-x-2.5 self-end sm:self-auto">
+              <Button type="button" variant="outline" size="md" onClick={() => setPageMode('index')}>
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="primary"
+                size="md"
+                onClick={handleSubmit}
+                icon={<FontAwesomeIcon icon={faFloppyDisk} className="text-xs" />}
               >
-                <option value="Active">Active</option>
-                <option value="Inactive">Inactive</option>
-              </select>
+                {pageMode === 'add' ? 'Publish Vacancy' : 'Save Changes'}
+              </Button>
             </div>
           </div>
 
-          {/* Row 2: Job Title & Subtitle */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <InputField
-              label="JOB TITLE"
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              placeholder="e.g. Store Operations Manager"
-              required
-            />
-            <InputField
-              label="SUUBTITLE"
-              value={formData.subtitle}
-              onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
-              placeholder="e.g. Retail Operations & Branch Leadership"
-            />
-          </div>
+          {/* Form Card */}
+          <form onSubmit={handleSubmit} className="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 sm:p-8 space-y-6">
+            {/* Row 1: Sorting Order & Status Dropdown */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div>
+                <InputField
+                  label="SORTING ORDER"
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={formData.sortingOrder}
+                  onChange={(e) => setFormData({ ...formData, sortingOrder: e.target.value })}
+                  placeholder="e.g. 1"
+                  required
+                />
+              </div>
 
-          {/* Row 3: Type, Experience, Location, Sallary */}
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                TYPE
-              </label>
-              <select
-                value={formData.type}
-                onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 outline-none focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 transition-all cursor-pointer"
-              >
-                <option value="Full Time">Full Time</option>
-                <option value="Part Time">Part Time</option>
-                <option value="Contract">Contract</option>
-                <option value="Internship">Internship</option>
-              </select>
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                  STATUS
+                </label>
+                <select
+                  value={formData.status}
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 outline-none focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 transition-all cursor-pointer"
+                >
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
+              </div>
             </div>
 
-            <div>
+            {/* Row 2: Job Title & Subtitle */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <InputField
-                label="EXPERIENCE"
-                value={formData.experience}
-                onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
-                placeholder="e.g. 2 - 4 Years"
+                label="JOB TITLE"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                placeholder="e.g. Store Operations Manager"
+                required
+              />
+              <InputField
+                label="SUUBTITLE"
+                value={formData.subtitle}
+                onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
+                placeholder="e.g. Retail Operations & Branch Leadership"
               />
             </div>
 
-            <div>
-              <InputField
-                label="LOCATION"
-                value={formData.location}
-                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                placeholder="e.g. Sector 18, Noida"
-              />
+            {/* Row 3: Type, Experience, Location, Sallary */}
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-5">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                  TYPE
+                </label>
+                <select
+                  value={formData.type}
+                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 outline-none focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 transition-all cursor-pointer"
+                >
+                  <option value="Full Time">Full Time</option>
+                  <option value="Part Time">Part Time</option>
+                  <option value="Contract">Contract</option>
+                  <option value="Internship">Internship</option>
+                </select>
+              </div>
+
+              <div>
+                <InputField
+                  label="EXPERIENCE"
+                  value={formData.experience}
+                  onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
+                  placeholder="e.g. 2 - 4 Years"
+                />
+              </div>
+
+              <div>
+                <InputField
+                  label="LOCATION"
+                  value={formData.location}
+                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                  placeholder="e.g. Sector 18, Noida"
+                />
+              </div>
+
+              <div>
+                <InputField
+                  label="SALLARY"
+                  value={formData.salary}
+                  onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
+                  placeholder="e.g. ₹25,000 - ₹35,000 / mo"
+                />
+              </div>
             </div>
 
-            <div>
-              <InputField
-                label="SALLARY"
-                value={formData.salary}
-                onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
-                placeholder="e.g. ₹25,000 - ₹35,000 / mo"
-              />
-            </div>
-          </div>
-
-          {/* Row 4: Description */}
-          <div className="space-y-1.5">
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-              DESCRIPTION
-            </label>
-            <textarea
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              rows={3}
-              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 outline-none focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 transition-all"
-              placeholder="Detailed description of role duties, responsibilities, and requirements..."
-            />
-          </div>
-
-          {/* Row 5: SEO Meta Inputs */}
-          <div className="pt-3 border-t border-slate-100 space-y-3">
-            <div className="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider text-[#064C23]">
-              <FontAwesomeIcon icon={faGlobe} />
-              <span>SEO Meta Configuration</span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <InputField
-                label="SEO META TITLE"
-                value={formData.seoTitle}
-                onChange={(e) => setFormData({ ...formData, seoTitle: e.target.value })}
-                placeholder="e.g. Careers at Bazario - Store Operations Manager"
-                helperText="Appears in Google search results and browser title tab"
-              />
-              <InputField
-                label="SEO KEYWORDS"
-                value={formData.seoKeywords}
-                onChange={(e) => setFormData({ ...formData, seoKeywords: e.target.value })}
-                placeholder="e.g. grocery jobs, supermarket manager, retail careers"
-                helperText="Comma separated target keywords"
-              />
-            </div>
-
+            {/* Row 4: Description */}
             <div className="space-y-1.5">
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-                SEO META DESCRIPTION
+                DESCRIPTION
               </label>
               <textarea
-                value={formData.seoDescription}
-                onChange={(e) => setFormData({ ...formData, seoDescription: e.target.value })}
-                rows={2}
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                rows={4}
                 className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 outline-none focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 transition-all"
-                placeholder="Meta summary shown beneath the title in search engine result snippets..."
+                placeholder="Detailed description of role duties, responsibilities, and requirements..."
               />
             </div>
-          </div>
 
-          {/* Footer Actions */}
-          <div className="pt-3 border-t border-slate-100 flex justify-end space-x-3">
-            <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button type="submit" variant="primary" icon={<FontAwesomeIcon icon={faFloppyDisk} className="text-xs" />} >
-              {editingJob ? 'Save Changes' : 'Publish Job'}
-            </Button>
-          </div>
-        </form>
-      </Modal>
+            {/* Row 5: SEO Meta Inputs */}
+            <div className="pt-4 border-t border-slate-100 space-y-4">
+              <div className="flex items-center space-x-2 text-xs font-black uppercase tracking-wider text-[#064C23]">
+                <FontAwesomeIcon icon={faGlobe} />
+                <span>SEO Meta Configuration</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <InputField
+                  label="SEO META TITLE"
+                  value={formData.seoTitle}
+                  onChange={(e) => setFormData({ ...formData, seoTitle: e.target.value })}
+                  placeholder="e.g. Careers at Bazario - Store Operations Manager"
+                  helperText="Appears in Google search results and browser title tab"
+                />
+                <InputField
+                  label="SEO KEYWORDS"
+                  value={formData.seoKeywords}
+                  onChange={(e) => setFormData({ ...formData, seoKeywords: e.target.value })}
+                  placeholder="e.g. grocery jobs, supermarket manager, retail careers"
+                  helperText="Comma separated target keywords"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                  SEO META DESCRIPTION
+                </label>
+                <textarea
+                  value={formData.seoDescription}
+                  onChange={(e) => setFormData({ ...formData, seoDescription: e.target.value })}
+                  rows={2}
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 outline-none focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 transition-all"
+                  placeholder="Meta summary shown beneath the title in search engine result snippets..."
+                />
+              </div>
+            </div>
+
+            {/* Footer Actions */}
+            <div className="pt-4 border-t border-slate-100 flex items-center justify-end space-x-3">
+              <Button type="button" variant="outline" size="md" onClick={() => setPageMode('index')}>
+                Cancel
+              </Button>
+              <Button type="submit" variant="primary" size="md" icon={<FontAwesomeIcon icon={faFloppyDisk} className="text-xs" />}>
+                {pageMode === 'add' ? 'Publish Vacancy' : 'Save Changes'}
+              </Button>
+            </div>
+          </form>
+        </div>
+      )}
 
       {/* ==========================================================
-          VIEW DETAILS MODAL
+          PAGE 4: DEDICATED VIEW DETAILS FULL PAGE (NO POPUPS)
           ========================================================== */}
-      {viewingJob && (
-        <Modal
-          isOpen={viewModalOpen}
-          onClose={() => setViewModalOpen(false)}
-          title="Career Details"
-          size="md"
-        >
-          <div className="space-y-5">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+      {pageMode === 'view' && activeJob && (
+        <div className="space-y-6">
+          {/* Header */}
+          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center space-x-4">
+              <BackButton onClick={() => setPageMode('index')} />
               <div>
-                <h3 className="text-lg font-black text-slate-900">{viewingJob.title}</h3>
-                {viewingJob.subtitle && (
-                  <p className="text-xs font-semibold text-slate-500">{viewingJob.subtitle}</p>
+                <div className="flex items-center space-x-2">
+                  <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                    {activeJob.title}
+                  </h1>
+                  <span
+                    className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                      activeJob.status === 'Active'
+                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                        : 'bg-slate-100 text-slate-600 border border-slate-200'
+                    }`}
+                  >
+                    {activeJob.status}
+                  </span>
+                </div>
+                {activeJob.subtitle && (
+                  <p className="text-xs sm:text-sm text-slate-500 font-semibold">{activeJob.subtitle}</p>
                 )}
               </div>
-              <span
-                className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                  viewingJob.status === 'Active'
-                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                    : 'bg-slate-100 text-slate-600 border border-slate-200'
-                }`}
+            </div>
+
+            <div className="flex items-center space-x-2 self-end sm:self-auto">
+              <Button
+                variant="outline"
+                size="md"
+                onClick={() => handleOpenEdit(activeJob)}
+                icon={<FontAwesomeIcon icon={faPenToSquare} className="text-xs" />}
               >
-                {viewingJob.status}
-              </span>
+                Edit Vacancy
+              </Button>
+              <Button
+                variant="danger"
+                size="md"
+                onClick={() => {
+                  setJobToDelete(activeJob)
+                  setDeleteModalOpen(true)
+                }}
+                icon={<FontAwesomeIcon icon={faTrashCan} className="text-xs" />}
+              >
+                Delete
+              </Button>
             </div>
+          </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-0.5">
+          {/* Overview Grid Cards */}
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 sm:p-8 space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-1">
                 <span className="text-[11px] font-bold text-slate-500 uppercase">Sorting Order</span>
-                <p className="text-sm font-black font-mono text-[#064C23]">#{viewingJob.sortingOrder || 1}</p>
+                <p className="text-lg font-black font-mono text-[#064C23]">#{activeJob.sortingOrder || 1}</p>
               </div>
 
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-0.5">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Type</span>
-                <p className="text-xs font-bold text-slate-800">{viewingJob.type}</p>
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-1">
+                <span className="text-[11px] font-bold text-slate-500 uppercase">Employment Type</span>
+                <p className="text-sm font-bold text-slate-900">{activeJob.type}</p>
               </div>
 
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-0.5">
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-1">
                 <span className="text-[11px] font-bold text-slate-500 uppercase">Experience</span>
-                <p className="text-xs font-bold text-slate-800">{viewingJob.experience || 'Not specified'}</p>
+                <p className="text-sm font-bold text-slate-900">{activeJob.experience || 'Not specified'}</p>
               </div>
 
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-0.5">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Location</span>
-                <p className="text-xs font-bold text-slate-800">{viewingJob.location || 'All Outlets'}</p>
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-1">
+                <span className="text-[11px] font-bold text-slate-500 uppercase">Location Branch</span>
+                <p className="text-sm font-bold text-slate-900">{activeJob.location || 'All Outlets'}</p>
               </div>
 
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-0.5 col-span-2">
+              <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-1">
                 <span className="text-[11px] font-bold text-slate-500 uppercase">Sallary</span>
-                <p className="text-sm font-mono font-bold text-slate-900">{viewingJob.salary || 'Not specified'}</p>
+                <p className="text-sm font-mono font-bold text-slate-900">{activeJob.salary || 'Not specified'}</p>
               </div>
             </div>
 
-            {viewingJob.description && (
-              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
-                <span className="text-[11px] font-bold text-slate-500 uppercase">Description</span>
-                <p className="text-xs font-medium text-slate-700 whitespace-pre-line leading-relaxed">
-                  {viewingJob.description}
+            {/* Description Section */}
+            {activeJob.description && (
+              <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
+                  Role Description & Requirements
+                </span>
+                <p className="text-sm font-medium text-slate-800 whitespace-pre-line leading-relaxed">
+                  {activeJob.description}
                 </p>
               </div>
             )}
 
-            {(viewingJob.seoTitle || viewingJob.seoKeywords || viewingJob.seoDescription) && (
-              <div className="p-4 bg-emerald-50/50 rounded-xl border border-emerald-200/80 space-y-2">
-                <span className="text-[11px] font-bold text-[#064C23] uppercase block">
-                  SEO Configuration
-                </span>
-                {viewingJob.seoTitle && (
-                  <div>
-                    <span className="text-[10px] text-slate-500 font-bold uppercase block">Meta Title</span>
-                    <p className="text-xs font-semibold text-slate-800">{viewingJob.seoTitle}</p>
-                  </div>
-                )}
-                {viewingJob.seoKeywords && (
-                  <div>
-                    <span className="text-[10px] text-slate-500 font-bold uppercase block">Keywords</span>
-                    <p className="text-xs font-mono text-slate-700">{viewingJob.seoKeywords}</p>
-                  </div>
-                )}
-                {viewingJob.seoDescription && (
-                  <div>
+            {/* SEO Section */}
+            {(activeJob.seoTitle || activeJob.seoKeywords || activeJob.seoDescription) && (
+              <div className="p-5 bg-emerald-50/50 rounded-2xl border border-emerald-200/80 space-y-3">
+                <div className="flex items-center space-x-2 text-xs font-black text-[#064C23] uppercase">
+                  <FontAwesomeIcon icon={faGlobe} />
+                  <span>Configured SEO Metadata</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {activeJob.seoTitle && (
+                    <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-0.5">
+                      <span className="text-[10px] text-slate-500 font-bold uppercase block">Meta Title</span>
+                      <p className="text-xs font-semibold text-slate-800">{activeJob.seoTitle}</p>
+                    </div>
+                  )}
+                  {activeJob.seoKeywords && (
+                    <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-0.5">
+                      <span className="text-[10px] text-slate-500 font-bold uppercase block">Keywords</span>
+                      <p className="text-xs font-mono text-slate-700">{activeJob.seoKeywords}</p>
+                    </div>
+                  )}
+                </div>
+                {activeJob.seoDescription && (
+                  <div className="p-3 bg-white rounded-xl border border-slate-200 space-y-0.5">
                     <span className="text-[10px] text-slate-500 font-bold uppercase block">Meta Description</span>
-                    <p className="text-xs text-slate-700">{viewingJob.seoDescription}</p>
+                    <p className="text-xs text-slate-700 leading-relaxed">{activeJob.seoDescription}</p>
                   </div>
                 )}
               </div>
             )}
-
-            <div className="pt-2 flex justify-end">
-              <Button variant="outline" size="sm" onClick={() => setViewModalOpen(false)}>
-                Close
-              </Button>
-            </div>
           </div>
-        </Modal>
+        </div>
       )}
 
-      {/* Delete Alert */}
+      {/* ==========================================================
+          DELETE ALERT MODAL
+          ========================================================== */}
       <AlertModal
         isOpen={deleteModalOpen}
         onClose={() => setDeleteModalOpen(false)}
