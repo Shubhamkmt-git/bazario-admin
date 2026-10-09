@@ -448,14 +448,11 @@ export default function AboutManageView() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
-                  HERO BANNER IMAGE
-                </label>
                 <ImageUploadFrame
-                  label="Hero Banner Image"
+                  label="HERO BANNER IMAGE"
                   aspectRatio="video"
-                  previewUrl={formData.hero.bannerImage}
-                  onImageSelect={(file, url) => updateSection('hero', 'bannerImage', url)}
+                  value={formData.hero.bannerImage}
+                  onChange={(url) => updateSection('hero', 'bannerImage', url)}
                 />
               </div>
             </div>
@@ -859,10 +856,10 @@ export default function AboutManageView() {
                     </div>
 
                     <ImageUploadFrame
-                      label="Gallery Image"
+                      label="GALLERY IMAGE"
                       aspectRatio="video"
-                      previewUrl={item.image}
-                      onImageSelect={(file, url) => updateGalleryItem(item.id, 'image', url)}
+                      value={item.image}
+                      onChange={(url) => updateGalleryItem(item.id, 'image', url)}
                     />
 
                     <InputField

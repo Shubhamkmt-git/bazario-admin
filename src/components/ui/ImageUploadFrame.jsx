@@ -1,11 +1,13 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCloudArrowUp, faTrashCan, faImage, faArrowsRotate } from '@fortawesome/free-solid-svg-icons'
 
 export default function ImageUploadFrame({
   value,
+  previewUrl,
   onChange,
-  label = 'Product Image',
+  onImageSelect,
+  label = '',
   description = 'PNG, JPG, WEBP up to 5MB',
   aspectRatio = 'square', // 'square' | 'video' | 'banner' | 'auto'
   className = '',
@@ -13,9 +15,13 @@ export default function ImageUploadFrame({
   disabled = false,
 }) {
   const [isDragging, setIsDragging] = useState(false)
-  const [preview, setPreview] = useState(value || null)
+  const [preview, setPreview] = useState(value || previewUrl || null)
   const [error, setError] = useState('')
   const fileInputRef = useRef(null)
+
+  useEffect(() => {
+    setPreview(value || previewUrl || null)
+  }, [value, previewUrl])
 
   const aspectClasses = {
     square: 'aspect-square max-w-[260px]',
@@ -43,6 +49,7 @@ export default function ImageUploadFrame({
       const result = e.target.result
       setPreview(result)
       if (onChange) onChange(result, file)
+      if (onImageSelect) onImageSelect(file, result)
     }
     reader.readAsDataURL(file)
   }
@@ -72,6 +79,7 @@ export default function ImageUploadFrame({
     setError('')
     if (fileInputRef.current) fileInputRef.current.value = ''
     if (onChange) onChange(null, null)
+    if (onImageSelect) onImageSelect(null, null)
   }
 
   return (
