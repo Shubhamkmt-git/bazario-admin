@@ -221,6 +221,17 @@ export default function DashboardPage({ onLogout }) {
         {/* Fixed Reusable Header (Never Scrolls) */}
         <Header
           onMenuToggle={() => setSidebarOpen((prev) => !prev)}
+          title={
+            activeTab === 'settings'
+              ? 'Store Settings'
+              : activeTab === 'orders'
+              ? 'Store Orders'
+              : activeTab === 'products'
+              ? 'Products & Stock'
+              : activeTab === 'customers'
+              ? 'Customers'
+              : 'Dashboard'
+          }
           onLogout={onLogout}
           className="shrink-0"
         />

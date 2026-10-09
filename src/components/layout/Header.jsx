@@ -20,13 +20,13 @@ export default function Header({
 
   return (
     <header className={`sticky top-0 z-40 w-full h-16 bg-white/95 backdrop-blur-md border-b border-slate-200 px-4 sm:px-6 flex items-center justify-between shadow-xs transition-all ${className}`}>
-      {/* Left side: Hamburger Toggle / Optional Title */}
-      <div className="flex items-center space-x-4">
+      {/* Left side: Hamburger Toggle & Page Title */}
+      <div className="flex items-center space-x-3 sm:space-x-4 min-w-0">
         {onMenuToggle && (
           <button
             type="button"
             onClick={onMenuToggle}
-            className="text-slate-600 hover:text-slate-900 p-2 rounded-xl hover:bg-slate-100 transition-colors focus:outline-none cursor-pointer"
+            className="text-slate-600 hover:text-[#064C23] p-2 rounded-xl hover:bg-slate-100 transition-colors focus:outline-none cursor-pointer shrink-0"
             aria-label="Toggle navigation menu"
             title="Toggle Sidebar"
           >
@@ -35,7 +35,11 @@ export default function Header({
         )}
 
         {title && (
-          <h1 className="text-lg font-bold text-slate-900 truncate">{title}</h1>
+          <div className="flex items-center space-x-2.5 min-w-0 border-l border-slate-200 pl-3 sm:pl-4 py-0.5">
+            <h1 className="text-sm sm:text-base font-bold text-slate-900 tracking-tight truncate">
+              {title}
+            </h1>
+          </div>
         )}
       </div>
 
