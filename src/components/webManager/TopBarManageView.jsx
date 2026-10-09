@@ -334,7 +334,7 @@ export default function TopBarManageView() {
               <table className="w-full text-left text-sm text-slate-600">
                 <thead className="bg-slate-50/90 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
                   <tr>
-                    <th className="px-6 py-4 w-28 text-center">Sorting Order</th>
+                    <th className="px-6 py-4 w-24 text-center">Order</th>
                     <th className="px-6 py-4 min-w-[320px]">Title / Announcement</th>
                     <th className="px-6 py-4 min-w-[220px]">URL / Copytext</th>
                     <th className="px-6 py-4 w-32">Status</th>

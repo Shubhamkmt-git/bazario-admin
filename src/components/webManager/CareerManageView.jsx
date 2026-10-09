@@ -328,7 +328,7 @@ export default function CareerManageView() {
               <table className="w-full text-left text-sm text-slate-600">
                 <thead className="bg-slate-50/80 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
                   <tr>
-                    <th className="px-6 py-4 w-28 text-center">Sorting Order</th>
+                    <th className="px-6 py-4 w-24 text-center">Order</th>
                     <th className="px-6 py-4 min-w-[240px]">Job Title & Subtitle</th>
                     <th className="px-6 py-4">Type & Exp</th>
                     <th className="px-6 py-4">Location</th>
