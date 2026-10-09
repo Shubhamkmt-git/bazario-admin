@@ -14,6 +14,7 @@ export default function EditHeroBannerView({ banner, onBack, onSave }) {
 
   const [formData, setFormData] = useState({
     title: banner?.title || '',
+    redirectUrl: banner?.redirectUrl || '',
     webImage: banner?.webImage || '',
     mobileImage: banner?.mobileImage || '',
     sortingOrder: banner?.sortingOrder || 1,
@@ -47,7 +48,7 @@ export default function EditHeroBannerView({ banner, onBack, onSave }) {
               Edit Hero Banner
             </h1>
             <p className="text-xs sm:text-sm text-slate-500">
-              Update homepage hero banner title, desktop web image (5:1), mobile image (1.5:1), sorting order, and status.
+              Update homepage hero banner title, redirection link, desktop web image (5:1), mobile image (1.5:1), sorting order, and status.
             </p>
           </div>
         </div>
@@ -70,34 +71,41 @@ export default function EditHeroBannerView({ banner, onBack, onSave }) {
 
       {/* Clean Unified Form Card */}
       <form onSubmit={handleSubmit} className="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 sm:p-8 space-y-6">
-        {/* Row 1: Title, Sorting Order & Status */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
-          <div className="md:col-span-6">
-            <InputField
-              label="BANNER TITLE"
-              placeholder="e.g. Mega Grocery Super Saver - Up to 50% Off"
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              helperText="Internal banner identifier & promotional campaign headline"
-              required
-            />
-          </div>
+        {/* Row 1: Title & Redirection URL */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <InputField
+            label="BANNER TITLE"
+            placeholder="e.g. Mega Grocery Super Saver - Up to 50% Off"
+            value={formData.title}
+            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            helperText="Internal banner identifier & promotional campaign headline"
+            required
+          />
 
-          <div className="md:col-span-3">
-            <InputField
-              label="SORTING ORDER"
-              type="number"
-              min="1"
-              step="1"
-              value={formData.sortingOrder}
-              onChange={(e) => setFormData({ ...formData, sortingOrder: e.target.value })}
-              placeholder="1"
-              helperText="Display sequence (1 = Top Carousel)"
-              required
-            />
-          </div>
+          <InputField
+            label="REDIRECTION URL / TARGET LINK"
+            placeholder="e.g. /products?category=fruits or https://bazario.in/deals"
+            value={formData.redirectUrl}
+            onChange={(e) => setFormData({ ...formData, redirectUrl: e.target.value })}
+            helperText="Target URL/route when shoppers click this banner"
+          />
+        </div>
 
-          <div className="md:col-span-3">
+        {/* Row 2: Sorting Order & Status */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <InputField
+            label="SORTING ORDER"
+            type="number"
+            min="1"
+            step="1"
+            value={formData.sortingOrder}
+            onChange={(e) => setFormData({ ...formData, sortingOrder: e.target.value })}
+            placeholder="1"
+            helperText="Display sequence (1 = Top Carousel)"
+            required
+          />
+
+          <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
               STATUS
             </label>

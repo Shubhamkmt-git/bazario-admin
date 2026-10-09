@@ -12,6 +12,7 @@ const INITIAL_HERO_BANNERS = [
   {
     id: 1,
     title: 'Super Weekend Fresh Produce Sale - Flat 40% Off',
+    redirectUrl: '/categories/farm-fresh-fruits-vegetables',
     webImage: '/supermart-bg.jpg',
     mobileImage: '/supermart-bg.jpg',
     sortingOrder: 1,
@@ -20,6 +21,7 @@ const INITIAL_HERO_BANNERS = [
   {
     id: 2,
     title: 'Mega Daily Essentials & Dairy Morning Rush',
+    redirectUrl: '/categories/dairy-bread-eggs',
     webImage: '',
     mobileImage: '',
     sortingOrder: 2,
@@ -28,6 +30,7 @@ const INITIAL_HERO_BANNERS = [
   {
     id: 3,
     title: 'Festival Sweets, Dry Fruits & Gourmet Gifting Hampers',
+    redirectUrl: '/categories/snacks-munchies',
     webImage: '',
     mobileImage: '',
     sortingOrder: 3,

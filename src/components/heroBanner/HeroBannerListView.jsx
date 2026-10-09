@@ -134,12 +134,21 @@ export default function HeroBannerListView({
                       </span>
                     </td>
 
-                    {/* Banner Title */}
+                    {/* Banner Title & Target URL */}
                     <td className="px-6 py-4">
                       <div className="max-w-xs sm:max-w-sm">
                         <span className="font-bold text-slate-900 text-sm block">
                           {banner.title}
                         </span>
+                        {banner.redirectUrl ? (
+                          <span className="text-[11px] font-mono text-[#064C23] truncate block mt-0.5" title={banner.redirectUrl}>
+                            🔗 {banner.redirectUrl}
+                          </span>
+                        ) : (
+                          <span className="text-[11px] text-slate-400 block mt-0.5">
+                            No redirect link
+                          </span>
+                        )}
                       </div>
                     </td>
 

@@ -70,7 +70,7 @@ export default function HeroBannerDetailsView({ banner, onBack, onEdit }) {
       </div>
 
       {/* Metadata KPI Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs flex items-center space-x-3.5">
           <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center font-bold text-sm">
             <FontAwesomeIcon icon={faSort} />
@@ -103,6 +103,25 @@ export default function HeroBannerDetailsView({ banner, onBack, onEdit }) {
               {banner.status === 'Active' ? 'Active on Homepage' : 'Hidden / Inactive'}
             </span>
           </div>
+        </div>
+
+        <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs flex flex-col justify-center">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+            Redirection URL
+          </span>
+          {banner.redirectUrl ? (
+            <a
+              href={banner.redirectUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs font-bold text-[#064C23] hover:underline truncate block"
+              title={banner.redirectUrl}
+            >
+              {banner.redirectUrl} ↗
+            </a>
+          ) : (
+            <span className="text-xs text-slate-400 font-medium">None configured</span>
+          )}
         </div>
       </div>
 
