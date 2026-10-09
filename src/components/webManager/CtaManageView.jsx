@@ -2,164 +2,94 @@ import React, { useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faBullhorn,
-  faPlus,
-  faPenToSquare,
-  faTrashCan,
-  faEye,
   faFloppyDisk,
+  faRotateLeft,
+  faTag,
+  faTags,
+  faLink,
+  faCopy,
+  faCheck,
+  faEye,
   faArrowRight,
-  faMobileScreenButton,
-  faEnvelopeOpenText,
-  faPercent,
-  faHandshake
+  faTicket
 } from '@fortawesome/free-solid-svg-icons'
 import {
   Button,
-  ActionButton,
-  ToggleButton,
   InputField,
-  ImageUploadFrame,
-  Modal,
-  AlertModal,
-  FormLayout,
-  FormSection,
-  FormRow,
-  FormActions
+  ToggleButton
 } from '../../components'
 import { useToast } from '../../context/ToastContext'
 
-const INITIAL_CTA_LIST = [
-  {
-    id: 1,
-    title: 'Download the Bazario Mobile App',
-    subtitle: 'Get 20-minute grocery deliveries, app-exclusive coupons, and instant order tracking.',
-    badge: 'Mobile App Launch',
-    buttonText: 'Get on Google Play & App Store',
-    buttonLink: 'https://bazario.com/download',
-    theme: 'green',
-    status: 'Active',
-    icon: 'mobile',
-    image: '/logo.png'
-  },
-  {
-    id: 2,
-    title: 'Subscribe to Weekly Fresh Savings Newsletter',
-    subtitle: 'Join over 35,000+ smart shoppers receiving weekly vegetable price cuts and recipe guides.',
-    badge: 'Weekly VIP Deals',
-    buttonText: 'Subscribe Now for Free',
-    buttonLink: '/newsletter',
-    theme: 'terracotta',
-    status: 'Active',
-    icon: 'mail',
-    image: '/logo.png'
-  },
-  {
-    id: 3,
-    title: 'Partner with Bazario - Open a Franchise Outlet',
-    subtitle: 'Become a supermarket franchise partner in your district with guaranteed supply chain and POS support.',
-    badge: 'Business Opportunity',
-    buttonText: 'Submit Franchise Inquiry',
-    buttonLink: '/franchise',
-    theme: 'emerald',
-    status: 'Active',
-    icon: 'handshake',
-    image: '/logo.png'
-  }
-]
+const INITIAL_CTA_DATA = {
+  status: true,
+  label: 'LIMITED TIME PROMOTION',
+  title: 'Download the Bazario App & Get ₹150 OFF on Your First 3 Orders',
+  subtitle: 'Enjoy 20-minute grocery delivery, live order tracking, and exclusive weekly farm produce discounts directly to your doorstep.',
+  tags: [
+    '⚡ 20-Min Delivery',
+    '🥬 100% Farm Fresh',
+    '💰 Zero Delivery Fee'
+  ],
+  code: 'BAZARIO150',
+  buttonLabel: 'Download App Now',
+  buttonUrl: 'https://bazario.in/download'
+}
 
 export default function CtaManageView() {
   const toast = useToast()
-  const [ctaList, setCtaList] = useState(() => {
-    const saved = localStorage.getItem('bazario_web_cta_list')
-    return saved ? JSON.parse(saved) : INITIAL_CTA_LIST
+  const [saving, setSaving] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  const [formData, setFormData] = useState(() => {
+    try {
+      const saved = localStorage.getItem('bazario_web_cta_manage')
+      return saved ? JSON.parse(saved) : INITIAL_CTA_DATA
+    } catch {
+      return INITIAL_CTA_DATA
+    }
   })
 
-  const [modalOpen, setModalOpen] = useState(false)
-  const [editingCta, setEditingCta] = useState(null)
-  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
-  const [ctaToDelete, setCtaToDelete] = useState(null)
-
-  const [formData, setFormData] = useState({
-    title: '',
-    subtitle: '',
-    badge: '',
-    buttonText: '',
-    buttonLink: '',
-    theme: 'green',
-    status: 'Active',
-    image: '/logo.png'
-  })
-
-  const saveToStorage = (updated) => {
-    setCtaList(updated)
-    localStorage.setItem('bazario_web_cta_list', JSON.stringify(updated))
+  const handleChange = (field, val) => {
+    setFormData((prev) => ({ ...prev, [field]: val }))
   }
 
-  const handleOpenAdd = () => {
-    setEditingCta(null)
-    setFormData({
-      title: '',
-      subtitle: '',
-      badge: 'Special Announcement',
-      buttonText: 'Learn More',
-      buttonLink: '/',
-      theme: 'green',
-      status: 'Active',
-      image: '/logo.png'
-    })
-    setModalOpen(true)
+  const handleTagChange = (index, val) => {
+    const updatedTags = [...formData.tags]
+    updatedTags[index] = val
+    setFormData((prev) => ({ ...prev, tags: updatedTags }))
   }
 
-  const handleOpenEdit = (cta) => {
-    setEditingCta(cta)
-    setFormData({ ...cta })
-    setModalOpen(true)
-  }
-
-  const handleToggleStatus = (cta) => {
-    const newStatus = cta.status === 'Active' ? 'Inactive' : 'Active'
-    const updated = ctaList.map((item) =>
-      item.id === cta.id ? { ...item, status: newStatus } : item
-    )
-    saveToStorage(updated)
-    toast.info('CTA Status', `"${cta.title}" is now ${newStatus}.`)
-  }
-
-  const handleSubmit = (e) => {
+  const handleSave = (e) => {
     e?.preventDefault?.()
-    if (!formData.title || !formData.buttonText) {
-      toast.error('Validation Error', 'Please fill in headline title and button label.')
-      return
+    setSaving(true)
+    try {
+      localStorage.setItem('bazario_web_cta_manage', JSON.stringify(formData))
+      setTimeout(() => {
+        setSaving(false)
+        toast.success('CTA Saved', 'Website CTA banner settings have been saved successfully.')
+      }, 350)
+    } catch {
+      setSaving(false)
+      toast.error('Save Failed', 'Could not save CTA settings.')
     }
-
-    if (editingCta) {
-      const updated = ctaList.map((item) =>
-        item.id === editingCta.id ? { ...item, ...formData } : item
-      )
-      saveToStorage(updated)
-      toast.success('CTA Updated', `"${formData.title}" was successfully updated.`)
-    } else {
-      const newCta = {
-        id: Date.now(),
-        ...formData
-      }
-      saveToStorage([...ctaList, newCta])
-      toast.success('CTA Created', 'New Call-To-Action banner added to website.')
-    }
-    setModalOpen(false)
   }
 
-  const handleDeleteConfirm = () => {
-    if (!ctaToDelete) return
-    const updated = ctaList.filter((c) => c.id !== ctaToDelete.id)
-    saveToStorage(updated)
-    setDeleteModalOpen(false)
-    setCtaToDelete(null)
-    toast.success('CTA Deleted', 'The CTA banner has been removed.')
+  const handleReset = () => {
+    setFormData(INITIAL_CTA_DATA)
+    localStorage.setItem('bazario_web_cta_manage', JSON.stringify(INITIAL_CTA_DATA))
+    toast.info('CTA Reset', 'Restored default CTA values.')
+  }
+
+  const handleCopyCode = (code) => {
+    if (!code) return
+    navigator.clipboard?.writeText?.(code)
+    setCopied(true)
+    toast.success('Code Copied', `"${code}" copied to clipboard.`)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-5xl mx-auto pb-20">
       {/* Header Banner */}
       <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center space-x-4">
@@ -168,219 +98,277 @@ export default function CtaManageView() {
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h1 className="text-xl sm:text-2xl font-black text-slate-900">CTA Manage</h1>
+              <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+                CTA Manage
+              </h1>
               <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                {ctaList.length} Banners Configured
+                Live Storefront Lead CTA
               </span>
             </div>
             <p className="text-xs sm:text-sm text-slate-500">
-              Manage website Call-To-Action blocks, promotional lead magnets, and app download banners.
+              Configure promotional Call-To-Action banner with tags, coupon code, and destination action button.
             </p>
           </div>
         </div>
 
-        <Button
-          variant="primary"
-          onClick={handleOpenAdd}
-          icon={<FontAwesomeIcon icon={faPlus} />}
-        >
-          Add New CTA
-        </Button>
+        <div className="flex items-center space-x-2.5 self-end sm:self-auto">
+          <Button
+            type="button"
+            variant="outline"
+            size="md"
+            onClick={handleReset}
+            icon={<FontAwesomeIcon icon={faRotateLeft} className="text-xs" />}
+          >
+            Reset
+          </Button>
+          <Button
+            type="button"
+            variant="primary"
+            size="md"
+            onClick={handleSave}
+            loading={saving}
+            icon={<FontAwesomeIcon icon={faFloppyDisk} className="text-xs" />}
+          >
+            Save CTA
+          </Button>
+        </div>
       </div>
 
-      {/* CTA Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {ctaList.map((cta) => {
-          const isGreen = cta.theme === 'green'
-          const isTerracotta = cta.theme === 'terracotta'
-          const isEmerald = cta.theme === 'emerald'
+      {/* Live Storefront Visual Preview Card */}
+      <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-xs space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-2 text-xs font-black uppercase tracking-wider text-slate-700">
+            <FontAwesomeIcon icon={faEye} className="text-[#064C23]" />
+            <span>Live Website CTA Preview</span>
+          </div>
+          <span className="text-[11px] font-semibold text-slate-400">
+            Public Website Representation
+          </span>
+        </div>
 
-          const bgClass = isGreen
-            ? 'from-[#042813] to-[#064C23]'
-            : isTerracotta
-            ? 'from-[#5e2718] to-[#A44F37]'
-            : 'from-[#064e3b] to-[#047857]'
+        {formData.status ? (
+          <div className="rounded-3xl p-6 sm:p-8 bg-gradient-to-br from-[#042813] via-[#064C23] to-[#0b6330] text-white relative overflow-hidden shadow-md">
+            {/* Ambient Background Glow */}
+            <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none" />
 
-          return (
-            <div
-              key={cta.id}
-              className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden flex flex-col justify-between transition-all hover:shadow-md"
-            >
-              {/* Visual Banner Preview */}
-              <div
-                className={`p-6 bg-gradient-to-br ${bgClass} text-white relative overflow-hidden flex flex-col justify-between min-h-[190px]`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="px-2.5 py-0.5 rounded-md text-[10px] font-extrabold uppercase tracking-wider bg-white/20 backdrop-blur-xs text-white">
-                    {cta.badge || 'PROMO BANNER'}
-                  </span>
-                  <div className="flex items-center space-x-2 bg-black/20 backdrop-blur-xs px-2 py-1 rounded-xl">
-                    <span className="text-[10px] font-bold">Live:</span>
-                    <ToggleButton
-                      size="sm"
-                      checked={cta.status === 'Active'}
-                      onChange={() => handleToggleStatus(cta)}
-                      activeColor="#ffffff"
-                    />
-                  </div>
+            <div className="relative z-10 space-y-4 max-w-3xl">
+              {/* Lable Pill */}
+              {formData.label && (
+                <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-white/15 text-emerald-200 border border-white/20 backdrop-blur-xs">
+                  <span>{formData.label}</span>
+                </span>
+              )}
+
+              {/* Title */}
+              <h2 className="text-xl sm:text-3xl font-black leading-tight text-white drop-shadow-xs">
+                {formData.title || 'Enter your CTA title...'}
+              </h2>
+
+              {/* Subtitle */}
+              {formData.subtitle && (
+                <p className="text-xs sm:text-sm text-white/85 leading-relaxed font-medium max-w-2xl">
+                  {formData.subtitle}
+                </p>
+              )}
+
+              {/* Tag (3) Badges */}
+              {formData.tags && formData.tags.some((t) => t?.trim()) && (
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  {formData.tags.map((tag, idx) =>
+                    tag?.trim() ? (
+                      <span
+                        key={idx}
+                        className="px-3 py-1 rounded-xl text-xs font-bold bg-black/25 text-white border border-white/15 backdrop-blur-xs"
+                      >
+                        {tag}
+                      </span>
+                    ) : null
+                  )}
                 </div>
+              )}
 
-                <div className="space-y-1.5 mt-4">
-                  <h3 className="font-extrabold text-lg sm:text-xl leading-tight text-white drop-shadow-xs">
-                    {cta.title}
-                  </h3>
-                  <p className="text-xs text-white/80 line-clamp-2">{cta.subtitle}</p>
-                </div>
+              {/* Bottom Actions: Code and Button */}
+              <div className="pt-3 flex flex-wrap items-center gap-3">
+                {/* Promo Code Box */}
+                {formData.code && (
+                  <button
+                    type="button"
+                    onClick={() => handleCopyCode(formData.code)}
+                    className="flex items-center space-x-2 px-3.5 py-2.5 rounded-xl bg-white/15 hover:bg-white/25 border border-white/25 text-white font-mono text-xs font-black transition-all cursor-pointer shadow-xs"
+                    title="Click to copy code"
+                  >
+                    <FontAwesomeIcon icon={faTicket} className="text-amber-300 text-xs" />
+                    <span>CODE: {formData.code}</span>
+                    <FontAwesomeIcon icon={copied ? faCheck : faCopy} className="text-[11px] opacity-80" />
+                  </button>
+                )}
 
-                <div className="mt-4 pt-3 border-t border-white/20 flex items-center justify-between">
-                  <span className="inline-flex items-center text-xs font-bold bg-white text-slate-900 px-3 py-1.5 rounded-xl shadow-xs">
-                    {cta.buttonText}
-                    <FontAwesomeIcon icon={faArrowRight} className="ml-1.5 text-[10px]" />
-                  </span>
-                </div>
-              </div>
-
-              {/* Controls Footer */}
-              <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
-                <div className="text-xs text-slate-500">
-                  <span className="font-semibold text-slate-700">Link: </span>
-                  <span className="font-mono text-[11px] truncate inline-block max-w-[140px] align-bottom">
-                    {cta.buttonLink}
-                  </span>
-                </div>
-
-                <div className="flex items-center space-x-1.5">
-                  <ActionButton
-                    variant="edit"
-                    tooltip="Edit CTA"
-                    onClick={() => handleOpenEdit(cta)}
-                  />
-                  <ActionButton
-                    variant="delete"
-                    tooltip="Delete CTA"
-                    onClick={() => {
-                      setCtaToDelete(cta)
-                      setDeleteModalOpen(true)
+                {/* Primary Button */}
+                {formData.buttonLabel && (
+                  <a
+                    href={formData.buttonUrl || '#'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => {
+                      if (!formData.buttonUrl) e.preventDefault()
                     }}
-                  />
-                </div>
+                    className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-white text-slate-900 font-black text-xs sm:text-sm hover:bg-emerald-50 transition-all shadow-md active:scale-95"
+                  >
+                    <span>{formData.buttonLabel}</span>
+                    <FontAwesomeIcon icon={faArrowRight} className="text-xs text-[#064C23]" />
+                  </a>
+                )}
               </div>
             </div>
-          )
-        })}
+          </div>
+        ) : (
+          <div className="p-8 bg-slate-50 rounded-2xl text-center text-xs font-bold text-slate-400 border border-dashed border-slate-200">
+            CTA banner is currently inactive and hidden from the website.
+          </div>
+        )}
       </div>
 
-      {/* Add / Edit CTA Modal */}
-      <Modal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        title={editingCta ? 'Edit Call-To-Action Banner' : 'Create New CTA Banner'}
-        size="lg"
-      >
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <InputField
-            label="CTA HEADLINE TITLE"
-            value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            placeholder="e.g. Download the Bazario Mobile App"
-            required
-          />
-
-          <div className="space-y-1.5">
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-              SUBTITLE DESCRIPTION
-            </label>
-            <textarea
-              value={formData.subtitle}
-              onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
-              rows={2}
-              className="w-full px-3.5 py-2.5 bg-slate-50/50 hover:bg-slate-50 focus:bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-800 transition-all focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 outline-none"
-              placeholder="Explaining the value proposition..."
-            />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <InputField
-              label="PILL BADGE TEXT"
-              value={formData.badge}
-              onChange={(e) => setFormData({ ...formData, badge: e.target.value })}
-              placeholder="e.g. Mobile App Launch"
-            />
-            <InputField
-              label="BUTTON LABEL"
-              value={formData.buttonText}
-              onChange={(e) => setFormData({ ...formData, buttonText: e.target.value })}
-              placeholder="e.g. Download Now / Subscribe"
-              required
-            />
-          </div>
-
-          <InputField
-            label="TARGET REDIRECT LINK (URL)"
-            value={formData.buttonLink}
-            onChange={(e) => setFormData({ ...formData, buttonLink: e.target.value })}
-            placeholder="https://... or /download"
-            required
-          />
-
+      {/* Main Manage Form Card */}
+      <form onSubmit={handleSave} className="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 sm:p-8 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
-              COLOR THEME
-            </label>
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                { id: 'green', name: 'Forest Green', bg: 'bg-[#064C23]' },
-                { id: 'terracotta', name: 'Warm Terracotta', bg: 'bg-[#A44F37]' },
-                { id: 'emerald', name: 'Clean Emerald', bg: 'bg-[#047857]' }
-              ].map((theme) => (
-                <button
-                  key={theme.id}
-                  type="button"
-                  onClick={() => setFormData({ ...formData, theme: theme.id })}
-                  className={`p-3 rounded-2xl border flex items-center space-x-2.5 cursor-pointer transition-all ${
-                    formData.theme === theme.id
-                      ? 'border-[#064C23] ring-2 ring-[#064C23]/20 bg-slate-50'
-                      : 'border-slate-200 hover:border-slate-300'
-                  }`}
-                >
-                  <span className={`w-4 h-4 rounded-full ${theme.bg}`} />
-                  <span className="text-xs font-bold text-slate-800">{theme.name}</span>
-                </button>
-              ))}
-            </div>
+            <h2 className="text-base sm:text-lg font-black text-slate-900">
+              CTA Banner Content Settings
+            </h2>
+            <p className="text-xs text-slate-500">
+              Manage promotional texts, tags, copyable voucher code, and action link.
+            </p>
           </div>
 
-          <div className="flex items-center justify-between p-3 bg-slate-50 rounded-2xl border border-slate-200 text-xs">
-            <span className="font-bold text-slate-700">Publish Immediately on Website</span>
+          <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold">
+            <span className="text-slate-700">Banner Status:</span>
             <ToggleButton
               size="sm"
-              checked={formData.status === 'Active'}
-              onChange={(val) => setFormData({ ...formData, status: val ? 'Active' : 'Inactive' })}
+              checked={formData.status}
+              onChange={(val) => handleChange('status', val)}
               activeColor="#064C23"
             />
           </div>
+        </div>
 
-          <div className="pt-3 border-t border-slate-200 flex justify-end space-x-3">
-            <Button type="button" variant="outline" onClick={() => setModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button type="submit" variant="primary" icon={<FontAwesomeIcon icon={faFloppyDisk} />}>
-              {editingCta ? 'Save Changes' : 'Create CTA'}
-            </Button>
+        {/* 1. LABLE */}
+        <div className="space-y-1.5">
+          <InputField
+            label="LABLE"
+            placeholder="e.g. LIMITED TIME PROMOTION"
+            value={formData.label}
+            onChange={(e) => handleChange('label', e.target.value)}
+            helperText="Upper badge or category kicker displayed above the title"
+          />
+        </div>
+
+        {/* 2. TITLE */}
+        <div className="space-y-1.5">
+          <InputField
+            label="TITLE"
+            placeholder="e.g. Download the Bazario App & Get ₹150 OFF on Your First 3 Orders"
+            value={formData.title}
+            onChange={(e) => handleChange('title', e.target.value)}
+            helperText="Primary headline message of the Call-To-Action"
+            required
+          />
+        </div>
+
+        {/* 3. SUBTITLE */}
+        <div className="space-y-1.5">
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+            SUBTITLE
+          </label>
+          <textarea
+            rows={3}
+            placeholder="Enter supporting subtitle description..."
+            value={formData.subtitle}
+            onChange={(e) => handleChange('subtitle', e.target.value)}
+            className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 outline-none focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 transition-all"
+          />
+        </div>
+
+        {/* 4. TAAG (3) */}
+        <div className="space-y-2">
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+            TAAG (3)
+          </label>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <InputField
+              label="TAG 1"
+              placeholder="e.g. ⚡ 20-Min Delivery"
+              value={formData.tags[0] || ''}
+              onChange={(e) => handleTagChange(0, e.target.value)}
+            />
+            <InputField
+              label="TAG 2"
+              placeholder="e.g. 🥬 100% Farm Fresh"
+              value={formData.tags[1] || ''}
+              onChange={(e) => handleTagChange(1, e.target.value)}
+            />
+            <InputField
+              label="TAG 3"
+              placeholder="e.g. 💰 Zero Delivery Fee"
+              value={formData.tags[2] || ''}
+              onChange={(e) => handleTagChange(2, e.target.value)}
+            />
           </div>
-        </form>
-      </Modal>
+        </div>
 
-      {/* Delete Confirmation Alert */}
-      <AlertModal
-        isOpen={deleteModalOpen}
-        onClose={() => setDeleteModalOpen(false)}
-        onConfirm={handleDeleteConfirm}
-        title="Delete CTA Banner?"
-        message={`Are you sure you want to remove the CTA banner "${ctaToDelete?.title}"? This banner will no longer be visible to visitors.`}
-        confirmText="Delete CTA"
-        type="danger"
-      />
+        {/* 5. CODE */}
+        <div className="space-y-1.5">
+          <InputField
+            label="CODE"
+            placeholder="e.g. BAZARIO150"
+            value={formData.code}
+            onChange={(e) => handleChange('code', e.target.value)}
+            helperText="Optional coupon or referral code that users can copy with one click"
+          />
+        </div>
+
+        {/* 6 & 7. BUTTON LABLE & BUUTTON URL */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+          <InputField
+            label="BUTTON LAABLE"
+            placeholder="e.g. Download App Now"
+            value={formData.buttonLabel}
+            onChange={(e) => handleChange('buttonLabel', e.target.value)}
+            helperText="Text shown on the action button"
+            required
+          />
+
+          <InputField
+            label="BUUTTON URL"
+            placeholder="e.g. https://bazario.in/download or /app"
+            value={formData.buttonUrl}
+            onChange={(e) => handleChange('buttonUrl', e.target.value)}
+            helperText="Destination redirect URL or link"
+            required
+          />
+        </div>
+
+        {/* Form Actions Footer */}
+        <div className="pt-4 border-t border-slate-100 flex items-center justify-end space-x-3">
+          <Button
+            type="button"
+            variant="outline"
+            size="md"
+            onClick={handleReset}
+            icon={<FontAwesomeIcon icon={faRotateLeft} className="text-xs" />}
+          >
+            Reset Defaults
+          </Button>
+          <Button
+            type="submit"
+            variant="primary"
+            size="md"
+            loading={saving}
+            icon={<FontAwesomeIcon icon={faFloppyDisk} className="text-xs" />}
+          >
+            Save CTA Banner
+          </Button>
+        </div>
+      </form>
     </div>
   )
 }
