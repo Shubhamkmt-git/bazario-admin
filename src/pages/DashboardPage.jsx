@@ -123,8 +123,8 @@ export default function DashboardPage({ onLogout }) {
   // Navigation Items
   const navItems = [
     { id: 'dashboard', name: 'Dashboard', icon: faChartLine },
-    { id: 'orders', name: 'Orders', icon: faCartShopping, badge: `${orders.length}` },
-    { id: 'products', name: 'Products & Stock', icon: faBoxesStacked, badge: 'Low' },
+    { id: 'orders', name: 'Orders', icon: faCartShopping },
+    { id: 'products', name: 'Products & Stock', icon: faBoxesStacked },
     { id: 'customers', name: 'Customers', icon: faUsers },
     { id: 'settings', name: 'Settings', icon: faGear },
   ]
