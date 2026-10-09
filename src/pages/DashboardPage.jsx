@@ -129,8 +129,8 @@ export default function DashboardPage({ onLogout }) {
         { id: 'web-about', name: 'About Manage', icon: faCircleInfo },
         { id: 'web-topbar', name: 'Top-Bar Manage', icon: faWindowMaximize },
         { id: 'web-cta', name: 'CTA Manage', icon: faBullhorn },
-        { id: 'web-career', name: 'Carrier Manage', icon: faBriefcase },
-        { id: 'web-homepage', name: 'Home Page Section Manage', icon: faTableCellsLarge },
+        { id: 'web-career', name: 'Career Manage', icon: faBriefcase },
+        { id: 'web-homepage', name: 'Home Page Section Heading Manage', icon: faTableCellsLarge },
       ],
     },
     { id: 'settings', name: 'Settings', icon: faGear },
@@ -290,9 +290,9 @@ export default function DashboardPage({ onLogout }) {
               : activeTab === 'web-cta'
               ? 'CTA Manage'
               : activeTab === 'web-career'
-              ? 'Carrier Manage'
+              ? 'Career Manage'
               : activeTab === 'web-homepage'
-              ? 'Home Page Section Manage'
+              ? 'Home Page Section Heading Manage'
               : 'Dashboard'
           }
           onLogout={onLogout}
