@@ -550,29 +550,6 @@ export default function TopBarManageView() {
 
           {/* Form Card */}
           <form onSubmit={handleFormSubmit} className="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 sm:p-8 space-y-6">
-            
-            {/* Live Interactive Preview Box */}
-            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 block">
-                Live Preview Output
-              </span>
-              <div className="rounded-xl px-4 py-2.5 bg-[#064C23] text-white flex flex-col sm:flex-row items-center justify-between gap-2 text-xs shadow-inner">
-                <div className="flex items-center space-x-2 truncate">
-                  <span className="px-1.5 py-0.5 rounded bg-white/20 text-white font-mono text-[10px] font-black">
-                    #{formData.sortingOrder || 1}
-                  </span>
-                  <span className="font-bold truncate">
-                    {formData.title || 'Enter your announcement title below...'}
-                  </span>
-                </div>
-                {formData.urlOrCopyText && (
-                  <span className="font-mono text-[11px] font-bold px-2 py-0.5 rounded bg-white/20 text-emerald-100">
-                    {formData.urlOrCopyText}
-                  </span>
-                )}
-              </div>
-            </div>
-
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               {/* 1. Sorting Order */}
               <div>
