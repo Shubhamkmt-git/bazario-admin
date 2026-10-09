@@ -99,7 +99,7 @@ export default function Sidebar({
           }`}
         >
           {isOpen && (
-            <div className="text-[11px] font-extrabold text-[#064C23]/75 uppercase tracking-wider px-3 mb-2">
+            <div className="text-[11px] font-extrabold text-black uppercase tracking-wider px-3 mb-2">
               Main Menu
             </div>
           )}
@@ -133,8 +133,8 @@ export default function Sidebar({
                         : 'justify-center p-2 text-base'
                     } ${
                       isActive
-                        ? 'bg-white text-[#064C23] font-bold shadow-sm shadow-[#064C23]/8 border border-[#9fd3b4]'
-                        : 'text-[#28573d] font-semibold border border-transparent hover:border-[#bfe0cd] hover:bg-white/60 hover:text-[#064C23]'
+                        ? 'bg-white text-black font-bold shadow-sm shadow-[#064C23]/8 border border-[#9fd3b4]'
+                        : 'text-black font-semibold border border-transparent hover:border-[#bfe0cd] hover:bg-white/60 hover:text-black'
                     }`}
                   >
                     <div
@@ -147,7 +147,7 @@ export default function Sidebar({
                           className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-all duration-200 ${
                             isActive
                               ? 'bg-[#064C23] text-white shadow-xs'
-                              : 'bg-white/60 text-[#2b6d4b] group-hover:bg-white group-hover:text-[#064C23] group-hover:shadow-2xs'
+                              : 'bg-white/60 text-[#064C23] group-hover:bg-white group-hover:text-[#064C23] group-hover:shadow-2xs'
                           }`}
                         >
                           <FontAwesomeIcon
@@ -156,16 +156,16 @@ export default function Sidebar({
                           />
                         </div>
                       )}
-                      {isOpen && <span className="truncate tracking-tight">{item.name}</span>}
+                      {isOpen && <span className="truncate tracking-tight text-black font-bold">{item.name}</span>}
                     </div>
 
                     {/* Chevron Indicator */}
                     {isOpen && (
-                      <div className="text-xs text-slate-400 group-hover:text-[#064C23] transition-transform duration-200 pr-1">
+                      <div className="text-xs text-slate-500 group-hover:text-black transition-transform duration-200 pr-1">
                         <FontAwesomeIcon
                           icon={faChevronDown}
                           className={`text-[11px] transition-transform duration-200 ${
-                            isDropdownOpen ? 'rotate-180 text-[#064C23]' : 'rotate-0'
+                            isDropdownOpen ? 'rotate-180 text-black' : 'rotate-0'
                           }`}
                         />
                       </div>
@@ -193,14 +193,14 @@ export default function Sidebar({
                               className={`w-full flex items-center space-x-2.5 px-3 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                                 isSubActive
                                   ? 'bg-[#064C23] text-white shadow-xs'
-                                  : 'text-slate-700 hover:text-[#064C23] hover:bg-white/80'
+                                  : 'text-black hover:text-[#064C23] hover:bg-white/80'
                               }`}
                             >
                               {child.icon && (
                                 <FontAwesomeIcon
                                   icon={child.icon}
                                   className={`text-[11px] ${
-                                    isSubActive ? 'text-white' : 'text-[#064C23]/80'
+                                    isSubActive ? 'text-white' : 'text-[#064C23]'
                                   }`}
                                 />
                               )}
@@ -215,7 +215,7 @@ export default function Sidebar({
                   {/* Collapsed Flyout Menu */}
                   {!isOpen && flyoutMenu === item.id && (
                     <div className="absolute left-full top-0 ml-2 bg-white rounded-2xl shadow-xl border border-slate-200 p-2 min-w-[180px] z-50 space-y-1">
-                      <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400 px-2 py-1 border-b border-slate-100">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-black px-2 py-1 border-b border-slate-100">
                         {item.name}
                       </div>
                       {item.children.map((child) => {
@@ -231,7 +231,7 @@ export default function Sidebar({
                             className={`w-full flex items-center space-x-2 px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                               isSubActive
                                 ? 'bg-[#064C23] text-white shadow-xs'
-                                : 'text-slate-700 hover:text-[#064C23] hover:bg-[#f0f9f3]'
+                                : 'text-black hover:text-[#064C23] hover:bg-[#f0f9f3]'
                             }`}
                           >
                             {child.icon && (
@@ -267,8 +267,8 @@ export default function Sidebar({
                     : 'justify-center p-2 text-base'
                 } ${
                   isActive
-                    ? 'bg-white text-[#064C23] font-bold shadow-sm shadow-[#064C23]/8 border border-[#9fd3b4]'
-                    : 'text-[#28573d] font-semibold border border-transparent hover:border-[#bfe0cd] hover:bg-white/60 hover:text-[#064C23]'
+                    ? 'bg-white text-black font-bold shadow-sm shadow-[#064C23]/8 border border-[#9fd3b4]'
+                    : 'text-black font-semibold border border-transparent hover:border-[#bfe0cd] hover:bg-white/60 hover:text-black'
                 }`}
               >
                 <div
@@ -281,7 +281,7 @@ export default function Sidebar({
                       className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-all duration-200 ${
                         isActive
                           ? 'bg-[#064C23] text-white shadow-xs'
-                          : 'bg-white/60 text-[#2b6d4b] group-hover:bg-white group-hover:text-[#064C23] group-hover:shadow-2xs'
+                          : 'bg-white/60 text-[#064C23] group-hover:bg-white group-hover:text-[#064C23] group-hover:shadow-2xs'
                       }`}
                     >
                       <FontAwesomeIcon
@@ -290,7 +290,7 @@ export default function Sidebar({
                       />
                     </div>
                   )}
-                  {isOpen && <span className="truncate tracking-tight">{item.name}</span>}
+                  {isOpen && <span className="truncate tracking-tight text-black font-bold">{item.name}</span>}
                 </div>
 
                 {/* Badge */}
@@ -299,7 +299,7 @@ export default function Sidebar({
                     className={`px-2 py-0.5 text-xs font-bold rounded-full transition-colors shrink-0 ml-2 ${
                       isActive
                         ? 'bg-[#064C23] text-white shadow-2xs'
-                        : 'bg-[#064C23]/10 text-[#064C23] border border-[#064C23]/15'
+                        : 'bg-black/10 text-black border border-black/15'
                     }`}
                   >
                     {item.badge}
@@ -337,8 +337,8 @@ export default function Sidebar({
 
           {isOpen && (
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-slate-800 truncate">{user.name}</p>
-              <p className="text-xs font-medium text-slate-500 truncate">{user.email}</p>
+              <p className="text-sm font-bold text-black truncate">{user.name}</p>
+              <p className="text-xs font-medium text-slate-600 truncate">{user.email}</p>
             </div>
           )}
         </div>
