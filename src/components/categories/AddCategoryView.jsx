@@ -1,9 +1,8 @@
 import React, { useState } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faFloppyDisk, faStar } from '@fortawesome/free-solid-svg-icons'
+import { faFloppyDisk } from '@fortawesome/free-solid-svg-icons'
 import {
   Button,
-  ToggleButton,
   InputField,
   ImageUploadFrame,
   BackButton
@@ -71,44 +70,30 @@ export default function AddCategoryView({ onBack, onSave, categoriesCount = 0 })
         </div>
       </div>
 
-      {/* Main Form Card */}
+      {/* Clean Unified Form Card */}
       <form onSubmit={handleSubmit} className="bg-white rounded-3xl border border-slate-200 shadow-xs p-6 sm:p-8 space-y-6">
-        {/* Section 1: Title, Subtitle & Image */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left (2 cols): Title & Subtitle */}
-          <div className="lg:col-span-2 space-y-4">
-            <InputField
-              label="CATEGORY TITLE"
-              placeholder="e.g. Farm-Fresh Fruits & Vegetables"
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              helperText="Primary category name displayed to customers"
-              required
-            />
+        {/* Row 1: Title & Subtitle */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <InputField
+            label="CATEGORY TITLE"
+            placeholder="e.g. Farm-Fresh Fruits & Vegetables"
+            value={formData.title}
+            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            helperText="Primary category name displayed to customers"
+            required
+          />
 
-            <InputField
-              label="SUBTITLE / TAGLINE"
-              placeholder="e.g. 100% Direct from local farms with morning freshness check"
-              value={formData.subtitle}
-              onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
-              helperText="Secondary subtitle or promotional tagline"
-            />
-          </div>
-
-          {/* Right (1 col): Category Image */}
-          <div className="lg:col-span-1">
-            <ImageUploadFrame
-              label="CATEGORY IMAGE / ICON"
-              aspectRatio="square"
-              description="PNG, JPG, WEBP (Max 5MB)"
-              value={formData.image}
-              onChange={(url) => setFormData({ ...formData, image: url })}
-            />
-          </div>
+          <InputField
+            label="SUBTITLE / TAGLINE"
+            placeholder="e.g. 100% Direct from local farms with morning freshness check"
+            value={formData.subtitle}
+            onChange={(e) => setFormData({ ...formData, subtitle: e.target.value })}
+            helperText="Secondary subtitle or promotional tagline"
+          />
         </div>
 
-        {/* Section 2: Sorting Order, Status & Is Featured */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 pt-2 border-t border-slate-100">
+        {/* Row 2: Sorting Order, Status & Is Featured Dropdown */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
           <div>
             <InputField
               label="SORTING ORDER"
@@ -135,29 +120,38 @@ export default function AddCategoryView({ onBack, onSave, categoriesCount = 0 })
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
             </select>
+            <p className="text-[11px] text-slate-400 mt-1">Catalog visibility state</p>
           </div>
 
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
               IS FEATURED
             </label>
-            <div className="flex items-center justify-between h-[42px] px-4 bg-slate-50 border border-slate-200 rounded-xl">
-              <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                <FontAwesomeIcon icon={faStar} className={formData.isFeatured ? 'text-amber-500' : 'text-slate-400'} />
-                <span>{formData.isFeatured ? 'Featured Category' : 'Standard'}</span>
-              </span>
-              <ToggleButton
-                size="sm"
-                checked={formData.isFeatured}
-                onChange={(val) => setFormData({ ...formData, isFeatured: val })}
-                activeColor="#A44F37"
-              />
-            </div>
+            <select
+              value={formData.isFeatured ? 'true' : 'false'}
+              onChange={(e) => setFormData({ ...formData, isFeatured: e.target.value === 'true' })}
+              className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 outline-none focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 transition-all cursor-pointer"
+            >
+              <option value="true">Yes (Featured Category)</option>
+              <option value="false">No (Standard Category)</option>
+            </select>
+            <p className="text-[11px] text-slate-400 mt-1">Storefront highlight flag</p>
           </div>
         </div>
 
-        {/* Section 3: Description */}
-        <div className="space-y-1.5 pt-2 border-t border-slate-100">
+        {/* Row 3: Category Image / Icon */}
+        <div className="space-y-1.5">
+          <ImageUploadFrame
+            label="CATEGORY IMAGE / ICON"
+            aspectRatio="square"
+            description="Upload category thumbnail icon or graphic (PNG, JPG, WEBP up to 5MB)"
+            value={formData.image}
+            onChange={(url) => setFormData({ ...formData, image: url })}
+          />
+        </div>
+
+        {/* Row 4: Description */}
+        <div className="space-y-1.5">
           <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
             DESCRIPTION
           </label>
