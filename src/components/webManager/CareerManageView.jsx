@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faBriefcase,
@@ -23,97 +23,46 @@ import {
   BackButton
 } from '../../components'
 import { useToast } from '../../context/ToastContext'
+import {
+  getAdminCareersApi,
+  createAdminCareerApi,
+  updateAdminCareerApi,
+  deleteAdminCareerApi
+} from '../../utils/adminApi'
 
-const INITIAL_JOBS = [
-  {
-    id: 1,
-    sortingOrder: 1,
-    title: 'Store Operations Manager',
-    subtitle: 'Retail Operations & Branch Leadership',
-    type: 'Full Time',
-    experience: '3 - 5 Years',
-    location: 'Central Superstore, Noida (Sec 18)',
-    status: 'Active',
-    salary: '₹45,000 - ₹60,000 / mo',
-    description: 'Responsible for day-to-day supermarket branch operations, inventory audits, team leadership, and customer satisfaction.',
-    seoTitle: 'Career Opportunity: Store Operations Manager at Bazario Supermarket',
-    seoKeywords: 'retail operations, store manager, supermarket careers, bazario jobs',
-    seoDescription: 'Join Bazario as Store Operations Manager in Noida. Lead grocery retail operations with competitive pay and growth opportunities.'
-  },
-  {
-    id: 2,
-    sortingOrder: 2,
-    title: 'POS Cashier & Billing Executive',
-    subtitle: 'Front Desk & Cash Management',
-    type: 'Full Time',
-    experience: '1 - 2 Years',
-    location: 'DLF Cyber City Outlet, Gurugram',
-    status: 'Active',
-    salary: '₹18,000 - ₹24,000 / mo',
-    description: 'Handling fast-paced supermarket barcode scanning, cash and UPI POS terminals, and friendly customer checkout bagging.',
-    seoTitle: 'POS Cashier Jobs at Bazario Gurugram',
-    seoKeywords: 'cashier jobs, billing executive, retail cashier, gurugram jobs',
-    seoDescription: 'Urgent hiring for POS Cashier and Billing Executives at Bazario Superstore in Gurugram.'
-  },
-  {
-    id: 3,
-    sortingOrder: 3,
-    title: 'Fresh Procurement Lead',
-    subtitle: 'Farm Produce & Sourcing Quality',
-    type: 'Full Time',
-    experience: '4+ Years',
-    location: 'Delhi Central Hub',
-    status: 'Active',
-    salary: '₹50,000 - ₹70,000 / mo',
-    description: 'Direct procurement from farmers and local mandis to maintain grade-A freshness standards across all branches.',
-    seoTitle: 'Fresh Produce Procurement Lead - Bazario Supply Chain',
-    seoKeywords: 'procurement lead, farm sourcing, agricultural supply chain jobs',
-    seoDescription: 'Manage farm produce sourcing and quality verification across North India at Bazario Hub.'
-  },
-  {
-    id: 4,
-    sortingOrder: 4,
-    title: 'Express Delivery Partner',
-    subtitle: '20-Minute Doorstep Fleet',
-    type: 'Part Time',
-    experience: 'Freshers Welcome',
-    location: 'Multiple Outlets (Delhi NCR)',
-    status: 'Active',
-    salary: '₹20,000 - ₹30,000 / mo',
-    description: 'Timely 20-minute grocery home delivery with two-wheeler bike and valid driver license.',
-    seoTitle: 'Express Grocery Delivery Partner Jobs - Bazario Fleet',
-    seoKeywords: 'delivery partner jobs, bike rider jobs, part time delivery, delhi ncr jobs',
-    seoDescription: 'Earn daily with flexible shifts as a Bazario 20-minute express grocery delivery partner in Delhi NCR.'
-  },
-  {
-    id: 5,
-    sortingOrder: 5,
-    title: 'Inventory & Stock Supervisor',
-    subtitle: 'Warehouse & Shelf Replenishment',
-    type: 'Full Time',
-    experience: '2 - 3 Years',
-    location: 'Indirapuram Branch, Ghaziabad',
-    status: 'Inactive',
-    salary: '₹25,000 - ₹32,000 / mo',
-    description: 'Verifying FMCG expiry dates, barcode labeling, shelf replenishment, and cold storage monitoring.',
-    seoTitle: 'Supermarket Inventory Supervisor Job in Ghaziabad',
-    seoKeywords: 'inventory supervisor, warehouse stock management, grocery retail',
-    seoDescription: 'Supervise supermarket stock replenishment, expiry audits, and warehouse inwarding at Bazario.'
-  }
-]
 
 export default function CareerManageView() {
   const toast = useToast()
 
   // State: Careers list
-  const [jobs, setJobs] = useState(() => {
-    try {
-      const saved = localStorage.getItem('bazario_web_careers')
-      return saved ? JSON.parse(saved) : INITIAL_JOBS
-    } catch {
-      return INITIAL_JOBS
+  const [jobs, setJobs] = useState([])
+
+  // Load live careers from backend API
+  useEffect(() => {
+    const fetchCareers = async () => {
+      try {
+        const res = await getAdminCareersApi()
+        const list = res.openings || res.data || []
+        const formatted = (Array.isArray(list) ? list : []).map((job, idx) => ({
+          ...job,
+          id: job.id || job._id || idx + 1,
+          sortingOrder: Number(job.sortingOrder) || idx + 1,
+          title: job.title || '',
+          subtitle: job.subtitle || '',
+          type: job.type || 'Full Time',
+          experience: job.experience || '',
+          location: job.location || '',
+          status: job.status || 'Active',
+          salary: job.salary || '',
+          description: job.description || ''
+        }))
+        setJobs(formatted)
+      } catch (err) {
+        console.warn('API error fetching careers:', err)
+      }
     }
-  })
+    fetchCareers()
+  }, [])
 
   // Page Routing Mode: 'index' | 'add' | 'edit' | 'view' (No popups!)
   const [pageMode, setPageMode] = useState('index')
@@ -124,7 +73,7 @@ export default function CareerManageView() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [jobToDelete, setJobToDelete] = useState(null)
 
-  // Form State (Inputs: sortingOrder, title, subtitle, type, experience, location, status, salary, description, seoTitle, seoKeywords, seoDescription)
+  // Form State
   const [formData, setFormData] = useState({
     sortingOrder: 1,
     title: '',
@@ -142,7 +91,11 @@ export default function CareerManageView() {
 
   const saveToStorage = (updated) => {
     setJobs(updated)
-    localStorage.setItem('bazario_web_careers', JSON.stringify(updated))
+    try {
+      localStorage.setItem('bazario_web_careers', JSON.stringify(updated))
+    } catch (e) {
+      console.warn('LocalStorage save error:', e)
+    }
   }
 
   // Open Dedicated Add Page
@@ -193,15 +146,20 @@ export default function CareerManageView() {
   }
 
   // Toggle Status inline
-  const handleToggleStatus = (job) => {
+  const handleToggleStatus = async (job) => {
     const nextStatus = job.status === 'Active' ? 'Inactive' : 'Active'
-    const updated = jobs.map((j) => (j.id === job.id ? { ...j, status: nextStatus } : j))
+    try {
+      await updateAdminCareerApi(job._id || job.id, { status: nextStatus })
+    } catch (err) {
+      console.warn('Backend toggle error:', err)
+    }
+    const updated = jobs.map((j) => (String(j.id || j._id) === String(job.id || job._id) ? { ...j, status: nextStatus } : j))
     saveToStorage(updated)
     toast.info('Status Updated', `"${job.title}" is now ${nextStatus}.`)
   }
 
   // Form Submit (Create / Update)
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e?.preventDefault?.()
 
     if (!formData.title?.trim()) {
@@ -212,8 +170,17 @@ export default function CareerManageView() {
     const orderNum = parseInt(formData.sortingOrder, 10) || 1
 
     if (pageMode === 'edit' && activeJob) {
+      try {
+        await updateAdminCareerApi(activeJob._id || activeJob.id, {
+          ...formData,
+          sortingOrder: orderNum,
+          title: formData.title.trim()
+        })
+      } catch (err) {
+        console.warn('Backend edit error:', err)
+      }
       const updated = jobs.map((j) =>
-        j.id === activeJob.id
+        String(j.id || j._id) === String(activeJob.id || activeJob._id)
           ? {
               ...j,
               ...formData,
@@ -227,8 +194,19 @@ export default function CareerManageView() {
       setPageMode('index')
       setActiveJob(null)
     } else if (pageMode === 'add') {
+      let created = null
+      try {
+        const res = await createAdminCareerApi({
+          ...formData,
+          sortingOrder: orderNum,
+          title: formData.title.trim()
+        })
+        created = res.data || res.opening
+      } catch (err) {
+        console.warn('Backend create error:', err)
+      }
       const newJob = {
-        id: Date.now(),
+        id: created?._id || created?.id || Date.now(),
         ...formData,
         sortingOrder: orderNum,
         title: formData.title.trim()
@@ -240,9 +218,14 @@ export default function CareerManageView() {
   }
 
   // Delete Confirm
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (!jobToDelete) return
-    const updated = jobs.filter((j) => j.id !== jobToDelete.id)
+    try {
+      await deleteAdminCareerApi(jobToDelete._id || jobToDelete.id)
+    } catch (err) {
+      console.warn('Backend delete error:', err)
+    }
+    const updated = jobs.filter((j) => String(j.id || j._id) !== String(jobToDelete.id || jobToDelete._id))
     saveToStorage(updated)
     setDeleteModalOpen(false)
     setItemToDelete(null)

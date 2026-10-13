@@ -423,22 +423,19 @@ export default function ProductListView({
                       <td className="py-4 px-4 sm:px-6 text-right">
                         <div className="flex items-center justify-end space-x-1">
                           <ActionButton
-                            icon={<FontAwesomeIcon icon={faEye} className="text-xs" />}
+                            action="view"
                             tooltip="View Details"
-                            variant="default"
-                            onClick={() => onView(prod.id)}
+                            onClick={() => onView(prod._id || prod.id)}
                           />
                           <ActionButton
-                            icon={<FontAwesomeIcon icon={faPenToSquare} className="text-xs" />}
+                            action="edit"
                             tooltip="Edit Product"
-                            variant="primary"
-                            onClick={() => onEdit(prod.id)}
+                            onClick={() => onEdit(prod._id || prod.id)}
                           />
                           <ActionButton
-                            icon={<FontAwesomeIcon icon={faTrashCan} className="text-xs" />}
+                            action="delete"
                             tooltip="Delete Product"
-                            variant="danger"
-                            onClick={() => onDelete(prod.id)}
+                            onClick={() => onDelete(prod._id || prod.id)}
                           />
                         </div>
                       </td>

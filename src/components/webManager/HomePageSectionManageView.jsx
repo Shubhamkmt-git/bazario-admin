@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faTableCellsLarge,
@@ -23,98 +23,38 @@ import {
   BackButton
 } from '../../components'
 import { useToast } from '../../context/ToastContext'
-
-const INITIAL_SECTIONS = [
-  {
-    id: 1,
-    key: 'hero_slider',
-    name: 'Hero Carousel Banner Slider',
-    subtitle: 'High-impact full-width seasonal sale promotions',
-    itemCount: '4 Slides',
-    layout: 'Carousel Banner',
-    status: 'Active',
-    order: 1
-  },
-  {
-    id: 2,
-    key: 'categories_grid',
-    name: 'Featured Grocery Categories',
-    subtitle: 'Browse Fresh Veggies, Dairy, Snacks, Staples',
-    itemCount: '8 Categories',
-    layout: 'Circular Grid',
-    status: 'Active',
-    order: 2
-  },
-  {
-    id: 3,
-    key: 'flash_deals',
-    name: 'Today’s Hot Deals & Discounts',
-    subtitle: 'Limited-time daily price drops and bundle offers',
-    itemCount: '12 Products',
-    layout: 'Product Grid',
-    status: 'Active',
-    order: 3
-  },
-  {
-    id: 4,
-    key: 'fresh_produce',
-    name: 'Farm-Fresh Fruits & Vegetables',
-    subtitle: '100% Direct from local farms with morning freshness check',
-    itemCount: '16 Products',
-    layout: 'Horizontal Scroll',
-    status: 'Active',
-    order: 4
-  },
-  {
-    id: 5,
-    key: 'app_cta',
-    name: 'Mobile App Download Banner',
-    subtitle: 'Interactive QR Code & app store direct download banner',
-    itemCount: '1 Banner Block',
-    layout: 'Full-Width CTA',
-    status: 'Active',
-    order: 5
-  },
-  {
-    id: 6,
-    key: 'best_sellers',
-    name: 'Pantry Essentials & Best-Sellers',
-    subtitle: 'Atta, Rice, Cooking Oils, Ghee, and Daily Staples',
-    itemCount: '10 Products',
-    layout: 'Product Grid',
-    status: 'Active',
-    order: 6
-  },
-  {
-    id: 7,
-    key: 'store_locator',
-    name: 'Find Your Nearest Bazario Store',
-    subtitle: 'Interactive map and contact directory for physical outlets',
-    itemCount: '4 Outlets',
-    layout: 'Interactive Map',
-    status: 'Active',
-    order: 7
-  },
-  {
-    id: 8,
-    key: 'reviews_trust',
-    name: 'Customer Reviews & Trust Badges',
-    subtitle: 'Verified buyer testimonials, hygienic packaging seals',
-    itemCount: '6 Reviews',
-    layout: 'Card Grid',
-    status: 'Inactive',
-    order: 8
-  }
-]
+import {
+  getAdminHomeSectionsApi,
+  updateAdminHomeSectionsApi
+} from '../../utils/adminApi'
 
 export default function HomePageSectionManageView() {
   const toast = useToast()
 
-  // State: Sections List from LocalStorage or Defaults
-  const [sections, setSections] = useState(() => {
-    const saved = localStorage.getItem('bazario_web_homepage_sections')
-    return saved ? JSON.parse(saved) : INITIAL_SECTIONS
-  })
+  // State: Sections List
+  const [sections, setSections] = useState([])
+
+  // Load live sections from backend API
+  useEffect(() => {
+    const fetchSections = async () => {
+      try {
+        const res = await getAdminHomeSectionsApi()
+        const list = res.sections || res.data || []
+        const formatted = (Array.isArray(list) ? list : []).map((sec, idx) => ({
+          ...sec,
+          id: sec.id || sec._id || idx + 1,
+          order: Number(sec.order) || idx + 1,
+          name: sec.name || '',
+          subtitle: sec.subtitle || '',
+          status: sec.status || 'Active'
+        }))
+        setSections(formatted)
+      } catch (err) {
+        console.warn('API error fetching home sections:', err)
+      }
+    }
+    fetchSections()
+  }, [])
 
   // Page Subview Navigation: 'index' | 'edit' | 'view' (No Add subpage)
   const [pageMode, setPageMode] = useState('index')
@@ -136,10 +76,15 @@ export default function HomePageSectionManageView() {
     order: 1
   })
 
-  // Sync to LocalStorage
-  const saveToStorage = (updated) => {
+  // Sync to LocalStorage & Backend API
+  const saveToStorage = async (updated) => {
     setSections(updated)
-    localStorage.setItem('bazario_web_homepage_sections', JSON.stringify(updated))
+    try {
+      localStorage.setItem('bazario_web_homepage_sections', JSON.stringify(updated))
+      await updateAdminHomeSectionsApi({ sections: updated })
+    } catch (e) {
+      console.warn('Save home sections error:', e)
+    }
   }
 
   // Quick Toggle Status in List

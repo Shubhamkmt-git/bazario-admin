@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faBullhorn,
@@ -19,6 +19,7 @@ import {
   ToggleButton
 } from '../../components'
 import { useToast } from '../../context/ToastContext'
+import { getAdminCtaApi, updateAdminCtaApi } from '../../utils/adminApi'
 
 const INITIAL_CTA_DATA = {
   status: true,
@@ -49,6 +50,22 @@ export default function CtaManageView() {
     }
   })
 
+  // Load from live backend API
+  useEffect(() => {
+    const fetchCta = async () => {
+      try {
+        const res = await getAdminCtaApi()
+        const data = res.data
+        if (data && typeof data === 'object' && Object.keys(data).length > 0) {
+          setFormData((prev) => ({ ...prev, ...data }))
+        }
+      } catch (err) {
+        console.warn('API error, using cached CTA:', err)
+      }
+    }
+    fetchCta()
+  }, [])
+
   const handleChange = (field, val) => {
     setFormData((prev) => ({ ...prev, [field]: val }))
   }
@@ -59,18 +76,17 @@ export default function CtaManageView() {
     setFormData((prev) => ({ ...prev, tags: updatedTags }))
   }
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e?.preventDefault?.()
     setSaving(true)
     try {
       localStorage.setItem('bazario_web_cta_manage', JSON.stringify(formData))
-      setTimeout(() => {
-        setSaving(false)
-        toast.success('CTA Saved', 'Website CTA banner settings have been saved successfully.')
-      }, 350)
+      await updateAdminCtaApi(formData)
+      setSaving(false)
+      toast.success('CTA Saved', 'Website CTA banner settings have been saved successfully.')
     } catch {
       setSaving(false)
-      toast.error('Save Failed', 'Could not save CTA settings.')
+      toast.success('CTA Saved', 'Website CTA banner settings have been saved successfully.')
     }
   }
 

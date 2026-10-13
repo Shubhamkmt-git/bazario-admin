@@ -8,6 +8,28 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { useIndianTime } from '../../utils/timeUtils'
 
+const formatAvatarUrl = (avatar) => {
+  if (!avatar || typeof avatar !== 'string') return ''
+  if (avatar.startsWith('http') || avatar.startsWith('data:image') || avatar.startsWith('blob:')) {
+    return avatar
+  }
+  if (avatar.startsWith('/uploads')) {
+    return `http://localhost:5000${avatar}`
+  }
+  return avatar
+}
+
+const isImage = (avatar) => {
+  if (!avatar || typeof avatar !== 'string') return false
+  return (
+    avatar.startsWith('http') ||
+    avatar.startsWith('/uploads') ||
+    avatar.startsWith('data:image') ||
+    avatar.startsWith('blob:') ||
+    /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(avatar)
+  )
+}
+
 export default function Header({
   onMenuToggle,
   title = '',
@@ -63,18 +85,39 @@ export default function Header({
 
         {/* User Profile */}
         <div className="flex items-center space-x-2.5 pl-1 border-l border-slate-200">
-          <div className="w-9 h-9 rounded-full bg-[#064C23] text-white flex items-center justify-center font-bold text-xs shadow-xs">
-            {user.avatar || 'BA'}
+          <div className="w-9 h-9 rounded-full bg-[#064C23] text-white flex items-center justify-center font-bold text-xs shadow-xs overflow-hidden shrink-0 border border-slate-200">
+            {isImage(user.avatar) ? (
+              <img
+                src={formatAvatarUrl(user.avatar)}
+                alt={user.name || 'Admin'}
+                className="w-full h-full object-cover rounded-full"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none'
+                }}
+              />
+            ) : (
+              <span>
+                {user.name
+                  ? user.name
+                      .split(' ')
+                      .filter(Boolean)
+                      .map((n) => n[0])
+                      .join('')
+                      .slice(0, 2)
+                      .toUpperCase()
+                  : (user.avatar || 'BA')}
+              </span>
+            )}
           </div>
           <div className="hidden sm:block text-left">
-            <p className="text-xs font-bold text-slate-800 leading-tight">{user.name}</p>
-            <p className="text-[10px] text-slate-400 leading-tight">{user.email}</p>
+            <p className="text-xs font-bold text-slate-800 leading-tight">{user.name || 'Admin'}</p>
+            <p className="text-[10px] text-slate-400 leading-tight">{user.email || 'admin@bazario.com'}</p>
           </div>
           {onLogout && (
             <button
               type="button"
               onClick={onLogout}
-              className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors ml-1 focus:outline-none cursor-pointer"
+              className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors ml-1 focus:outline-none cursor-pointer shrink-0"
               title="Logout"
             >
               <FontAwesomeIcon icon={faArrowRightFromBracket} className="text-xs" />

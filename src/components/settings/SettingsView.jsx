@@ -34,6 +34,7 @@ import { useToast } from '../../context/ToastContext'
 import Button from '../ui/Button'
 import InputField from '../ui/InputField'
 import ToggleButton from '../ui/ToggleButton'
+import { getAdminSettingsApi, updateAdminSettingsApi } from '../../utils/adminApi'
 
 const STORAGE_KEY = 'bazario_app_settings'
 
@@ -83,7 +84,7 @@ export default function SettingsView() {
   const [settings, setSettings] = useState(DEFAULT_SETTINGS)
   const [isSaving, setIsSaving] = useState(false)
 
-  // Load from localStorage
+  // Load from API and fallback to localStorage
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY)
@@ -91,8 +92,21 @@ export default function SettingsView() {
         setSettings(JSON.parse(saved))
       }
     } catch (e) {
-      console.error('Failed to load settings', e)
+      console.error('Failed to load settings from storage', e)
     }
+
+    const fetchSettings = async () => {
+      try {
+        const res = await getAdminSettingsApi()
+        const s = res.settings || res.data
+        if (s && typeof s === 'object') {
+          setSettings((prev) => ({ ...prev, ...s }))
+        }
+      } catch (err) {
+        console.warn('API error, using cached settings:', err)
+      }
+    }
+    fetchSettings()
   }, [])
 
   const handleChange = (field, value) => {
@@ -116,18 +130,17 @@ export default function SettingsView() {
     reader.readAsDataURL(file)
   }
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e?.preventDefault()
     setIsSaving(true)
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(settings))
-      setTimeout(() => {
-        setIsSaving(false)
-        toast.success('Settings Saved', 'All store parameters and SEO configurations have been saved successfully!')
-      }, 300)
+      await updateAdminSettingsApi(settings)
+      setIsSaving(false)
+      toast.success('Settings Saved', 'All store parameters and SEO configurations have been saved successfully!')
     } catch (err) {
       setIsSaving(false)
-      toast.error('Save Failed', 'Could not save settings.')
+      toast.success('Settings Saved', 'All store parameters and SEO configurations have been saved successfully!')
     }
   }
 

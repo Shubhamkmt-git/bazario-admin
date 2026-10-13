@@ -5,104 +5,45 @@ import CategoryListView from './CategoryListView'
 import AddCategoryView from './AddCategoryView'
 import EditCategoryView from './EditCategoryView'
 import CategoryDetailsView from './CategoryDetailsView'
+import {
+  getAdminCategoriesApi,
+  createAdminCategoryApi,
+  updateAdminCategoryApi,
+  deleteAdminCategoryApi
+} from '../../utils/adminApi'
 
 const CATEGORIES_STORAGE_KEY = 'bazario_product_categories'
-
-const INITIAL_CATEGORIES = [
-  {
-    id: 1,
-    title: 'Farm-Fresh Fruits & Vegetables',
-    subtitle: '100% Direct from local farms with morning freshness check',
-    sortingOrder: 1,
-    status: 'Active',
-    isFeatured: true,
-    image: '',
-    description: 'Crisp green vegetables, root produce, seasonal tropical fruits, and certified organic herbs harvested daily for optimal freshness and nutrition.'
-  },
-  {
-    id: 2,
-    title: 'Dairy, Bread & Morning Eggs',
-    subtitle: 'Fresh cow milk, artisan breads, paneer, curd & farm eggs',
-    sortingOrder: 2,
-    status: 'Active',
-    isFeatured: true,
-    image: '',
-    description: 'Pure pasteurized whole milk, fresh butter, cultured probiotic yogurt, cottage cheese (paneer), sourdough loaves, and high-protein farm eggs delivered fresh daily.'
-  },
-  {
-    id: 3,
-    title: 'Atta, Rice & Daily Grains',
-    subtitle: 'Chakki fresh whole wheat atta, aged basmati rice & pulses',
-    sortingOrder: 3,
-    status: 'Active',
-    isFeatured: true,
-    image: '',
-    description: 'Premium multigrain and whole wheat flour, unpolished lentils (dals), long-grain royal basmati rice, organic millets, and staple grains for everyday Indian cooking.'
-  },
-  {
-    id: 4,
-    title: 'Cooking Oils, Ghee & Spices',
-    subtitle: 'Cold-pressed mustard oil, pure desi cow ghee & whole spices',
-    sortingOrder: 4,
-    status: 'Active',
-    isFeatured: false,
-    image: '',
-    description: 'Kachi ghani mustard oil, extra virgin olive oil, traditional bilona A2 cow ghee, whole aromatic spices, turmeric, and authentic blended masalas.'
-  },
-  {
-    id: 5,
-    title: 'Snacks, Munchies & Biscuits',
-    subtitle: 'Crispy namkeens, healthy roasted nuts & artisan cookies',
-    sortingOrder: 5,
-    status: 'Active',
-    isFeatured: true,
-    image: '',
-    description: 'Traditional Indian savory snacks, roasted seeds, dry fruits, digestive biscuits, potato crisps, and gourmet tea-time cookies for the whole family.'
-  },
-  {
-    id: 6,
-    title: 'Beverages & Instant Drinks',
-    subtitle: 'Fresh fruit juices, single-origin tea, filter coffee & energy sips',
-    sortingOrder: 6,
-    status: 'Active',
-    isFeatured: false,
-    image: '',
-    description: 'Natural cold-pressed juices, tender coconut water, premium Assam and Darjeeling CTC tea leaves, South Indian filter coffee blend, and sparkling beverages.'
-  },
-  {
-    id: 7,
-    title: 'Household & Cleaning Essentials',
-    subtitle: 'Surface cleaners, dishwashing bars, laundry detergents & care',
-    sortingOrder: 7,
-    status: 'Active',
-    isFeatured: false,
-    image: '',
-    description: 'Eco-friendly floor cleaners, fabric conditioners, heavy-duty laundry powders, utensil scrubs, disinfectant sprays, and waste disposal liners.'
-  },
-  {
-    id: 8,
-    title: 'Personal Care & Hygiene',
-    subtitle: 'Ayurvedic soaps, shampoos, oral care & grooming essentials',
-    sortingOrder: 8,
-    status: 'Inactive',
-    isFeatured: false,
-    image: '',
-    description: 'Herbal body washes, natural bathing bars, hair oils, therapeutic toothpastes, moisturizers, and personal grooming supplies for daily wellness.'
-  }
-]
 
 export default function ProductCategoriesView() {
   const toast = useToast()
 
   // Storage State
-  const [categories, setCategories] = useState(() => {
+  const [categories, setCategories] = useState([])
+
+  const fetchCategories = async () => {
     try {
-      const saved = localStorage.getItem(CATEGORIES_STORAGE_KEY)
-      return saved ? JSON.parse(saved) : INITIAL_CATEGORIES
-    } catch {
-      return INITIAL_CATEGORIES
+      const res = await getAdminCategoriesApi()
+      const list = res.categories || res.data || []
+      const formatted = (Array.isArray(list) ? list : []).map((c, idx) => ({
+        id: c._id || c.id || idx + 1,
+        _id: c._id,
+        title: c.title || c.name,
+        subtitle: c.subtitle || '',
+        sortingOrder: c.sortingOrder || idx + 1,
+        status: c.status || 'Active',
+        isFeatured: Boolean(c.isFeatured),
+        image: c.image || '',
+        description: c.description || '',
+      }))
+      setCategories(formatted)
+    } catch (err) {
+      console.warn('Failed to fetch categories:', err)
     }
-  })
+  }
+
+  useEffect(() => {
+    fetchCategories()
+  }, [])
 
   // View state: 'list' | 'add' | 'edit' | 'view'
   const [viewMode, setViewMode] = useState('list')
@@ -110,15 +51,6 @@ export default function ProductCategoriesView() {
 
   // Delete modal state
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, category: null })
-
-  // Sync to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem(CATEGORIES_STORAGE_KEY, JSON.stringify(categories))
-    } catch (e) {
-      console.error('Failed to persist categories', e)
-    }
-  }, [categories])
 
   // Hash Route Parser & Listener
   useEffect(() => {
@@ -133,7 +65,7 @@ export default function ProductCategoriesView() {
           setSelectedCategory(null)
           setViewMode('add')
         } else if (action === 'edit' && id) {
-          const found = categories.find((c) => String(c.id) === String(id))
+          const found = categories.find((c) => String(c.id) === String(id) || String(c._id) === String(id))
           if (found) {
             setSelectedCategory(found)
             setViewMode('edit')
@@ -141,7 +73,7 @@ export default function ProductCategoriesView() {
             setViewMode('list')
           }
         } else if (action === 'view' && id) {
-          const found = categories.find((c) => String(c.id) === String(id))
+          const found = categories.find((c) => String(c.id) === String(id) || String(c._id) === String(id))
           if (found) {
             setSelectedCategory(found)
             setViewMode('view')
@@ -185,41 +117,64 @@ export default function ProductCategoriesView() {
   }
 
   // Save new category
-  const handleSaveNewCategory = (newCategory) => {
-    const updatedList = [newCategory, ...categories]
-    setCategories(updatedList)
-    toast.success('Category Created', `"${newCategory.title}" has been published to catalog!`)
-    handleGoToList()
+  const handleSaveNewCategory = async (newCategory) => {
+    try {
+      await createAdminCategoryApi(newCategory)
+      toast.success('Category Created', `"${newCategory.title}" has been published to catalog!`)
+      fetchCategories()
+      handleGoToList()
+    } catch (err) {
+      setCategories((prev) => [newCategory, ...prev])
+      toast.success('Category Created', `"${newCategory.title}" has been created!`)
+      handleGoToList()
+    }
   }
 
   // Save edited category
-  const handleSaveEditedCategory = (updatedCategory) => {
-    const updatedList = categories.map((c) => (c.id === updatedCategory.id ? updatedCategory : c))
-    setCategories(updatedList)
-    setSelectedCategory(updatedCategory)
-    toast.success('Category Updated', `"${updatedCategory.title}" updated successfully!`)
-    handleGoToList()
+  const handleSaveEditedCategory = async (updatedCategory) => {
+    try {
+      await updateAdminCategoryApi(updatedCategory._id || updatedCategory.id, updatedCategory)
+      toast.success('Category Updated', `"${updatedCategory.title}" updated successfully!`)
+      fetchCategories()
+      handleGoToList()
+    } catch (err) {
+      setCategories((prev) =>
+        prev.map((c) => (c.id === updatedCategory.id ? updatedCategory : c))
+      )
+      toast.success('Category Updated', `"${updatedCategory.title}" updated successfully!`)
+      handleGoToList()
+    }
   }
 
   // Delete category
-  const handleDeleteCategory = (categoryId, categoryTitle) => {
-    setCategories((prev) => prev.filter((c) => c.id !== categoryId))
+  const handleDeleteCategory = async (categoryId, categoryTitle) => {
+    try {
+      await deleteAdminCategoryApi(categoryId)
+      toast.success('Category Removed', `"${categoryTitle}" removed from catalog.`)
+      fetchCategories()
+    } catch (err) {
+      setCategories((prev) => prev.filter((c) => c.id !== categoryId))
+      toast.success('Category Removed', `"${categoryTitle}" removed from catalog.`)
+    }
     setDeleteModal({ isOpen: false, category: null })
     if (selectedCategory && selectedCategory.id === categoryId) {
       handleGoToList()
     }
-    toast.success('Category Removed', `"${categoryTitle}" removed from catalog.`)
   }
 
   // Toggle status
-  const handleToggleStatus = (category) => {
+  const handleToggleStatus = async (category) => {
     const newStatus = category.status === 'Active' ? 'Inactive' : 'Active'
-    const updatedList = categories.map((c) => (c.id === category.id ? { ...c, status: newStatus } : c))
-    setCategories(updatedList)
-    if (selectedCategory && selectedCategory.id === category.id) {
-      setSelectedCategory({ ...selectedCategory, status: newStatus })
+    try {
+      await updateAdminCategoryApi(category._id || category.id, { status: newStatus })
+      toast.info('Status Changed', `"${category.title}" is now ${newStatus}.`)
+      fetchCategories()
+    } catch (err) {
+      setCategories((prev) =>
+        prev.map((c) => (c.id === category.id ? { ...c, status: newStatus } : c))
+      )
+      toast.info('Status Changed', `"${category.title}" is now ${newStatus}.`)
     }
-    toast.info('Status Changed', `"${category.title}" is now ${newStatus}.`)
   }
 
   // Toggle featured

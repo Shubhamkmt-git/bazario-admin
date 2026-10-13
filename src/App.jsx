@@ -1,9 +1,10 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEye, faEyeSlash, faSpinner, faCircleCheck, faCircleExclamation } from '@fortawesome/free-solid-svg-icons'
 import BazarioLogo from './components/BazarioLogo'
 import DashboardPage from './pages/DashboardPage'
 import { ToastProvider, useToast } from './context/ToastContext'
+import { adminLoginApi } from './utils/adminApi'
 
 function LoginBlade({ onLoginSuccess }) {
   const toast = useToast()
@@ -16,7 +17,7 @@ function LoginBlade({ onLoginSuccess }) {
   const VALID_EMAIL = 'admin@bazario.com'
   const VALID_PASSWORD = 'BazarioStore@2026'
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setErrorMessage('')
 
@@ -27,16 +28,17 @@ function LoginBlade({ onLoginSuccess }) {
 
     setIsLoading(true)
 
-    setTimeout(() => {
+    try {
+      const res = await adminLoginApi(email.trim(), password)
+      toast.success('Login Successful', `Welcome back, ${res.admin?.name || 'Admin'}!`)
+      onLoginSuccess()
+    } catch (err) {
+      const msg = err.message || 'Invalid credentials. Please check your email and password.'
+      setErrorMessage(msg)
+      toast.error('Authentication Failed', msg)
+    } finally {
       setIsLoading(false)
-      if (email.trim().toLowerCase() === VALID_EMAIL.toLowerCase() && password === VALID_PASSWORD) {
-        toast.success('Login Successful', `Welcome back, Admin!`)
-        onLoginSuccess()
-      } else {
-        setErrorMessage('Invalid credentials. Please check your email and password.')
-        toast.error('Authentication Failed', 'Invalid email or password.')
-      }
-    }, 600)
+    }
   }
 
   const handleQuickFill = () => {
@@ -183,8 +185,16 @@ function LoginBlade({ onLoginSuccess }) {
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return localStorage.getItem('bazario_admin_auth') === 'true'
+    return localStorage.getItem('bazario_admin_auth') === 'true' && !!localStorage.getItem('bazario_admin_token')
   })
+
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      setIsAuthenticated(false)
+    }
+    window.addEventListener('bazario_admin_unauthorized', handleUnauthorized)
+    return () => window.removeEventListener('bazario_admin_unauthorized', handleUnauthorized)
+  }, [])
 
   const handleLoginSuccess = () => {
     localStorage.setItem('bazario_admin_auth', 'true')
@@ -193,6 +203,8 @@ export default function App() {
 
   const handleLogout = () => {
     localStorage.removeItem('bazario_admin_auth')
+    localStorage.removeItem('bazario_admin_token')
+    localStorage.removeItem('bazario_admin_user')
     setIsAuthenticated(false)
   }
 

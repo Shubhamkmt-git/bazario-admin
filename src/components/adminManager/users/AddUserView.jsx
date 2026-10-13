@@ -19,6 +19,7 @@ import BackButton from '../../ui/BackButton'
 import InputField from '../../ui/InputField'
 import ToggleButton from '../../ui/ToggleButton'
 import { FormActions } from '../../ui/FormLayout'
+import { uploadImageApi } from '../../../utils/adminApi'
 
 const DEFAULT_ROLES = [
   'Super Admin',
@@ -172,12 +173,23 @@ export default function AddUserView({ onBack, onSave }) {
                     accept="image/*"
                     className="sr-only"
                     id="avatar-upload-add"
-                    onChange={(e) => {
+                    onChange={async (e) => {
                       const file = e.target.files?.[0]
                       if (file) {
                         const reader = new FileReader()
                         reader.onload = (ev) => handleChange('avatar', ev.target.result)
                         reader.readAsDataURL(file)
+
+                        try {
+                          const res = await uploadImageApi(file)
+                          if (res.url) {
+                            const fullUrl = res.url.startsWith('http') ? res.url : `http://localhost:5000${res.url}`
+                            handleChange('avatar', fullUrl)
+                            toast.success('Image Uploaded', 'Avatar stored on server.')
+                          }
+                        } catch (err) {
+                          console.warn('Backend upload failed, kept as preview:', err)
+                        }
                       }
                     }}
                   />

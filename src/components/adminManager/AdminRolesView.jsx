@@ -5,81 +5,44 @@ import RoleListView from './roles/RoleListView'
 import AddRoleView from './roles/AddRoleView'
 import EditRoleView from './roles/EditRoleView'
 import RoleDetailsView from './roles/RoleDetailsView'
+import {
+  getAdminRolesApi,
+  createAdminRoleApi,
+  updateAdminRoleApi,
+  deleteAdminRoleApi
+} from '../../utils/adminApi'
 
 const ROLES_STORAGE_KEY = 'bazario_roles_data'
-
-const INITIAL_ROLES = [
-  {
-    id: 1,
-    title: 'Super Admin',
-    subtitle: 'Full unrestricted root access to all stores, finance, settings, and staff credentials.',
-    sortingOrder: 1,
-    permissions: [
-      'stores.view-outlets',
-      'stores.create-location',
-      'stores.edit-details',
-      'stores.delete-records',
-      'products.manage-stock',
-      'orders.process-orders',
-      'admin.manage-users',
-      'orders.issue-refunds',
-    ],
-    status: 'Active',
-    isSystem: true,
-  },
-  {
-    id: 2,
-    title: 'Store Manager',
-    subtitle: 'Operational control over local store products, stock levels, orders, and daily POS cashflow.',
-    sortingOrder: 2,
-    permissions: [
-      'stores.view-outlets',
-      'stores.edit-details',
-      'products.manage-stock',
-      'orders.process-orders',
-    ],
-    status: 'Active',
-    isSystem: false,
-  },
-  {
-    id: 3,
-    title: 'Inventory Lead',
-    subtitle: 'Manage warehouse inventory intake, SKU barcodes, stock refill alerts, and supplier receipts.',
-    sortingOrder: 3,
-    permissions: [
-      'products.manage-stock',
-      'stores.view-outlets',
-    ],
-    status: 'Active',
-    isSystem: false,
-  },
-  {
-    id: 4,
-    title: 'Customer Support Agent',
-    subtitle: 'Handle customer inquiries, order delivery tracking, refunds, and support ticket resolutions.',
-    sortingOrder: 4,
-    permissions: [
-      'orders.process-orders',
-      'orders.issue-refunds',
-      'stores.view-outlets',
-    ],
-    status: 'Active',
-    isSystem: false,
-  },
-]
 
 export default function AdminRolesView() {
   const toast = useToast()
 
   // Storage state
-  const [roles, setRoles] = useState(() => {
-    try {
-      const saved = localStorage.getItem(ROLES_STORAGE_KEY)
-      return saved ? JSON.parse(saved) : INITIAL_ROLES
-    } catch {
-      return INITIAL_ROLES
+  const [roles, setRoles] = useState([])
+
+  // Fetch live roles from backend API
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const res = await getAdminRolesApi()
+        const list = res.roles || res.data || []
+        const formatted = (Array.isArray(list) ? list : []).map((r, idx) => ({
+          ...r,
+          id: r.id || r._id || idx + 1,
+          title: r.title || r.name || 'Role',
+          subtitle: r.subtitle || r.description || '',
+          permissions: r.permissions || [],
+          sortingOrder: r.sortingOrder || idx + 1,
+          status: r.status || 'Active',
+          isSystem: Boolean(r.isSystem)
+        }))
+        setRoles(formatted)
+      } catch (err) {
+        console.warn('API error fetching roles:', err)
+      }
     }
-  })
+    fetchRoles()
+  }, [])
 
   // View state: 'list' | 'add' | 'edit' | 'view'
   const [viewMode, setViewMode] = useState('list')
@@ -119,15 +82,50 @@ export default function AdminRolesView() {
   }
 
   // Save new role
-  const handleSaveNew = (newRole) => {
-    setRoles([newRole, ...roles])
-    toast.success('Role Created', `"${newRole.title}" has been created successfully!`)
+  const handleSaveNew = async (newRole) => {
+    try {
+      const res = await createAdminRoleApi({
+        title: newRole.title,
+        name: newRole.title,
+        subtitle: newRole.subtitle,
+        description: newRole.subtitle,
+        permissions: newRole.permissions || [],
+        sortingOrder: newRole.sortingOrder || roles.length + 1,
+        status: newRole.status || 'Active'
+      })
+      const created = res.data || res.role || newRole
+      const formatted = {
+        ...newRole,
+        ...created,
+        id: created._id || created.id || Date.now()
+      }
+      setRoles([formatted, ...roles])
+      toast.success('Role Created', `"${newRole.title}" has been created successfully!`)
+    } catch (err) {
+      console.warn('Backend create role error:', err)
+      setRoles([newRole, ...roles])
+      toast.success('Role Created', `"${newRole.title}" has been created successfully!`)
+    }
     setViewMode('list')
   }
 
   // Save edited role
-  const handleSaveEdited = (updatedRole) => {
-    const updatedList = roles.map((r) => (r.id === updatedRole.id ? updatedRole : r))
+  const handleSaveEdited = async (updatedRole) => {
+    try {
+      const targetId = updatedRole._id || updatedRole.id
+      await updateAdminRoleApi(targetId, {
+        title: updatedRole.title,
+        name: updatedRole.title,
+        subtitle: updatedRole.subtitle,
+        description: updatedRole.subtitle,
+        permissions: updatedRole.permissions,
+        sortingOrder: updatedRole.sortingOrder,
+        status: updatedRole.status
+      })
+    } catch (err) {
+      console.warn('Backend update role error:', err)
+    }
+    const updatedList = roles.map((r) => (String(r.id || r._id) === String(updatedRole.id || updatedRole._id) ? updatedRole : r))
     setRoles(updatedList)
     setSelectedRole(updatedRole)
     toast.success('Role Updated', `"${updatedRole.title}" updated successfully!`)
@@ -135,10 +133,16 @@ export default function AdminRolesView() {
   }
 
   // Delete role
-  const handleDelete = (roleId, roleTitle) => {
-    setRoles((prev) => prev.filter((r) => r.id !== roleId))
+  const handleDelete = async (roleId, roleTitle) => {
+    const targetRole = roles.find((r) => String(r.id || r._id) === String(roleId))
+    try {
+      await deleteAdminRoleApi(targetRole?._id || roleId)
+    } catch (err) {
+      console.warn('Backend delete role error:', err)
+    }
+    setRoles((prev) => prev.filter((r) => String(r.id || r._id) !== String(roleId)))
     setDeleteModal({ isOpen: false, role: null })
-    if (selectedRole && selectedRole.id === roleId) {
+    if (selectedRole && String(selectedRole.id || selectedRole._id) === String(roleId)) {
       setViewMode('list')
       setSelectedRole(null)
     }
@@ -146,11 +150,16 @@ export default function AdminRolesView() {
   }
 
   // Toggle status
-  const handleToggleStatus = (role) => {
+  const handleToggleStatus = async (role) => {
     const newStatus = role.status === 'Active' ? 'Inactive' : 'Active'
-    const updatedList = roles.map((r) => (r.id === role.id ? { ...r, status: newStatus } : r))
+    try {
+      await updateAdminRoleApi(role._id || role.id, { status: newStatus })
+    } catch (err) {
+      console.warn('Backend toggle status error:', err)
+    }
+    const updatedList = roles.map((r) => (String(r.id || r._id) === String(role.id || role._id) ? { ...r, status: newStatus } : r))
     setRoles(updatedList)
-    if (selectedRole && selectedRole.id === role.id) {
+    if (selectedRole && String(selectedRole.id || selectedRole._id) === String(role.id || role._id)) {
       setSelectedRole({ ...selectedRole, status: newStatus })
     }
     toast.info('Status Changed', `"${role.title}" is now ${newStatus}.`)

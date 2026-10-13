@@ -14,6 +14,7 @@ import {
   FormActions,
   Modal,
   AlertModal,
+  OrdersView,
   StoresView,
   CustomersView,
   SettingsView,
@@ -35,6 +36,7 @@ import {
   OrdersAnalyticsSection,
   CustomerAnalyticsSection
 } from '../components'
+import { getDashboardStatsApi, getAdminMeApi, getAdminStoresApi, getAdminCustomersApi } from '../utils/adminApi'
 import { useToast } from '../context/ToastContext'
 import {
   faChartLine,
@@ -78,6 +80,37 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 export default function DashboardPage({ onLogout }) {
   const toast = useToast()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  // Current logged in admin profile
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('bazario_admin_user')
+      return saved ? JSON.parse(saved) : { name: 'Super Admin', email: 'admin@bazario.com', avatar: 'BA' }
+    } catch {
+      return { name: 'Super Admin', email: 'admin@bazario.com', avatar: 'BA' }
+    }
+  })
+
+  useEffect(() => {
+    // Sync current logged in user from backend
+    getAdminMeApi()
+      .then((res) => {
+        if (res && res.admin) {
+          setCurrentUser(res.admin)
+          localStorage.setItem('bazario_admin_user', JSON.stringify(res.admin))
+        }
+      })
+      .catch(() => {})
+
+    const handleProfileUpdated = () => {
+      try {
+        const saved = localStorage.getItem('bazario_admin_user')
+        if (saved) setCurrentUser(JSON.parse(saved))
+      } catch (e) {}
+    }
+    window.addEventListener('bazario_admin_profile_updated', handleProfileUpdated)
+    return () => window.removeEventListener('bazario_admin_profile_updated', handleProfileUpdated)
+  }, [])
 
   // URL Hash Routing Synchronization
   const getTabFromHash = () => {
@@ -123,8 +156,12 @@ export default function DashboardPage({ onLogout }) {
     ) {
       return 'manage-offers'
     }
+    if (baseTab === 'orders' || baseTab === 'order') {
+      return 'orders'
+    }
     const validTabs = [
       'dashboard',
+      'orders',
       'stores',
       'customers',
       'delivery-staff',
@@ -166,10 +203,26 @@ export default function DashboardPage({ onLogout }) {
 
   const [dateFilter, setDateFilter] = useState('today')
   const [searchQuery, setSearchQuery] = useState('')
+  const [statsData, setStatsData] = useState(null)
+
+  useEffect(() => {
+    let isMounted = true
+    getDashboardStatsApi()
+      .then((res) => {
+        if (isMounted && res && res.stats) {
+          setStatsData(res.stats)
+        }
+      })
+      .catch(() => {})
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   // Navigation Items
   const navItems = [
     { id: 'dashboard', name: 'Dashboard', icon: faChartLine },
+    { id: 'orders', name: 'Orders', icon: faCartShopping },
     { id: 'stores', name: 'Stores', icon: faStore },
     { id: 'customers', name: 'Customers', icon: faUsers },
     { id: 'delivery-staff', name: 'Delivery Staff', icon: faTruck },
@@ -207,109 +260,86 @@ export default function DashboardPage({ onLogout }) {
   const stats = [
     {
       title: "Today's Gross Sales",
-      value: '₹1,48,250.00',
-      change: '+14.8%',
+      value: statsData?.todaySalesFormatted || (statsData?.totalRevenue !== undefined ? `₹${statsData.totalRevenue.toLocaleString('en-IN')}.00` : '₹0.00'),
+      change: statsData?.todaySalesGrowth || '0%',
       isPositive: true,
       icon: faWallet,
       iconBg: 'bg-[#f0f9f3] text-[#064C23] border border-[#bae2cb]',
     },
     {
       title: 'Active Store Outlets',
-      value: '4 Outlets',
-      change: '3 Open • 1 Closed',
+      value: statsData?.activeStoresCount !== undefined ? `${statsData.activeStoresCount} Outlets` : '0 Outlets',
+      change: statsData?.totalStoresCount !== undefined ? `${statsData.activeStoresCount} Open • ${Math.max(0, statsData.totalStoresCount - statsData.activeStoresCount)} Closed` : '0 Open',
       isPositive: true,
       icon: faStore,
       iconBg: 'bg-[#fdf6f4] text-[#A44F37] border border-[#f5d5cc]',
     },
     {
       title: 'Total Customers',
-      value: '1,240',
-      change: '+12.4% this month',
+      value: statsData?.totalCustomers !== undefined ? statsData.totalCustomers.toLocaleString('en-IN') : '0',
+      change: 'Active in database',
       isPositive: true,
       icon: faUsers,
       iconBg: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
     },
     {
-      title: 'Admin Staff & Roles',
-      value: '4 Admins',
-      change: '4 Access Roles Active',
+      title: 'Live Orders Processed',
+      value: statsData?.totalOrdersCount !== undefined ? `${statsData.totalOrdersCount} Orders` : '0 Orders',
+      change: statsData?.pendingOrders !== undefined ? `${statsData.pendingOrders} Pending • ${statsData.deliveredOrders} Delivered` : '0 Pending',
       isPositive: true,
-      icon: faUserTie,
+      icon: faCartShopping,
       iconBg: 'bg-blue-50 text-blue-700 border border-blue-200',
     },
   ]
 
-  // Top Supermarket Branches Data (in ₹)
-  const storeBranches = [
-    {
-      id: 1,
-      name: 'Bazario Central Superstore #01',
-      location: 'Sector 18, Noida Commercial Hub',
-      dailySales: '₹58,400.00',
-      status: 'Open',
-      phone: '+91 98111 22334',
-    },
-    {
-      id: 2,
-      name: 'Bazario Express Store',
-      location: 'DLF Cyber City, Phase 2, Gurugram',
-      dailySales: '₹42,650.00',
-      status: 'Open',
-      phone: '+91 98222 33445',
-    },
-    {
-      id: 3,
-      name: 'Bazario Supermarket',
-      location: 'Main Market, Green Park, South Delhi',
-      dailySales: '₹34,200.00',
-      status: 'Open',
-      phone: '+91 98333 44556',
-    },
-    {
-      id: 4,
-      name: 'Bazario Daily Outlet',
-      location: 'Block B, Indirapuram, Ghaziabad',
-      dailySales: '₹13,000.00',
-      status: 'Closed',
-      phone: '+91 98444 55667',
-    },
-  ]
+  // Top Supermarket Branches Data - fetched live from backend
+  const [storeBranches, setStoreBranches] = useState([])
 
-  // Recent Registered Customers for Dashboard Overview
-  const [recentCustomers, setRecentCustomers] = useState([
-    {
-      id: 1,
-      name: 'Priya Sharma',
-      email: 'priya.s@example.com',
-      phone: '+91 98234 11223',
-      status: 'Active',
-      totalSpent: '₹14,200.00',
-    },
-    {
-      id: 2,
-      name: 'Rahul Verma',
-      email: 'rahul.v@techmail.com',
-      phone: '+91 97123 44556',
-      status: 'Active',
-      totalSpent: '₹6,800.00',
-    },
-    {
-      id: 3,
-      name: 'Ananya Roy',
-      email: 'ananya.roy@web.in',
-      phone: '+91 98450 67890',
-      status: 'Active',
-      totalSpent: '₹28,900.00',
-    },
-    {
-      id: 4,
-      name: 'Amit Patel',
-      email: 'amit.patel@corphub.com',
-      phone: '+91 99012 33445',
-      status: 'Restricted',
-      totalSpent: '₹3,200.00',
-    },
-  ])
+  // Recent Registered Customers for Dashboard Overview - fetched live from backend
+  const [recentCustomers, setRecentCustomers] = useState([])
+
+  useEffect(() => {
+    let isMounted = true
+    getAdminStoresApi()
+      .then((res) => {
+        if (isMounted && res) {
+          const list = res.stores || res.data || []
+          setStoreBranches(
+            list.map((s, idx) => ({
+              id: s._id || s.id || idx + 1,
+              name: s.title || s.name || `Store #${idx + 1}`,
+              location: s.subtitle || s.address || 'Noida Hub',
+              dailySales: '₹0.00',
+              status: s.status || 'Open',
+              phone: s.phone || '+91 98111 22334',
+            }))
+          )
+        }
+      })
+      .catch(() => {})
+
+    getAdminCustomersApi()
+      .then((res) => {
+        if (isMounted && res) {
+          const list = res.customers || res.data || []
+          setRecentCustomers(
+            list.map((c, idx) => ({
+              id: c._id || c.id || idx + 1,
+              name: c.name || 'Bazario Customer',
+              email: c.email || 'N/A',
+              phone: c.phone || 'N/A',
+              status: c.status || (c.isBlocked ? 'Restricted' : 'Active'),
+              totalSpent: c.totalSpent ? `₹${c.totalSpent.toLocaleString('en-IN')}` : '₹0.00',
+            }))
+          )
+        }
+      })
+      .catch(() => {})
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   const handleToggleCustomerStatus = (customer) => {
     const newStatus = customer.status === 'Active' ? 'Restricted' : 'Active'
@@ -329,16 +359,19 @@ export default function DashboardPage({ onLogout }) {
         navItems={navItems}
         activeTab={activeTab}
         onSelectTab={handleSelectTab}
-        user={{ name: 'Store Admin', email: 'admin@bazario.com', avatar: 'BA' }}
+        user={currentUser}
       />
 
       {/* Main Layout Area */}
       <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden">
         {/* Fixed Reusable Header */}
         <Header
+          user={currentUser}
           onMenuToggle={() => setSidebarOpen((prev) => !prev)}
           title={
-            activeTab === 'settings'
+            activeTab === 'orders'
+              ? 'Orders Management'
+              : activeTab === 'settings'
               ? 'Store Settings'
               : activeTab === 'stores'
               ? 'Store Locations & Outlets'
@@ -381,6 +414,7 @@ export default function DashboardPage({ onLogout }) {
         {/* Scrollable Main Content */}
         <div className="flex-1 overflow-y-auto min-h-0 flex flex-col justify-between scrollbar-thin">
           <main className="p-4 sm:p-6 lg:p-8 space-y-6 flex-1 pb-16">
+            {activeTab === 'orders' && <OrdersView />}
             {activeTab === 'settings' && <SettingsView />}
             {activeTab === 'stores' && <StoresView />}
             {activeTab === 'customers' && <CustomersView />}

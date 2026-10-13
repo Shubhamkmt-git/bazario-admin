@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faCartShopping,
@@ -18,101 +18,82 @@ import Button from '../ui/Button'
 import ActionButton from '../ui/ActionButton'
 import Modal from '../ui/Modal'
 import AlertModal from '../ui/AlertModal'
-
-const INITIAL_ORDERS = [
-  {
-    id: '#ORD-9842',
-    customer: 'Priya Sharma',
-    email: 'priya.s@example.com',
-    phone: '+91 98234 11223',
-    items: '5 items (Apples 1kg, Milk 2L, Brown Bread)',
-    total: '$34.80',
-    status: 'Completed',
-    time: '10 mins ago',
-    payment: 'UPI / Online',
-    deliveryAddress: 'Flat 402, Green Valley Apts, Sector 14',
-  },
-  {
-    id: '#ORD-9841',
-    customer: 'Rahul Verma',
-    email: 'rahul.v@techmail.com',
-    phone: '+91 97123 44556',
-    items: '12 items (Weekly Grocery Essentials Pack)',
-    total: '$118.50',
-    status: 'Processing',
-    time: '24 mins ago',
-    payment: 'Credit Card',
-    deliveryAddress: 'B-12, Palm Residency, Block C',
-  },
-  {
-    id: '#ORD-9840',
-    customer: 'Ananya Roy',
-    email: 'ananya.roy@web.in',
-    phone: '+91 98450 67890',
-    items: '3 items (Fresh Organic Strawberries x3)',
-    total: '$18.00',
-    status: 'Pending',
-    time: '45 mins ago',
-    payment: 'Cash on Delivery',
-    deliveryAddress: 'Villa 7, Orchid Enclave, Main Road',
-  },
-  {
-    id: '#ORD-9839',
-    customer: 'Amit Patel',
-    email: 'amit.patel@corphub.com',
-    phone: '+91 99012 33445',
-    items: '8 items (Bakery, Dairy & Organic Honey)',
-    total: '$52.20',
-    status: 'Completed',
-    time: '1 hour ago',
-    payment: 'UPI / Online',
-    deliveryAddress: 'Flat 101, Sunshine Towers',
-  },
-  {
-    id: '#ORD-9838',
-    customer: 'Kavita Joshi',
-    email: 'kavita.j@mail.com',
-    phone: '+91 98765 12340',
-    items: '2 items (Cold Pressed Olive Oil 1L x2)',
-    total: '$29.90',
-    status: 'Completed',
-    time: '2 hours ago',
-    payment: 'Credit Card',
-    deliveryAddress: 'House #45, Sector 21',
-  },
-  {
-    id: '#ORD-9837',
-    customer: 'Suresh Kumar',
-    email: 'suresh.k@enterprise.com',
-    phone: '+91 98333 44112',
-    items: '15 items (Bulk Grain & Pulse Pack)',
-    total: '$145.00',
-    status: 'Processing',
-    time: '3 hours ago',
-    payment: 'Net Banking',
-    deliveryAddress: 'Shop 12, Commercial Market Hub',
-  },
-  {
-    id: '#ORD-9836',
-    customer: 'Neha Gupta',
-    email: 'neha.gupta@fintech.io',
-    phone: '+91 97654 32109',
-    items: '4 items (Almond Milk, Oats & Berries)',
-    total: '$24.50',
-    status: 'Completed',
-    time: '4 hours ago',
-    payment: 'UPI / Online',
-    deliveryAddress: 'D-304, Silver Oak Apartments',
-  },
-]
+import { getAdminOrdersApi, updateAdminOrderStatusApi } from '../../utils/adminApi'
 
 export default function OrdersView() {
   const toast = useToast()
-  const [orders, setOrders] = useState(INITIAL_ORDERS)
+  const [orders, setOrders] = useState([])
   const [orderFilter, setOrderFilter] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedOrder, setSelectedOrder] = useState(null)
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, orderId: null })
+  const [isLoading, setIsLoading] = useState(false)
+
+  const fetchOrders = async () => {
+    setIsLoading(true)
+    try {
+      const res = await getAdminOrdersApi()
+      const list = res.orders || res.data || []
+      const formatted = (Array.isArray(list) ? list : []).map((o) => {
+          const itemList = o.items || []
+          const itemsText =
+            itemList.length > 0
+              ? `${itemList.length} items (${itemList
+                  .map((i) => i.name)
+                  .slice(0, 2)
+                  .join(', ')}${itemList.length > 2 ? '...' : ''})`
+              : '0 items'
+          const timeText = o.createdAt
+            ? new Date(o.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            : 'Just now'
+          const addr =
+            typeof o.deliveryAddress === 'object'
+              ? `${o.deliveryAddress?.addressLine || ''} ${o.deliveryAddress?.city || ''}`
+              : o.deliveryAddress || 'N/A'
+
+          return {
+            id: o.orderNumber ? `#${o.orderNumber}` : o.id ? `#${o.id}` : `#ORD-${(o._id || '').slice(-4)}`,
+            _id: o._id,
+            customer: o.customerName || o.user?.name || 'Bazario Customer',
+            email: o.customerEmail || o.user?.email || '',
+            phone: o.customerPhone || o.user?.phone || '',
+            items: itemsText,
+            rawItems: itemList,
+            total: `₹${(o.totalAmount || o.subtotal || 0).toFixed(2)}`,
+            status: o.status || o.orderStatus || 'Placed',
+            time: timeText,
+            payment: o.paymentMethod || 'Cash on Delivery (COD)',
+            deliveryAddress: addr,
+            assignedRider: o.assignedRider || '',
+          }
+        })
+        setOrders(formatted)
+    } catch (err) {
+      console.warn('Orders fetch error:', err)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchOrders()
+  }, [])
+
+  const handleUpdateStatus = async (newStatus) => {
+    if (!selectedOrder?._id) return
+    try {
+      await updateAdminOrderStatusApi(
+        selectedOrder._id,
+        newStatus,
+        selectedOrder.assignedRider || ''
+      )
+      toast.success('Order Status Updated', `Order ${selectedOrder.id} marked as "${newStatus}"`)
+      setSelectedOrder((prev) => (prev ? { ...prev, status: newStatus } : null))
+      fetchOrders()
+    } catch (err) {
+      toast.error('Update Failed', err.message || 'Could not update status')
+    }
+  }
 
   const filteredOrders = orders.filter((order) => {
     const matchesStatus =
@@ -153,8 +134,11 @@ export default function OrdersView() {
           <Button
             variant="outline"
             size="md"
-            onClick={() => toast.info('Refreshed', 'Latest order log synced.')}
-            icon={<FontAwesomeIcon icon={faRotateRight} className="text-xs" />}
+            onClick={() => {
+              fetchOrders()
+              toast.info('Refreshed', 'Latest order log synced.')
+            }}
+            icon={<FontAwesomeIcon icon={faRotateRight} className={`text-xs ${isLoading ? 'animate-spin' : ''}`} />}
           >
             Refresh
           </Button>
@@ -320,6 +304,29 @@ export default function OrdersView() {
               <div className="border-t border-slate-200 pt-2 flex justify-between font-black text-base text-[#064C23]">
                 <span>Total Amount:</span>
                 <span>{selectedOrder.total}</span>
+              </div>
+            </div>
+
+            {/* Update Order Status Controls */}
+            <div className="bg-white p-3.5 rounded-2xl border border-slate-200 space-y-2">
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+                Update Order Status:
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {['Placed', 'Processing', 'Out for Delivery', 'Delivered', 'Cancelled'].map((st) => (
+                  <button
+                    key={st}
+                    type="button"
+                    onClick={() => handleUpdateStatus(st)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      selectedOrder.status === st
+                        ? 'bg-[#064C23] text-white shadow-xs'
+                        : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                    }`}
+                  >
+                    {st}
+                  </button>
+                ))}
               </div>
             </div>
 

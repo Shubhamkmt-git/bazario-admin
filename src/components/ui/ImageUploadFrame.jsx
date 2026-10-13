@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCloudArrowUp, faTrashCan, faImage, faArrowsRotate } from '@fortawesome/free-solid-svg-icons'
+import { uploadImageApi } from '../../utils/adminApi'
 
 export default function ImageUploadFrame({
   value,
@@ -37,7 +38,7 @@ export default function ImageUploadFrame({
     auto: 'min-h-[180px]',
   }
 
-  const handleFileChange = (file) => {
+  const handleFileChange = async (file) => {
     setError('')
     if (!file) return
 
@@ -51,6 +52,7 @@ export default function ImageUploadFrame({
       return
     }
 
+    // Show immediate local preview
     const reader = new FileReader()
     reader.onload = (e) => {
       const result = e.target.result
@@ -59,6 +61,19 @@ export default function ImageUploadFrame({
       if (onImageSelect) onImageSelect(file, result)
     }
     reader.readAsDataURL(file)
+
+    // Upload to server and store public URL
+    try {
+      const res = await uploadImageApi(file)
+      if (res && res.url) {
+        const fullUrl = res.url.startsWith('http') ? res.url : `http://localhost:5000${res.url}`
+        setPreview(fullUrl)
+        if (onChange) onChange(fullUrl, file)
+        if (onImageSelect) onImageSelect(file, fullUrl)
+      }
+    } catch (err) {
+      console.warn('Server upload fallback to local preview:', err)
+    }
   }
 
   const handleDragOver = (e) => {

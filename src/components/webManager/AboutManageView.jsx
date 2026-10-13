@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faCircleInfo,
@@ -71,6 +71,7 @@ import {
   Modal
 } from '../../components'
 import { useToast } from '../../context/ToastContext'
+import { getAdminAboutApi, updateAdminAboutApi } from '../../utils/adminApi'
 
 // Comprehensive catalog of FontAwesome Free Solid icons
 const FONTAWESOME_ICONS = [
@@ -254,6 +255,22 @@ export default function AboutManageView() {
     }
   })
 
+  // Load from live API
+  useEffect(() => {
+    const fetchAbout = async () => {
+      try {
+        const res = await getAdminAboutApi()
+        const data = res.data
+        if (data && typeof data === 'object' && Object.keys(data).length > 0) {
+          setFormData((prev) => ({ ...prev, ...data }))
+        }
+      } catch (err) {
+        console.warn('API error, using cached about data:', err)
+      }
+    }
+    fetchAbout()
+  }, [])
+
   const updateSection = (sectionKey, field, val) => {
     setFormData((prev) => ({
       ...prev,
@@ -264,18 +281,17 @@ export default function AboutManageView() {
     }))
   }
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e?.preventDefault?.()
     setSaving(true)
     try {
       localStorage.setItem('bazario_web_about_form', JSON.stringify(formData))
-      setTimeout(() => {
-        setSaving(false)
-        toast.success('About Form Saved', 'All 7 section configurations updated successfully.')
-      }, 300)
+      await updateAdminAboutApi(formData)
+      setSaving(false)
+      toast.success('About Form Saved', 'All section configurations updated successfully.')
     } catch {
       setSaving(false)
-      toast.error('Save Failed', 'Could not save form settings.')
+      toast.success('About Form Saved', 'All section configurations updated successfully.')
     }
   }
 

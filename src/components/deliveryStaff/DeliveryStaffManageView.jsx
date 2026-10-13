@@ -5,64 +5,40 @@ import DeliveryStaffListView from './DeliveryStaffListView'
 import AddDeliveryStaffView from './AddDeliveryStaffView'
 import EditDeliveryStaffView from './EditDeliveryStaffView'
 import DeliveryStaffDetailsView from './DeliveryStaffDetailsView'
+import { getAdminDeliveryStaffApi } from '../../utils/adminApi'
 
 const DELIVERY_STAFF_STORAGE_KEY = 'bazario_delivery_staff'
-
-const INITIAL_DELIVERY_STAFF = [
-  {
-    id: 1,
-    riderId: 'BAZ-DRV-1001',
-    name: 'Ramesh Kumar Sharma',
-    mobileNumber: '+91 98765 43210',
-    email: 'ramesh.sharma@bazario.in',
-    belongToStore: 'Bazario Central Superstore #01',
-    image: '',
-    status: 'Active'
-  },
-  {
-    id: 2,
-    riderId: 'BAZ-DRV-1002',
-    name: 'Mohammad Imran Khan',
-    mobileNumber: '+91 98111 22334',
-    email: 'imran.khan@bazario.in',
-    belongToStore: 'Bazario Express Store - Cyber City',
-    image: '',
-    status: 'Active'
-  },
-  {
-    id: 3,
-    riderId: 'BAZ-DRV-1003',
-    name: 'Sunil Gurjar',
-    mobileNumber: '+91 97222 33445',
-    email: 'sunil.gurjar@bazario.in',
-    belongToStore: 'Bazario Supermarket - Green Park',
-    image: '',
-    status: 'Active'
-  },
-  {
-    id: 4,
-    riderId: 'BAZ-DRV-1004',
-    name: 'Vikas Deep Singh',
-    mobileNumber: '+91 99888 77665',
-    email: 'vikas.singh@bazario.in',
-    belongToStore: 'Bazario Daily Outlet - Indirapuram',
-    image: '',
-    status: 'Inactive'
-  }
-]
 
 export default function DeliveryStaffManageView() {
   const toast = useToast()
 
   // Storage State
-  const [staffMembers, setStaffMembers] = useState(() => {
+  const [staffMembers, setStaffMembers] = useState([])
+
+  const fetchDeliveryStaff = async () => {
     try {
-      const saved = localStorage.getItem(DELIVERY_STAFF_STORAGE_KEY)
-      return saved ? JSON.parse(saved) : INITIAL_DELIVERY_STAFF
-    } catch {
-      return INITIAL_DELIVERY_STAFF
+      const res = await getAdminDeliveryStaffApi()
+      const list = res.staff || res.deliveryStaff || res.data || []
+      const formatted = (Array.isArray(list) ? list : []).map((s, idx) => ({
+        id: s._id || s.id || idx + 1,
+        _id: s._id,
+        riderId: s.riderId || `BAZ-DRV-${1000 + idx + 1}`,
+        name: s.name || 'Delivery Partner',
+        mobileNumber: s.phone || s.mobileNumber || '+91 98765 43210',
+        email: s.email || '',
+        belongToStore: s.store?.title || s.belongToStore || 'Bazario Central Hub',
+        image: s.image || '',
+        status: s.status || 'Active'
+      }))
+      setStaffMembers(formatted)
+    } catch (err) {
+      console.warn('Failed to fetch delivery staff:', err)
     }
-  })
+  }
+
+  useEffect(() => {
+    fetchDeliveryStaff()
+  }, [])
 
   // View state: 'list' | 'add' | 'edit' | 'view'
   const [viewMode, setViewMode] = useState('list')
@@ -70,15 +46,6 @@ export default function DeliveryStaffManageView() {
 
   // Delete modal state
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, staff: null })
-
-  // Sync to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem(DELIVERY_STAFF_STORAGE_KEY, JSON.stringify(staffMembers))
-    } catch (e) {
-      console.error('Failed to persist delivery staff', e)
-    }
-  }, [staffMembers])
 
   // Hash Route Parser & Listener
   useEffect(() => {

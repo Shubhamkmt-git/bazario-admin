@@ -329,10 +329,31 @@ export default function Sidebar({
           }`}
         >
           <div
-            className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#A44F37] to-[#064C23] text-white flex items-center justify-center font-bold text-sm shadow-sm shrink-0 cursor-pointer transition-transform hover:scale-105"
+            className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#A44F37] to-[#064C23] text-white flex items-center justify-center font-bold text-sm shadow-sm shrink-0 cursor-pointer transition-transform hover:scale-105 overflow-hidden border border-white/60"
             title={!isOpen ? `${user.name} (${user.email})` : ''}
           >
-            {user.avatar || 'BA'}
+            {user.avatar && (user.avatar.startsWith('http') || user.avatar.startsWith('data:image') || user.avatar.startsWith('blob:') || user.avatar.startsWith('/uploads')) ? (
+              <img
+                src={user.avatar.startsWith('/uploads') ? `http://localhost:5000${user.avatar}` : user.avatar}
+                alt={user.name || 'User'}
+                className="w-full h-full object-cover rounded-full"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none'
+                }}
+              />
+            ) : (
+              <span>
+                {user.name
+                  ? user.name
+                      .split(' ')
+                      .filter(Boolean)
+                      .map((n) => n[0])
+                      .join('')
+                      .slice(0, 2)
+                      .toUpperCase()
+                  : (user.avatar || 'BA')}
+              </span>
+            )}
           </div>
 
           {isOpen && (

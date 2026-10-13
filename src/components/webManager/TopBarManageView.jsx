@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faWindowMaximize,
@@ -30,54 +30,40 @@ import {
   BackButton
 } from '../../components'
 import { useToast } from '../../context/ToastContext'
-
-const INITIAL_TOPBAR_ITEMS = [
-  {
-    id: 1,
-    sortingOrder: 1,
-    title: '⚡ Super Savings: Flat ₹150 OFF on orders above ₹999 with code BAZARIO150',
-    urlOrCopyText: 'BAZARIO150',
-    status: 'Active',
-    createdAt: '2026-10-08 10:00 AM'
-  },
-  {
-    id: 2,
-    sortingOrder: 2,
-    title: '🥬 Farm-Fresh Hydroponic Veggies & Greens restocked every morning at 7:00 AM',
-    urlOrCopyText: 'https://bazario.in/categories/fresh-produce',
-    status: 'Active',
-    createdAt: '2026-10-08 11:30 AM'
-  },
-  {
-    id: 3,
-    sortingOrder: 3,
-    title: '🚚 Express 20-Minute Grocery Delivery now active across Noida & Gurugram',
-    urlOrCopyText: 'https://bazario.in/express-delivery',
-    status: 'Active',
-    createdAt: '2026-10-09 08:00 AM'
-  },
-  {
-    id: 4,
-    sortingOrder: 4,
-    title: '🎉 Download the Bazario Supermarket App & get ₹100 Cashback on 1st Order',
-    urlOrCopyText: 'https://bazario.in/app-download',
-    status: 'Inactive',
-    createdAt: '2026-10-09 09:15 AM'
-  }
-]
+import {
+  getAdminTopBarApi,
+  createAdminTopBarApi,
+  updateAdminTopBarApi,
+  deleteAdminTopBarApi
+} from '../../utils/adminApi'
 
 export default function TopBarManageView() {
   const toast = useToast()
 
   // State: items list
-  const [items, setItems] = useState(() => {
-    try {
-      const saved = localStorage.getItem('bazario_web_topbar_items')
-      return saved ? JSON.parse(saved) : INITIAL_TOPBAR_ITEMS
-    } catch {
-      return INITIAL_TOPBAR_ITEMS
+  const [items, setItems] = useState([])
+
+  // Load live items from backend API
+  useEffect(() => {
+    const fetchTopBar = async () => {
+      try {
+        const res = await getAdminTopBarApi()
+        const list = res.items || res.data || []
+        const formatted = (Array.isArray(list) ? list : []).map((item, idx) => ({
+          ...item,
+          id: item.id || item._id || idx + 1,
+          sortingOrder: Number(item.sortingOrder) || idx + 1,
+          title: item.title || '',
+          urlOrCopyText: item.urlOrCopyText || '',
+          status: item.status || 'Active'
+        }))
+        setItems(formatted)
+      } catch (err) {
+        console.warn('API error fetching topbar items:', err)
+      }
     }
-  })
+    fetchTopBar()
+  }, [])
 
   // Navigation mode: 'index' | 'add' | 'edit' | 'view'
   const [pageMode, setPageMode] = useState('index')
@@ -104,7 +90,11 @@ export default function TopBarManageView() {
   // Sync to localStorage
   const saveItemsToStorage = (updated) => {
     setItems(updated)
-    localStorage.setItem('bazario_web_topbar_items', JSON.stringify(updated))
+    try {
+      localStorage.setItem('bazario_web_topbar_items', JSON.stringify(updated))
+    } catch (e) {
+      console.warn('LocalStorage save error:', e)
+    }
   }
 
   // Action: Open Add Page
@@ -139,15 +129,20 @@ export default function TopBarManageView() {
   }
 
   // Action: Toggle Status inline
-  const handleToggleStatus = (item) => {
+  const handleToggleStatus = async (item) => {
     const nextStatus = item.status === 'Active' ? 'Inactive' : 'Active'
-    const updated = items.map((i) => (i.id === item.id ? { ...i, status: nextStatus } : i))
+    try {
+      await updateAdminTopBarApi(item._id || item.id, { status: nextStatus })
+    } catch (err) {
+      console.warn('Backend toggle error:', err)
+    }
+    const updated = items.map((i) => (String(i.id || i._id) === String(item.id || item._id) ? { ...i, status: nextStatus } : i))
     saveItemsToStorage(updated)
     toast.info('Status Updated', `Announcement status changed to ${nextStatus}.`)
   }
 
   // Action: Submit Add/Edit Form
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
     e?.preventDefault?.()
 
     if (!formData.title?.trim()) {
@@ -158,8 +153,18 @@ export default function TopBarManageView() {
     const orderNum = parseInt(formData.sortingOrder, 10) || 1
 
     if (pageMode === 'edit' && activeItem) {
+      try {
+        await updateAdminTopBarApi(activeItem._id || activeItem.id, {
+          sortingOrder: orderNum,
+          title: formData.title.trim(),
+          urlOrCopyText: formData.urlOrCopyText.trim(),
+          status: formData.status
+        })
+      } catch (err) {
+        console.warn('Backend edit error:', err)
+      }
       const updated = items.map((i) =>
-        i.id === activeItem.id
+        String(i.id || i._id) === String(activeItem.id || activeItem._id)
           ? {
               ...i,
               sortingOrder: orderNum,
@@ -174,8 +179,20 @@ export default function TopBarManageView() {
       setPageMode('index')
       setActiveItem(null)
     } else if (pageMode === 'add') {
+      let created = null
+      try {
+        const res = await createAdminTopBarApi({
+          sortingOrder: orderNum,
+          title: formData.title.trim(),
+          urlOrCopyText: formData.urlOrCopyText.trim(),
+          status: formData.status
+        })
+        created = res.data || res.item
+      } catch (err) {
+        console.warn('Backend create error:', err)
+      }
       const newItem = {
-        id: Date.now(),
+        id: created?._id || created?.id || Date.now(),
         sortingOrder: orderNum,
         title: formData.title.trim(),
         urlOrCopyText: formData.urlOrCopyText.trim(),
@@ -195,9 +212,14 @@ export default function TopBarManageView() {
   }
 
   // Action: Delete Confirmation
-  const handleDeleteConfirm = () => {
+  const handleDeleteConfirm = async () => {
     if (!itemToDelete) return
-    const updated = items.filter((i) => i.id !== itemToDelete.id)
+    try {
+      await deleteAdminTopBarApi(itemToDelete._id || itemToDelete.id)
+    } catch (err) {
+      console.warn('Backend delete error:', err)
+    }
+    const updated = items.filter((i) => String(i.id || i._id) !== String(itemToDelete.id || itemToDelete._id))
     saveItemsToStorage(updated)
     setDeleteModalOpen(false)
     setItemToDelete(null)

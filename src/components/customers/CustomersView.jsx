@@ -5,80 +5,43 @@ import CustomerListView from './CustomerListView'
 import AddCustomerView from './AddCustomerView'
 import EditCustomerView from './EditCustomerView'
 import CustomerDetailsView from './CustomerDetailsView'
+import { getAdminCustomersApi } from '../../utils/adminApi'
 
 const CUSTOMERS_STORAGE_KEY = 'bazario_customers_data'
-
-const INITIAL_CUSTOMERS = [
-  {
-    id: 1,
-    name: 'Priya Sharma',
-    email: 'priya.s@example.com',
-    phone: '+91 98234 11223',
-    status: 'Active',
-    joined: 'Jan 2025',
-  },
-  {
-    id: 2,
-    name: 'Rahul Verma',
-    email: 'rahul.v@techmail.com',
-    phone: '+91 97123 44556',
-    status: 'Active',
-    joined: 'Mar 2025',
-  },
-  {
-    id: 3,
-    name: 'Ananya Roy',
-    email: 'ananya.roy@web.in',
-    phone: '+91 98450 67890',
-    status: 'Active',
-    joined: 'Nov 2024',
-  },
-  {
-    id: 4,
-    name: 'Amit Patel',
-    email: 'amit.patel@corphub.com',
-    phone: '+91 99012 33445',
-    status: 'Restricted',
-    joined: 'Aug 2025',
-  },
-  {
-    id: 5,
-    name: 'Kavita Joshi',
-    email: 'kavita.j@mail.com',
-    phone: '+91 98765 12340',
-    status: 'Active',
-    joined: 'Feb 2025',
-  },
-]
 
 export default function CustomersView() {
   const toast = useToast()
 
   // Storage State
-  const [customers, setCustomers] = useState(() => {
-    try {
-      const saved = localStorage.getItem(CUSTOMERS_STORAGE_KEY)
-      return saved ? JSON.parse(saved) : INITIAL_CUSTOMERS
-    } catch {
-      return INITIAL_CUSTOMERS
-    }
-  })
-
-  // View state: 'list' | 'add' | 'edit' | 'view'
+  const [customers, setCustomers] = useState([])
   const [viewMode, setViewMode] = useState('list')
   const [selectedCustomer, setSelectedCustomer] = useState(null)
-
-  // Delete modal state
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, customer: null })
 
-  // Sync to localStorage
-  useEffect(() => {
+  const fetchCustomers = async () => {
     try {
-      localStorage.setItem(CUSTOMERS_STORAGE_KEY, JSON.stringify(customers))
-    } catch (e) {
-      console.error('Failed to persist customers', e)
+      const res = await getAdminCustomersApi()
+      const list = res.customers || res.data || []
+      const formatted = (Array.isArray(list) ? list : []).map((c, idx) => ({
+        id: c._id || c.id || idx + 1,
+        _id: c._id,
+        name: c.name || 'Bazario Customer',
+        email: c.email || 'N/A',
+        phone: c.phone || 'N/A',
+        status: c.status || (c.isBlocked ? 'Restricted' : 'Active'),
+        joined: c.createdAt
+          ? new Date(c.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+          : 'Recently',
+      }))
+      setCustomers(formatted)
+    } catch (err) {
+      console.warn('Failed to fetch customers:', err)
     }
-  }, [customers])
+  }
+
+  useEffect(() => {
+    fetchCustomers()
+  }, [])
 
   // Navigation handlers
   const handleGoToList = () => {
@@ -119,9 +82,9 @@ export default function CustomersView() {
 
   // Delete customer
   const handleDelete = (customerId, customerName) => {
-    setCustomers((prev) => prev.filter((c) => c.id !== customerId))
+    setCustomers((prev) => prev.filter((c) => String(c.id || c._id) !== String(customerId)))
     setDeleteModal({ isOpen: false, customer: null })
-    if (selectedCustomer && selectedCustomer.id === customerId) {
+    if (selectedCustomer && String(selectedCustomer.id || selectedCustomer._id) === String(customerId)) {
       setViewMode('list')
       setSelectedCustomer(null)
     }
@@ -131,9 +94,11 @@ export default function CustomersView() {
   // Toggle status
   const handleToggleStatus = (customer) => {
     const newStatus = customer.status === 'Active' ? 'Restricted' : 'Active'
-    const updatedList = customers.map((c) => (c.id === customer.id ? { ...c, status: newStatus } : c))
+    const updatedList = customers.map((c) =>
+      String(c.id || c._id) === String(customer.id || customer._id) ? { ...c, status: newStatus } : c
+    )
     setCustomers(updatedList)
-    if (selectedCustomer && selectedCustomer.id === customer.id) {
+    if (selectedCustomer && String(selectedCustomer.id || selectedCustomer._id) === String(customer.id || customer._id)) {
       setSelectedCustomer({ ...selectedCustomer, status: newStatus })
     }
     toast.info('Status Changed', `"${customer.name}" is now ${newStatus}.`)

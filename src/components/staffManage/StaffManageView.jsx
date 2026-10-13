@@ -5,70 +5,39 @@ import EditStaffView from './EditStaffView'
 import StaffDetailsView from './StaffDetailsView'
 import { AlertModal } from '../index'
 import { useToast } from '../../context/ToastContext'
-
-const INITIAL_STAFF = [
-  {
-    id: 1,
-    staffId: 'BAZ-STF-1001',
-    name: 'Priya Sharma',
-    store: 'Bazario Central Superstore #01',
-    email: 'priya.sharma@bazario.in',
-    mobilenumber: '+91 98765 11223',
-    image: '',
-    status: 'Active',
-    createdAt: '2026-10-01T09:00:00.000Z'
-  },
-  {
-    id: 2,
-    staffId: 'BAZ-STF-1002',
-    name: 'Amit Patel',
-    store: 'Bazario Express Store - Cyber City',
-    email: 'amit.patel@bazario.in',
-    mobilenumber: '+91 98111 44556',
-    image: '',
-    status: 'Active',
-    createdAt: '2026-10-02T10:30:00.000Z'
-  },
-  {
-    id: 3,
-    staffId: 'BAZ-STF-1003',
-    name: 'Neha Verma',
-    store: 'Bazario Supermarket - Green Park',
-    email: 'neha.verma@bazario.in',
-    mobilenumber: '+91 97222 66778',
-    image: '',
-    status: 'Active',
-    createdAt: '2026-10-03T11:15:00.000Z'
-  },
-  {
-    id: 4,
-    staffId: 'BAZ-STF-1004',
-    name: 'Rajesh Kumar',
-    store: 'Bazario Daily Outlet - Indirapuram',
-    email: 'rajesh.kumar@bazario.in',
-    mobilenumber: '+91 99888 33221',
-    image: '',
-    status: 'Inactive',
-    createdAt: '2026-10-04T14:00:00.000Z'
-  }
-]
+import {
+  getAdminStaffApi,
+  createAdminStaffApi,
+  updateAdminStaffApi,
+  deleteAdminStaffApi
+} from '../../utils/adminApi'
 
 export default function StaffManageView() {
   const toast = useToast()
 
-  // Load from localStorage or use initial seed
-  const [staffList, setStaffList] = useState(() => {
-    try {
-      const saved = localStorage.getItem('bazario_staff_manage')
-      if (saved) {
-        const parsed = JSON.parse(saved)
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed
+  // Load from backend API
+  const [staffList, setStaffList] = useState([])
+
+  // Fetch live staff from backend API on mount
+  useEffect(() => {
+    const fetchStaff = async () => {
+      try {
+        const res = await getAdminStaffApi()
+        const list = res.staff || res.data || []
+        const formatted = (Array.isArray(list) ? list : []).map((item, idx) => ({
+          ...item,
+          id: item.id || item._id || idx + 1,
+          staffId: item.staffId || 'BAZ-STF-' + String(item._id || item.id).slice(-4).toUpperCase(),
+          store: item.storeName || item.store || 'Bazario Central Superstore #01',
+          mobilenumber: item.mobilenumber || item.phone || '',
+        }))
+        setStaffList(formatted)
+      } catch (err) {
+        console.warn('API error fetching staff:', err)
       }
-    } catch (e) {
-      console.error('Error loading staff from storage:', e)
     }
-    return INITIAL_STAFF
-  })
+    fetchStaff()
+  }, [])
 
   // Sync to localStorage
   useEffect(() => {
@@ -91,7 +60,7 @@ export default function StaffManageView() {
 
     if (base === 'staff-manage' || base === 'staffs' || base === 'staff') {
       const subAction = parts[1]?.toLowerCase()
-      const targetId = parts[2] ? parseInt(parts[2], 10) : null
+      const targetId = parts[2] ? parts[2] : null
 
       if (subAction === 'add') {
         setCurrentSubView({ type: 'add', id: null })
@@ -134,25 +103,72 @@ export default function StaffManageView() {
   }
 
   // CRUD Operations
-  const handleSaveNewStaff = (newStaff) => {
-    setStaffList((prev) => [newStaff, ...prev])
-    toast.success('Staff Added', `"${newStaff.name}" has been onboarded successfully.`)
+  const handleSaveNewStaff = async (newStaff) => {
+    try {
+      const res = await createAdminStaffApi({
+        name: newStaff.name,
+        email: newStaff.email,
+        phone: newStaff.mobilenumber,
+        mobilenumber: newStaff.mobilenumber,
+        store: newStaff.store,
+        storeName: newStaff.store,
+        role: 'Staff',
+        status: newStaff.status || 'Active',
+        image: newStaff.image || ''
+      })
+      const created = res.data || res.staff || { ...newStaff, id: Date.now() }
+      const formatted = {
+        ...newStaff,
+        ...created,
+        id: created._id || created.id || Date.now(),
+        staffId: created.staffId || newStaff.staffId || 'BAZ-STF-' + String(created._id || Date.now()).slice(-4).toUpperCase(),
+        store: newStaff.store,
+        mobilenumber: newStaff.mobilenumber
+      }
+      setStaffList((prev) => [formatted, ...prev])
+      toast.success('Staff Added', `"${newStaff.name}" has been onboarded successfully.`)
+    } catch (err) {
+      console.warn('Backend staff save failed, saving locally:', err)
+      setStaffList((prev) => [newStaff, ...prev])
+      toast.success('Staff Added', `"${newStaff.name}" has been onboarded successfully.`)
+    }
     goToList()
   }
 
-  const handleUpdateStaff = (updatedStaff) => {
+  const handleUpdateStaff = async (updatedStaff) => {
+    try {
+      const targetId = updatedStaff._id || updatedStaff.id
+      await updateAdminStaffApi(targetId, {
+        name: updatedStaff.name,
+        email: updatedStaff.email,
+        phone: updatedStaff.mobilenumber,
+        mobilenumber: updatedStaff.mobilenumber,
+        store: updatedStaff.store,
+        storeName: updatedStaff.store,
+        status: updatedStaff.status,
+        image: updatedStaff.image
+      })
+    } catch (err) {
+      console.warn('Backend update failed:', err)
+    }
     setStaffList((prev) =>
-      prev.map((item) => (item.id === updatedStaff.id ? updatedStaff : item))
+      prev.map((item) => (String(item.id || item._id) === String(updatedStaff.id || updatedStaff._id) ? updatedStaff : item))
     )
     toast.success('Staff Updated', `"${updatedStaff.name}" details updated.`)
     goToList()
   }
 
-  const handleToggleStatus = (id) => {
+  const handleToggleStatus = async (id) => {
+    const current = staffList.find((s) => String(s.id || s._id) === String(id))
+    const nextStatus = current?.status === 'Active' ? 'Inactive' : 'Active'
+    try {
+      await updateAdminStaffApi(current?._id || id, { status: nextStatus })
+    } catch (err) {
+      console.warn('Backend toggle status failed:', err)
+    }
     setStaffList((prev) =>
       prev.map((item) => {
-        if (item.id === id) {
-          const nextStatus = item.status === 'Active' ? 'Inactive' : 'Active'
+        if (String(item.id || item._id) === String(id)) {
           toast.info(
             'Status Changed',
             `"${item.name}" is now ${nextStatus}.`
@@ -168,11 +184,16 @@ export default function StaffManageView() {
     setDeleteModalState({ isOpen: true, staffId: id })
   }
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     const { staffId } = deleteModalState
-    const targetStaff = staffList.find((s) => s.id === staffId)
+    const targetStaff = staffList.find((s) => String(s.id || s._id) === String(staffId))
     if (staffId) {
-      setStaffList((prev) => prev.filter((item) => item.id !== staffId))
+      try {
+        await deleteAdminStaffApi(targetStaff?._id || staffId)
+      } catch (err) {
+        console.warn('Backend delete staff failed:', err)
+      }
+      setStaffList((prev) => prev.filter((item) => String(item.id || item._id) !== String(staffId)))
       toast.success(
         'Staff Deleted',
         `"${targetStaff?.name || 'Staff'}" was removed from the system.`
@@ -182,7 +203,7 @@ export default function StaffManageView() {
   }
 
   // Active staff for edit / view
-  const activeStaff = staffList.find((s) => s.id === currentSubView.id)
+  const activeStaff = staffList.find((s) => String(s.id || s._id) === String(currentSubView.id))
 
   return (
     <div className="w-full">

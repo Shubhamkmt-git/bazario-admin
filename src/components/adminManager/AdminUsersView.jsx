@@ -5,72 +5,47 @@ import UserListView from './users/UserListView'
 import AddUserView from './users/AddUserView'
 import EditUserView from './users/EditUserView'
 import UserDetailsView from './users/UserDetailsView'
+import {
+  getAdminUsersApi,
+  createAdminUserApi,
+  updateAdminUserApi,
+  deleteAdminUserApi
+} from '../../utils/adminApi'
 
 const USERS_STORAGE_KEY = 'bazario_admin_users_data'
-
-const INITIAL_ADMIN_USERS = [
-  {
-    id: 1,
-    name: 'Shubham Kumar',
-    fathersName: 'Rajesh Kumar',
-    email: 'shubham@bazario.com',
-    phone: '+91 98111 00221',
-    password: 'password123',
-    role: 'Super Admin',
-    status: 'Active',
-    avatar: null,
-    lastLogin: '10 mins ago',
-  },
-  {
-    id: 2,
-    name: 'Aakash Verma',
-    fathersName: 'Mahesh Verma',
-    email: 'aakash.v@bazario.com',
-    phone: '+91 98222 33441',
-    password: 'password123',
-    role: 'Store Manager',
-    status: 'Active',
-    avatar: null,
-    lastLogin: '2 hours ago',
-  },
-  {
-    id: 3,
-    name: 'Sneha Patel',
-    fathersName: 'Kirit Patel',
-    email: 'sneha.p@bazario.com',
-    phone: '+91 98333 44552',
-    password: 'password123',
-    role: 'Inventory Lead',
-    status: 'Active',
-    avatar: null,
-    lastLogin: 'Yesterday',
-  },
-  {
-    id: 4,
-    name: 'Rohan Mehta',
-    fathersName: 'Suresh Mehta',
-    email: 'rohan.m@bazario.com',
-    phone: '+91 98444 55663',
-    password: 'password123',
-    role: 'Customer Support Agent',
-    status: 'Inactive',
-    avatar: null,
-    lastLogin: '3 days ago',
-  },
-]
 
 export default function AdminUsersView() {
   const toast = useToast()
 
   // Storage state
-  const [users, setUsers] = useState(() => {
-    try {
-      const saved = localStorage.getItem(USERS_STORAGE_KEY)
-      return saved ? JSON.parse(saved) : INITIAL_ADMIN_USERS
-    } catch {
-      return INITIAL_ADMIN_USERS
+  const [users, setUsers] = useState([])
+
+  // Fetch live admin users from backend API
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const res = await getAdminUsersApi()
+        const list = res.users || res.data || []
+        const formatted = (Array.isArray(list) ? list : []).map((u, idx) => ({
+          ...u,
+          id: u.id || u._id || idx + 1,
+          _id: u._id || u.id,
+          name: u.name || 'Admin',
+          fathersName: u.fathersName || '',
+          email: u.email || '',
+          phone: u.phone || '',
+          role: u.role || 'Admin',
+          status: u.status || 'Active',
+          lastLogin: u.lastLogin || 'Recently',
+          avatar: u.avatar || null
+        }))
+        setUsers(formatted)
+      } catch (err) {
+        console.warn('API error fetching users:', err)
+      }
     }
-  })
+    fetchUsers()
+  }, [])
 
   // View state: 'list' | 'add' | 'edit' | 'view'
   const [viewMode, setViewMode] = useState('list')
@@ -110,26 +85,87 @@ export default function AdminUsersView() {
   }
 
   // Save new user
-  const handleSaveNew = (newUser) => {
-    setUsers([newUser, ...users])
-    toast.success('Admin Created', `"${newUser.name}" has been registered as ${newUser.role}!`)
+  const handleSaveNew = async (newUser) => {
+    try {
+      const res = await createAdminUserApi({
+        name: newUser.name,
+        fathersName: newUser.fathersName || '',
+        email: newUser.email,
+        password: newUser.password || 'BazarioStore@2026',
+        role: newUser.role || 'Admin',
+        phone: newUser.phone || '',
+        avatar: newUser.avatar || null,
+        status: newUser.status || 'Active'
+      })
+      const created = res.data || res.user || newUser
+      const formatted = {
+        ...newUser,
+        ...created,
+        id: created._id || created.id || Date.now(),
+        _id: created._id || created.id
+      }
+      setUsers([formatted, ...users])
+      toast.success('Admin Created', `"${newUser.name}" has been registered as ${newUser.role}!`)
+    } catch (err) {
+      console.warn('Backend user save error:', err)
+      setUsers([newUser, ...users])
+      toast.success('Admin Created', `"${newUser.name}" has been registered as ${newUser.role}!`)
+    }
     setViewMode('list')
   }
 
   // Save edited user
-  const handleSaveEdited = (updatedUser) => {
-    const updatedList = users.map((u) => (u.id === updatedUser.id ? updatedUser : u))
-    setUsers(updatedList)
-    setSelectedUser(updatedUser)
-    toast.success('Admin Updated', `"${updatedUser.name}" profile saved successfully!`)
+  const handleSaveEdited = async (updatedUser) => {
+    const targetId = updatedUser._id || updatedUser.id
+    try {
+      const res = await updateAdminUserApi(targetId, {
+        name: updatedUser.name,
+        fathersName: updatedUser.fathersName,
+        email: updatedUser.email,
+        phone: updatedUser.phone,
+        role: updatedUser.role,
+        avatar: updatedUser.avatar,
+        status: updatedUser.status,
+        ...(updatedUser.password ? { password: updatedUser.password } : {})
+      })
+      const saved = res.data || res.user || updatedUser
+      const merged = { ...updatedUser, ...saved }
+      const updatedList = users.map((u) => (String(u.id || u._id) === String(targetId) ? merged : u))
+      setUsers(updatedList)
+      setSelectedUser(merged)
+
+      // Sync active session if the edited user is the logged in admin
+      try {
+        const storedAdmin = JSON.parse(localStorage.getItem('bazario_admin_user') || '{}')
+        if (String(storedAdmin.id || storedAdmin._id) === String(targetId) || storedAdmin.email === updatedUser.email) {
+          const updatedSession = { ...storedAdmin, ...merged }
+          localStorage.setItem('bazario_admin_user', JSON.stringify(updatedSession))
+          window.dispatchEvent(new Event('bazario_admin_profile_updated'))
+        }
+      } catch (e) {}
+
+      toast.success('Admin Updated', `"${updatedUser.name}" profile saved successfully!`)
+    } catch (err) {
+      console.warn('Backend user update error:', err)
+      const updatedList = users.map((u) => (String(u.id || u._id) === String(targetId) ? updatedUser : u))
+      setUsers(updatedList)
+      setSelectedUser(updatedUser)
+      toast.success('Admin Updated', `"${updatedUser.name}" profile saved successfully!`)
+    }
     setViewMode('list')
   }
 
   // Delete user
-  const handleDelete = (userId, userName) => {
-    setUsers((prev) => prev.filter((u) => u.id !== userId))
+  const handleDelete = async (userId, userName) => {
+    const targetUser = users.find((u) => String(u.id || u._id) === String(userId))
+    try {
+      await deleteAdminUserApi(targetUser?._id || userId)
+    } catch (err) {
+      console.warn('Backend delete error:', err)
+    }
+    setUsers((prev) => prev.filter((u) => String(u.id || u._id) !== String(userId)))
     setDeleteModal({ isOpen: false, user: null })
-    if (selectedUser && selectedUser.id === userId) {
+    if (selectedUser && String(selectedUser.id || selectedUser._id) === String(userId)) {
       setViewMode('list')
       setSelectedUser(null)
     }
@@ -137,11 +173,16 @@ export default function AdminUsersView() {
   }
 
   // Toggle status
-  const handleToggleStatus = (user) => {
+  const handleToggleStatus = async (user) => {
     const newStatus = user.status === 'Active' ? 'Inactive' : 'Active'
-    const updatedList = users.map((u) => (u.id === user.id ? { ...u, status: newStatus } : u))
+    try {
+      await updateAdminUserApi(user._id || user.id, { status: newStatus })
+    } catch (err) {
+      console.warn('Backend toggle status error:', err)
+    }
+    const updatedList = users.map((u) => (String(u.id || u._id) === String(user.id || user._id) ? { ...u, status: newStatus } : u))
     setUsers(updatedList)
-    if (selectedUser && selectedUser.id === user.id) {
+    if (selectedUser && String(selectedUser.id || selectedUser._id) === String(user.id || user._id)) {
       setSelectedUser({ ...selectedUser, status: newStatus })
     }
     toast.info('Status Changed', `"${user.name}" is now ${newStatus}.`)

@@ -19,6 +19,7 @@ import BackButton from '../../ui/BackButton'
 import InputField from '../../ui/InputField'
 import ToggleButton from '../../ui/ToggleButton'
 import { FormActions } from '../../ui/FormLayout'
+import { uploadImageApi } from '../../../utils/adminApi'
 
 const DEFAULT_ROLES = [
   'Super Admin',
@@ -52,11 +53,26 @@ export default function EditUserView({ user, onBack, onSave }) {
     fathersName: user?.fathersName || '',
     email: user?.email || '',
     phone: user?.phone || '',
-    password: user?.password || '',
+    password: '',
     role: user?.role || 'Store Manager',
     avatar: user?.avatar || null,
     status: user?.status || 'Active',
   })
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name || '',
+        fathersName: user.fathersName || '',
+        email: user.email || '',
+        phone: user.phone || '',
+        password: '',
+        role: user.role || 'Store Manager',
+        avatar: user.avatar || null,
+        status: user.status || 'Active',
+      })
+    }
+  }, [user])
 
   const [errors, setErrors] = useState({})
 
@@ -100,7 +116,7 @@ export default function EditUserView({ user, onBack, onSave }) {
       fathersName: formData.fathersName.trim(),
       email: formData.email.trim().toLowerCase(),
       phone: formData.phone.trim(),
-      password: formData.password || user.password,
+      password: formData.password && formData.password.trim() ? formData.password.trim() : undefined,
       role: formData.role,
       avatar: formData.avatar,
       status: formData.status,
@@ -169,12 +185,23 @@ export default function EditUserView({ user, onBack, onSave }) {
                     accept="image/*"
                     className="sr-only"
                     id="avatar-upload-edit"
-                    onChange={(e) => {
+                    onChange={async (e) => {
                       const file = e.target.files?.[0]
                       if (file) {
                         const reader = new FileReader()
                         reader.onload = (ev) => handleChange('avatar', ev.target.result)
                         reader.readAsDataURL(file)
+
+                        try {
+                          const res = await uploadImageApi(file)
+                          if (res.url) {
+                            const fullUrl = res.url.startsWith('http') ? res.url : `http://localhost:5000${res.url}`
+                            handleChange('avatar', fullUrl)
+                            toast.success('Image Uploaded', 'Avatar stored on server.')
+                          }
+                        } catch (err) {
+                          console.warn('Backend upload failed, kept as preview:', err)
+                        }
                       }
                     }}
                   />

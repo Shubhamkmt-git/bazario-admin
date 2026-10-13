@@ -5,51 +5,46 @@ import OffersListView from './OffersListView'
 import AddOfferView from './AddOfferView'
 import EditOfferView from './EditOfferView'
 import OfferDetailsView from './OfferDetailsView'
+import {
+  getAdminOffersApi,
+  createAdminOfferApi,
+  deleteAdminOfferApi
+} from '../../utils/adminApi'
 
 const MANAGE_OFFERS_STORAGE_KEY = 'bazario_manage_offers'
-
-const INITIAL_OFFERS = [
-  {
-    id: 1,
-    title: 'Super Saver Weekend - Flat 40% Off on Fresh Fruits & Veggies',
-    redirectionUrl: '/categories/farm-fresh-fruits-vegetables',
-    image: '/supermart-bg.jpg',
-    sortingOrder: 1,
-    status: 'Active',
-    createdAt: '2026-10-01'
-  },
-  {
-    id: 2,
-    title: 'Buy 1 Get 1 Free on Premium Dairy & Bakery Essentials',
-    redirectionUrl: '/categories/dairy-bread-eggs',
-    image: '',
-    sortingOrder: 2,
-    status: 'Active',
-    createdAt: '2026-10-03'
-  },
-  {
-    id: 3,
-    title: 'Mega Festive Grocery Hamper - Up to 50% Off On Snacks & Sweets',
-    redirectionUrl: '/categories/snacks-munchies',
-    image: '',
-    sortingOrder: 3,
-    status: 'Inactive',
-    createdAt: '2026-10-05'
-  }
-]
 
 export default function ManageOffersView() {
   const toast = useToast()
 
   // Storage State
-  const [offers, setOffers] = useState(() => {
+  const [offers, setOffers] = useState([])
+
+  const fetchOffers = async () => {
     try {
-      const saved = localStorage.getItem(MANAGE_OFFERS_STORAGE_KEY)
-      return saved ? JSON.parse(saved) : INITIAL_OFFERS
-    } catch {
-      return INITIAL_OFFERS
+      const res = await getAdminOffersApi()
+      const list = res.offers || res.data || []
+      const formatted = (Array.isArray(list) ? list : []).map((o, idx) => ({
+        id: o._id || o.id || idx + 1,
+        _id: o._id,
+        title: o.title || `Promo ${o.code || ''}`,
+        code: o.code || '',
+        redirectionUrl: o.redirectionUrl || '/offers',
+        image: o.image || '/supermart-bg.jpg',
+        sortingOrder: o.sortingOrder || idx + 1,
+        status: o.active ? 'Active' : (o.status || 'Active'),
+        discount: o.discount || (o.discountValue ? `${o.discountValue}%` : ''),
+        minOrder: o.minOrderValue || o.minOrder || 0,
+        createdAt: o.createdAt ? new Date(o.createdAt).toISOString().split('T')[0] : '2026-10-01'
+      }))
+      setOffers(formatted)
+    } catch (err) {
+      console.warn('Failed to fetch admin offers:', err)
     }
-  })
+  }
+
+  useEffect(() => {
+    fetchOffers()
+  }, [])
 
   // View state: 'list' | 'add' | 'edit' | 'view'
   const [viewMode, setViewMode] = useState('list')
@@ -137,16 +132,23 @@ export default function ManageOffersView() {
   }
 
   // CRUD Operations
-  const handleSaveAdd = (newOfferData) => {
-    const nextId = offers.length > 0 ? Math.max(...offers.map((o) => o.id)) + 1 : 1
-    const newOffer = {
-      ...newOfferData,
-      id: nextId,
-      createdAt: new Date().toISOString().split('T')[0]
+  const handleSaveAdd = async (newOfferData) => {
+    try {
+      await createAdminOfferApi(newOfferData)
+      toast.success('Offer Created', `"${newOfferData.title}" was added successfully.`)
+      fetchOffers()
+      handleOpenList()
+    } catch (err) {
+      const nextId = offers.length > 0 ? Math.max(...offers.map((o) => o.id)) + 1 : 1
+      const newOffer = {
+        ...newOfferData,
+        id: nextId,
+        createdAt: new Date().toISOString().split('T')[0]
+      }
+      setOffers([newOffer, ...offers])
+      toast.success('Offer Created', `"${newOffer.title}" was added.`)
+      handleOpenList()
     }
-    setOffers([newOffer, ...offers])
-    toast.success('Offer Created', `"${newOffer.title}" was added successfully.`)
-    handleOpenList()
   }
 
   const handleSaveEdit = (updatedOffer) => {
@@ -163,11 +165,17 @@ export default function ManageOffersView() {
     toast.info('Status Changed', `Offer status changed to ${nextStatus}.`)
   }
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (!deleteModal.offer) return
     const offerToDelete = deleteModal.offer
-    setOffers(offers.filter((o) => o.id !== offerToDelete.id))
-    toast.success('Offer Deleted', `"${offerToDelete.title}" has been deleted.`)
+    try {
+      await deleteAdminOfferApi(offerToDelete._id || offerToDelete.id)
+      toast.success('Offer Deleted', `"${offerToDelete.title}" has been deleted.`)
+      fetchOffers()
+    } catch (err) {
+      setOffers(offers.filter((o) => o.id !== offerToDelete.id))
+      toast.success('Offer Deleted', `"${offerToDelete.title}" has been deleted.`)
+    }
     setDeleteModal({ isOpen: false, offer: null })
 
     if (viewMode === 'edit' || viewMode === 'view') {

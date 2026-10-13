@@ -53,19 +53,40 @@ export default function ActionButton({
     },
   }
 
+  // Aliases for variants
+  const variantMap = {
+    default: 'view',
+    primary: 'edit',
+    danger: 'delete',
+    info: 'view',
+    warning: 'edit',
+  }
+
   const requestedAction =
     action ||
+    variantMap[props.variant] ||
     (props.type && props.type !== 'button' ? props.type : null) ||
     props.variant ||
     'view'
+
   const currentConfig = configs[requestedAction] || configs.view
-  const displayIcon = icon || currentConfig.icon
   const displayTooltip = tooltip || props.title || currentConfig.defaultTooltip
 
   const sizeClasses = {
     sm: 'w-7 h-7 text-xs',
     md: 'w-8 h-8 text-sm',
     lg: 'w-10 h-10 text-base',
+  }
+
+  const renderIcon = () => {
+    if (React.isValidElement(icon)) {
+      return icon
+    }
+    const targetIcon =
+      icon && typeof icon === 'object' && (icon.iconName || icon.prefix)
+        ? icon
+        : currentConfig.icon
+    return <FontAwesomeIcon icon={targetIcon} />
   }
 
   return (
@@ -78,7 +99,7 @@ export default function ActionButton({
       className={`inline-flex items-center justify-center rounded-lg transition-all duration-150 active:scale-90 disabled:opacity-40 disabled:cursor-not-allowed focus:outline-none focus:ring-2 cursor-pointer ${sizeClasses[size] || sizeClasses.md} ${currentConfig.style} ${className}`}
       {...props}
     >
-      <FontAwesomeIcon icon={displayIcon} />
+      {renderIcon()}
     </button>
   )
 }

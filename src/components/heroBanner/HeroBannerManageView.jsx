@@ -5,51 +5,43 @@ import HeroBannerListView from './HeroBannerListView'
 import AddHeroBannerView from './AddHeroBannerView'
 import EditHeroBannerView from './EditHeroBannerView'
 import HeroBannerDetailsView from './HeroBannerDetailsView'
+import {
+  getAdminHeroBannersApi,
+  createAdminHeroBannerApi,
+  deleteAdminHeroBannerApi
+} from '../../utils/adminApi'
 
 const HERO_BANNERS_STORAGE_KEY = 'bazario_hero_banners'
-
-const INITIAL_HERO_BANNERS = [
-  {
-    id: 1,
-    title: 'Super Weekend Fresh Produce Sale - Flat 40% Off',
-    redirectUrl: '/categories/farm-fresh-fruits-vegetables',
-    webImage: '/supermart-bg.jpg',
-    mobileImage: '/supermart-bg.jpg',
-    sortingOrder: 1,
-    status: 'Active'
-  },
-  {
-    id: 2,
-    title: 'Mega Daily Essentials & Dairy Morning Rush',
-    redirectUrl: '/categories/dairy-bread-eggs',
-    webImage: '',
-    mobileImage: '',
-    sortingOrder: 2,
-    status: 'Active'
-  },
-  {
-    id: 3,
-    title: 'Festival Sweets, Dry Fruits & Gourmet Gifting Hampers',
-    redirectUrl: '/categories/snacks-munchies',
-    webImage: '',
-    mobileImage: '',
-    sortingOrder: 3,
-    status: 'Inactive'
-  }
-]
 
 export default function HeroBannerManageView() {
   const toast = useToast()
 
   // Storage State
-  const [banners, setBanners] = useState(() => {
+  const [banners, setBanners] = useState([])
+
+  const fetchBanners = async () => {
     try {
-      const saved = localStorage.getItem(HERO_BANNERS_STORAGE_KEY)
-      return saved ? JSON.parse(saved) : INITIAL_HERO_BANNERS
-    } catch {
-      return INITIAL_HERO_BANNERS
+      const res = await getAdminHeroBannersApi()
+      const list = res.banners || res.data || []
+      const formatted = (Array.isArray(list) ? list : []).map((b, idx) => ({
+        id: b._id || b.id || idx + 1,
+        _id: b._id,
+        title: b.title || b.altText || `Hero Banner #${idx + 1}`,
+        redirectUrl: b.redirectUrl || '/',
+        webImage: b.webImage || b.image || '/supermart-bg.jpg',
+        mobileImage: b.mobileImage || b.webImage || '/supermart-bg.jpg',
+        sortingOrder: b.sortingOrder || idx + 1,
+        status: b.status || (b.active ? 'Active' : 'Active')
+      }))
+      setBanners(formatted)
+    } catch (err) {
+      console.warn('Failed to fetch hero banners:', err)
     }
-  })
+  }
+
+  useEffect(() => {
+    fetchBanners()
+  }, [])
 
   // View state: 'list' | 'add' | 'edit' | 'view'
   const [viewMode, setViewMode] = useState('list')
@@ -57,15 +49,6 @@ export default function HeroBannerManageView() {
 
   // Delete modal state
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, banner: null })
-
-  // Sync to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem(HERO_BANNERS_STORAGE_KEY, JSON.stringify(banners))
-    } catch (e) {
-      console.error('Failed to persist hero banners', e)
-    }
-  }, [banners])
 
   // Hash Route Parser & Listener
   useEffect(() => {
@@ -137,11 +120,18 @@ export default function HeroBannerManageView() {
   }
 
   // Save new banner
-  const handleSaveNewBanner = (newBanner) => {
-    const updatedList = [newBanner, ...banners]
-    setBanners(updatedList)
-    toast.success('Hero Banner Created', `"${newBanner.title}" published to homepage carousel!`)
-    handleGoToList()
+  const handleSaveNewBanner = async (newBanner) => {
+    try {
+      await createAdminHeroBannerApi(newBanner)
+      toast.success('Hero Banner Created', `"${newBanner.title}" published to homepage carousel!`)
+      fetchBanners()
+      handleGoToList()
+    } catch (err) {
+      const updatedList = [newBanner, ...banners]
+      setBanners(updatedList)
+      toast.success('Hero Banner Created', `"${newBanner.title}" published to homepage carousel!`)
+      handleGoToList()
+    }
   }
 
   // Save edited banner
@@ -154,13 +144,19 @@ export default function HeroBannerManageView() {
   }
 
   // Delete banner
-  const handleDeleteBanner = (bannerId, bannerTitle) => {
-    setBanners((prev) => prev.filter((b) => b.id !== bannerId))
+  const handleDeleteBanner = async (bannerId, bannerTitle) => {
+    try {
+      await deleteAdminHeroBannerApi(bannerId)
+      toast.success('Hero Banner Removed', `"${bannerTitle}" removed from carousel.`)
+      fetchBanners()
+    } catch (err) {
+      setBanners((prev) => prev.filter((b) => b.id !== bannerId))
+      toast.success('Hero Banner Removed', `"${bannerTitle}" removed from carousel.`)
+    }
     setDeleteModal({ isOpen: false, banner: null })
     if (selectedBanner && selectedBanner.id === bannerId) {
       handleGoToList()
     }
-    toast.success('Hero Banner Removed', `"${bannerTitle}" removed from carousel.`)
   }
 
   // Toggle status

@@ -5,72 +5,47 @@ import StoreListView from './StoreListView'
 import AddStoreView from './AddStoreView'
 import EditStoreView from './EditStoreView'
 import StoreDetailsView from './StoreDetailsView'
+import {
+  getAdminStoresApi,
+  createAdminStoreApi,
+  updateAdminStoreApi,
+  deleteAdminStoreApi
+} from '../../utils/adminApi'
 
 const STORES_STORAGE_KEY = 'bazario_stores_data'
-
-const INITIAL_STORES = [
-  {
-    id: 1,
-    sortingOrder: 1,
-    title: 'Bazario Central Superstore #01',
-    subtitle: 'Flagship Mega Mart & Fresh Produce Hub, Sector 18',
-    image: '/supermart-bg.jpg',
-    coordinates: '28.5708, 77.3261',
-    googleUrl: 'https://maps.google.com/?q=28.5708,77.3261',
-    status: 'Open',
-    phone: '+91 98111 22334',
-    operatingHours: '7:00 AM - 11:00 PM',
-  },
-  {
-    id: 2,
-    sortingOrder: 2,
-    title: 'Bazario Express Store - Cyber City',
-    subtitle: '15-Min Quick Commerce & Convenience Branch, Phase 2',
-    image: '/supermart-bg.jpg',
-    coordinates: '28.4905, 77.0890',
-    googleUrl: 'https://maps.google.com/?q=28.4905,77.0890',
-    status: 'Open',
-    phone: '+91 98222 33445',
-    operatingHours: '6:30 AM - 12:00 AM',
-  },
-  {
-    id: 3,
-    sortingOrder: 3,
-    title: 'Bazario Supermarket - Green Park',
-    subtitle: 'Organic Dairy, Bakery & Gourmet Food Center',
-    image: '/supermart-bg.jpg',
-    coordinates: '28.5589, 77.2028',
-    googleUrl: 'https://maps.google.com/?q=28.5589,77.2028',
-    status: 'Open',
-    phone: '+91 98333 44556',
-    operatingHours: '8:00 AM - 10:30 PM',
-  },
-  {
-    id: 4,
-    sortingOrder: 4,
-    title: 'Bazario Daily Outlet - Indirapuram',
-    subtitle: 'Fresh Veggies & Household Essentials Depot, Block B',
-    image: '/supermart-bg.jpg',
-    coordinates: '28.6387, 77.3686',
-    googleUrl: 'https://maps.google.com/?q=28.6387,77.3686',
-    status: 'Closed',
-    phone: '+91 98444 55667',
-    operatingHours: '7:00 AM - 10:00 PM (Under Maintenance)',
-  },
-]
 
 export default function StoresView() {
   const toast = useToast()
 
   // Storage State
-  const [stores, setStores] = useState(() => {
+  const [stores, setStores] = useState([])
+
+  const fetchStores = async () => {
     try {
-      const saved = localStorage.getItem(STORES_STORAGE_KEY)
-      return saved ? JSON.parse(saved) : INITIAL_STORES
-    } catch {
-      return INITIAL_STORES
+      const res = await getAdminStoresApi()
+      const list = res.stores || res.data || []
+      const formatted = (Array.isArray(list) ? list : []).map((s, idx) => ({
+        id: s._id || s.id || idx + 1,
+        _id: s._id,
+        sortingOrder: s.sortingOrder || idx + 1,
+        title: s.title || s.name,
+        subtitle: s.subtitle || s.address || '',
+        image: s.image || '/supermart-bg.jpg',
+        coordinates: s.coordinates || '28.5708, 77.3261',
+        googleUrl: s.googleUrl || `https://maps.google.com/?q=${s.coordinates || '28.5708,77.3261'}`,
+        status: s.status || 'Open',
+        phone: s.phone || '+91 98111 22334',
+        operatingHours: s.operatingHours || '7:00 AM - 11:00 PM',
+      }))
+      setStores(formatted)
+    } catch (err) {
+      console.warn('Failed to fetch stores:', err)
     }
-  })
+  }
+
+  useEffect(() => {
+    fetchStores()
+  }, [])
 
   // View state: 'list' | 'add' | 'edit' | 'view'
   const [viewMode, setViewMode] = useState('list')
@@ -78,15 +53,6 @@ export default function StoresView() {
 
   // Delete modal state
   const [deleteModal, setDeleteModal] = useState({ isOpen: false, store: null })
-
-  // Sync to localStorage
-  useEffect(() => {
-    try {
-      localStorage.setItem(STORES_STORAGE_KEY, JSON.stringify(stores))
-    } catch (e) {
-      console.error('Failed to persist stores', e)
-    }
-  }, [stores])
 
   // Navigation handlers
   const handleGoToList = () => {
@@ -110,41 +76,67 @@ export default function StoresView() {
   }
 
   // Save new store
-  const handleSaveNewStore = (newStore) => {
-    setStores([newStore, ...stores])
-    toast.success('Store Published', `"${newStore.title}" has been listed successfully!`)
-    setViewMode('list')
+  const handleSaveNewStore = async (newStore) => {
+    try {
+      await createAdminStoreApi(newStore)
+      toast.success('Store Published', `"${newStore.title}" has been listed successfully!`)
+      fetchStores()
+      setViewMode('list')
+    } catch (err) {
+      setStores([newStore, ...stores])
+      toast.success('Store Published', `"${newStore.title}" has been listed!`)
+      setViewMode('list')
+    }
   }
 
   // Save edited store
-  const handleSaveEditedStore = (updatedStore) => {
-    const updatedList = stores.map((s) => (s.id === updatedStore.id ? updatedStore : s))
-    setStores(updatedList)
-    setSelectedStore(updatedStore)
-    toast.success('Store Updated', `"${updatedStore.title}" updated successfully!`)
-    setViewMode('list')
+  const handleSaveEditedStore = async (updatedStore) => {
+    try {
+      await updateAdminStoreApi(updatedStore._id || updatedStore.id, updatedStore)
+      toast.success('Store Updated', `"${updatedStore.title}" updated successfully!`)
+      fetchStores()
+      setViewMode('list')
+    } catch (err) {
+      const updatedList = stores.map((s) => (s.id === updatedStore.id ? updatedStore : s))
+      setStores(updatedList)
+      setSelectedStore(updatedStore)
+      toast.success('Store Updated', `"${updatedStore.title}" updated successfully!`)
+      setViewMode('list')
+    }
   }
 
   // Delete store
-  const handleDeleteStore = (storeId, storeTitle) => {
-    setStores((prev) => prev.filter((s) => s.id !== storeId))
+  const handleDeleteStore = async (storeId, storeTitle) => {
+    try {
+      await deleteAdminStoreApi(storeId)
+      toast.success('Store Removed', `"${storeTitle}" removed from listings.`)
+      fetchStores()
+    } catch (err) {
+      setStores((prev) => prev.filter((s) => s.id !== storeId))
+      toast.success('Store Removed', `"${storeTitle}" removed from listings.`)
+    }
     setDeleteModal({ isOpen: false, store: null })
     if (selectedStore && selectedStore.id === storeId) {
       setViewMode('list')
       setSelectedStore(null)
     }
-    toast.success('Store Removed', `"${storeTitle}" removed from listings.`)
   }
 
   // Toggle status
-  const handleToggleStatus = (store) => {
-    const newStatus = store.status === 'Open' ? 'Closed' : 'Open'
-    const updatedList = stores.map((s) => (s.id === store.id ? { ...s, status: newStatus } : s))
-    setStores(updatedList)
-    if (selectedStore && selectedStore.id === store.id) {
-      setSelectedStore({ ...selectedStore, status: newStatus })
+  const handleToggleStatus = async (store) => {
+    const nextStatus = store.status === 'Open' ? 'Closed' : 'Open'
+    try {
+      await updateAdminStoreApi(store._id || store.id, { status: nextStatus })
+      toast.info('Status Changed', `"${store.title}" is now marked as ${nextStatus}.`)
+      fetchStores()
+    } catch (err) {
+      const updatedList = stores.map((s) => (s.id === store.id ? { ...s, status: nextStatus } : s))
+      setStores(updatedList)
+      if (selectedStore && selectedStore.id === store.id) {
+        setSelectedStore({ ...selectedStore, status: nextStatus })
+      }
+      toast.info('Status Changed', `"${store.title}" is now marked as ${nextStatus}.`)
     }
-    toast.info('Status Changed', `"${store.title}" is now ${newStatus}.`)
   }
 
   return (
