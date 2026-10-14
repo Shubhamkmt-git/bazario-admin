@@ -15,40 +15,59 @@ import {
   faStore
 } from '@fortawesome/free-solid-svg-icons'
 
-const ORDER_TRAJECTORY_DATA = {
-  '7d': [
-    { label: 'Mon', date: 'Oct 03', orders: 420, revenue: 112000, delivered: 395 },
-    { label: 'Tue', date: 'Oct 04', orders: 465, revenue: 124500, delivered: 440 },
-    { label: 'Wed', date: 'Oct 05', orders: 490, revenue: 131200, delivered: 460 },
-    { label: 'Thu', date: 'Oct 06', orders: 510, revenue: 138900, delivered: 485 },
-    { label: 'Fri', date: 'Oct 07', orders: 580, revenue: 156400, delivered: 550 },
-    { label: 'Sat', date: 'Oct 08', orders: 670, revenue: 182100, delivered: 630 },
-    { label: 'Sun', date: 'Oct 09', orders: 740, revenue: 204500, delivered: 705 }
-  ],
-  '30d': [
-    { label: 'W1', date: 'Sep 11-17', orders: 3200, revenue: 864000, delivered: 3050 },
-    { label: 'W2', date: 'Sep 18-24', orders: 3450, revenue: 932000, delivered: 3300 },
-    { label: 'W3', date: 'Sep 25-01', orders: 3890, revenue: 1050000, delivered: 3710 },
-    { label: 'W4', date: 'Oct 02-09', orders: 4120, revenue: 1120000, delivered: 3940 }
-  ],
-  '12m': [
-    { label: 'May', date: 'May 2026', orders: 12400, revenue: 3350000, delivered: 11800 },
-    { label: 'Jun', date: 'Jun 2026', orders: 13800, revenue: 3720000, delivered: 13100 },
-    { label: 'Jul', date: 'Jul 2026', orders: 14500, revenue: 3910000, delivered: 13800 },
-    { label: 'Aug', date: 'Aug 2026', orders: 15900, revenue: 4290000, delivered: 15200 },
-    { label: 'Sep', date: 'Sep 2026', orders: 17200, revenue: 4640000, delivered: 16450 },
-    { label: 'Oct', date: 'Oct 2026', orders: 18500, revenue: 4990000, delivered: 17700 }
-  ]
+const getEmptyTrajectory = (timeframe) => {
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  const now = new Date()
+
+  if (timeframe === '7d') {
+    return Array.from({ length: 7 }, (_, idx) => {
+      const d = new Date(now)
+      d.setDate(d.getDate() - (6 - idx))
+      return {
+        label: dayNames[d.getDay()],
+        date: `${monthNames[d.getMonth()]} ${String(d.getDate()).padStart(2, '0')}`,
+        orders: 0,
+        revenue: 0,
+        delivered: 0
+      }
+    })
+  }
+  if (timeframe === '30d') {
+    return ['W1', 'W2', 'W3', 'W4'].map((w) => ({
+      label: w,
+      date: 'Weekly',
+      orders: 0,
+      revenue: 0,
+      delivered: 0
+    }))
+  }
+  return Array.from({ length: 6 }, (_, idx) => {
+    const m = new Date(now.getFullYear(), now.getMonth() - (5 - idx), 1)
+    return {
+      label: monthNames[m.getMonth()],
+      date: `${monthNames[m.getMonth()]} ${m.getFullYear()}`,
+      orders: 0,
+      revenue: 0,
+      delivered: 0
+    }
+  })
 }
 
-export default function OrdersAnalyticsSection() {
+export default function OrdersAnalyticsSection({
+  orderTrajectoryData = null,
+  fulfillmentPipeline = null,
+  channelDistribution = null,
+  statsData = null
+}) {
   const [timeframe, setTimeframe] = useState('7d')
   const [hoveredPoint, setHoveredPoint] = useState(null)
 
-  const data = ORDER_TRAJECTORY_DATA[timeframe] || ORDER_TRAJECTORY_DATA['7d']
+  const activeTrajectory = (orderTrajectoryData && orderTrajectoryData[timeframe]) || []
+  const data = activeTrajectory.length > 0 ? activeTrajectory : getEmptyTrajectory(timeframe)
 
   // SVG Chart Calculation
-  const maxOrders = Math.max(...data.map((d) => d.orders)) * 1.15
+  const maxOrders = Math.max(...data.map((d) => d.orders || 0), 1) * 1.15
   const minOrders = 0
   const chartWidth = 600
   const chartHeight = 220
@@ -56,19 +75,20 @@ export default function OrdersAnalyticsSection() {
   const paddingY = 30
 
   const getX = (index) => {
-    return paddingX + (index * (chartWidth - 2 * paddingX)) / (data.length - 1)
+    return paddingX + (index * (chartWidth - 2 * paddingX)) / Math.max(1, data.length - 1)
   }
 
   const getY = (value) => {
+    const range = maxOrders - minOrders || 1
     return (
       chartHeight -
       paddingY -
-      ((value - minOrders) / (maxOrders - minOrders)) * (chartHeight - 2 * paddingY)
+      (((value || 0) - minOrders) / range) * (chartHeight - 2 * paddingY)
     )
   }
 
   // Generate SVG path for line and area
-  const points = data.map((d, i) => ({ x: getX(i), y: getY(d.orders), ...d }))
+  const points = data.map((d, i) => ({ x: getX(i), y: getY(d.orders || 0), ...d }))
   const pathD = points.reduce((acc, p, i) => {
     if (i === 0) return `M ${p.x} ${p.y}`
     const prev = points[i - 1]
@@ -84,9 +104,27 @@ export default function OrdersAnalyticsSection() {
   } ${chartHeight - paddingY} Z`
 
   // Summary statistics
-  const totalVolume = data.reduce((sum, d) => sum + d.orders, 0)
-  const totalRev = data.reduce((sum, d) => sum + d.revenue, 0)
-  const avgOrderVal = Math.round(totalRev / totalVolume)
+  const totalVolume = data.reduce((sum, d) => sum + (d.orders || 0), 0)
+  const totalRev = data.reduce((sum, d) => sum + (d.revenue || 0), 0)
+  const avgOrderVal = totalVolume > 0 ? Math.round(totalRev / totalVolume) : 0
+
+  const fulfillment = fulfillmentPipeline || {
+    total: statsData?.totalOrdersCount || 0,
+    delivered: statsData?.deliveredOrders || 0,
+    deliveredPct: 0,
+    outForDelivery: 0,
+    outForDeliveryPct: 0,
+    processing: statsData?.pendingOrders || 0,
+    processingPct: 0,
+    cancelled: 0,
+    cancelledPct: 0,
+    successRate: 100
+  }
+
+  const channels = channelDistribution || {
+    appDelivery: { count: totalVolume, percentage: 50 },
+    storePos: { count: 0, percentage: 50 }
+  }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -144,8 +182,8 @@ export default function OrdersAnalyticsSection() {
               {totalVolume.toLocaleString('en-IN')}
             </span>
             <span className="text-[10px] font-semibold text-emerald-600 flex items-center mt-0.5">
-              <FontAwesomeIcon icon={faArrowTrendUp} className="mr-1 text-[9px]" />
-              +18.4% vs last period
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1" />
+              Live DB Count
             </span>
           </div>
 
@@ -154,11 +192,11 @@ export default function OrdersAnalyticsSection() {
               GROSS SALES (₹)
             </span>
             <span className="text-lg sm:text-xl font-black text-slate-900 font-mono mt-0.5 block">
-              ₹{(totalRev / 1000).toFixed(1)}k
+              {totalRev >= 1000 ? `₹${(totalRev / 1000).toFixed(1)}k` : `₹${totalRev.toLocaleString('en-IN')}`}
             </span>
             <span className="text-[10px] font-semibold text-emerald-600 flex items-center mt-0.5">
-              <FontAwesomeIcon icon={faArrowTrendUp} className="mr-1 text-[9px]" />
-              +14.2% growth
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1" />
+              Period Turnover
             </span>
           </div>
 
@@ -177,7 +215,7 @@ export default function OrdersAnalyticsSection() {
               DISPATCH RATE
             </span>
             <span className="text-lg sm:text-xl font-black text-emerald-700 font-mono mt-0.5 block">
-              98.6%
+              {fulfillment.successRate}%
             </span>
             <span className="text-[10px] text-slate-400 mt-0.5 block">On-time fulfillment</span>
           </div>
@@ -333,21 +371,37 @@ export default function OrdersAnalyticsSection() {
               </p>
             </div>
             <span className="text-xs font-bold font-mono text-[#064C23] bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-              548 Active
+              {fulfillment.total} Total
             </span>
           </div>
 
           {/* Segmented Status Progress Bar */}
           <div className="mt-4 space-y-2">
             <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden flex shadow-inner">
-              <div className="bg-[#064C23] h-full" style={{ width: '75%' }} title="Delivered: 75%" />
-              <div className="bg-emerald-400 h-full" style={{ width: '14%' }} title="Out for Delivery: 14%" />
-              <div className="bg-amber-400 h-full" style={{ width: '8%' }} title="Processing: 8%" />
-              <div className="bg-rose-400 h-full" style={{ width: '3%' }} title="Cancelled: 3%" />
+              <div
+                className="bg-[#064C23] h-full transition-all duration-300"
+                style={{ width: `${fulfillment.deliveredPct}%` }}
+                title={`Delivered: ${fulfillment.deliveredPct}%`}
+              />
+              <div
+                className="bg-emerald-400 h-full transition-all duration-300"
+                style={{ width: `${fulfillment.outForDeliveryPct}%` }}
+                title={`Out for Delivery: ${fulfillment.outForDeliveryPct}%`}
+              />
+              <div
+                className="bg-amber-400 h-full transition-all duration-300"
+                style={{ width: `${fulfillment.processingPct}%` }}
+                title={`Processing: ${fulfillment.processingPct}%`}
+              />
+              <div
+                className="bg-rose-400 h-full transition-all duration-300"
+                style={{ width: `${fulfillment.cancelledPct}%` }}
+                title={`Cancelled: ${fulfillment.cancelledPct}%`}
+              />
             </div>
             <div className="flex justify-between text-[10px] text-slate-400 font-mono">
               <span>0%</span>
-              <span>Overall Pipeline: 97.1% Success</span>
+              <span>Overall Pipeline: {fulfillment.successRate}% Success</span>
               <span>100%</span>
             </div>
           </div>
@@ -360,8 +414,8 @@ export default function OrdersAnalyticsSection() {
                 <span className="font-semibold text-slate-700">Delivered & Fulfilled</span>
               </div>
               <div className="text-right">
-                <span className="font-bold text-slate-900 font-mono">412 orders</span>
-                <span className="text-[10px] text-slate-400 ml-1.5">(75.2%)</span>
+                <span className="font-bold text-slate-900 font-mono">{fulfillment.delivered} orders</span>
+                <span className="text-[10px] text-slate-400 ml-1.5">({fulfillment.deliveredPct}%)</span>
               </div>
             </div>
 
@@ -371,8 +425,8 @@ export default function OrdersAnalyticsSection() {
                 <span className="font-semibold text-slate-700">Out for Delivery</span>
               </div>
               <div className="text-right">
-                <span className="font-bold text-slate-900 font-mono">78 orders</span>
-                <span className="text-[10px] text-slate-400 ml-1.5">(14.2%)</span>
+                <span className="font-bold text-slate-900 font-mono">{fulfillment.outForDelivery} orders</span>
+                <span className="text-[10px] text-slate-400 ml-1.5">({fulfillment.outForDeliveryPct}%)</span>
               </div>
             </div>
 
@@ -382,8 +436,8 @@ export default function OrdersAnalyticsSection() {
                 <span className="font-semibold text-slate-700">Packing & Processing</span>
               </div>
               <div className="text-right">
-                <span className="font-bold text-slate-900 font-mono">42 orders</span>
-                <span className="text-[10px] text-slate-400 ml-1.5">(7.7%)</span>
+                <span className="font-bold text-slate-900 font-mono">{fulfillment.processing} orders</span>
+                <span className="text-[10px] text-slate-400 ml-1.5">({fulfillment.processingPct}%)</span>
               </div>
             </div>
 
@@ -393,8 +447,8 @@ export default function OrdersAnalyticsSection() {
                 <span className="font-semibold text-slate-700">Cancelled / Returns</span>
               </div>
               <div className="text-right">
-                <span className="font-bold text-slate-900 font-mono">16 orders</span>
-                <span className="text-[10px] text-slate-400 ml-1.5">(2.9%)</span>
+                <span className="font-bold text-slate-900 font-mono">{fulfillment.cancelled} orders</span>
+                <span className="text-[10px] text-slate-400 ml-1.5">({fulfillment.cancelledPct}%)</span>
               </div>
             </div>
           </div>
@@ -411,17 +465,17 @@ export default function OrdersAnalyticsSection() {
                 <FontAwesomeIcon icon={faMobileScreenButton} className="text-[#064C23]" />
                 <span className="font-bold">App Delivery</span>
               </div>
-              <span className="text-base font-black text-slate-900 font-mono">64%</span>
-              <span className="text-[10px] text-slate-400 block mt-0.5">351 orders</span>
+              <span className="text-base font-black text-slate-900 font-mono">{channels.appDelivery.percentage}%</span>
+              <span className="text-[10px] text-slate-400 block mt-0.5">{channels.appDelivery.count} orders</span>
             </div>
 
             <div className="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
               <div className="flex items-center space-x-1.5 text-xs text-slate-600 mb-1">
                 <FontAwesomeIcon icon={faStore} className="text-[#A44F37]" />
-                <span className="font-bold">Store POS</span>
+                <span className="font-bold">Store POS / COD</span>
               </div>
-              <span className="text-base font-black text-slate-900 font-mono">36%</span>
-              <span className="text-[10px] text-slate-400 block mt-0.5">197 orders</span>
+              <span className="text-base font-black text-slate-900 font-mono">{channels.storePos.percentage}%</span>
+              <span className="text-[10px] text-slate-400 block mt-0.5">{channels.storePos.count} orders</span>
             </div>
           </div>
         </div>

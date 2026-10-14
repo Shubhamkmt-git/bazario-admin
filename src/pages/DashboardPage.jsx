@@ -204,19 +204,26 @@ export default function DashboardPage({ onLogout }) {
   const [dateFilter, setDateFilter] = useState('today')
   const [searchQuery, setSearchQuery] = useState('')
   const [statsData, setStatsData] = useState(null)
+  const [dashboardData, setDashboardData] = useState(null)
 
-  useEffect(() => {
-    let isMounted = true
+  const fetchDashboardData = () => {
     getDashboardStatsApi()
       .then((res) => {
-        if (isMounted && res && res.stats) {
-          setStatsData(res.stats)
+        if (res) {
+          setDashboardData(res)
+          if (res.stats) {
+            setStatsData(res.stats)
+          }
+          if (res.storeBreakdown && res.storeBreakdown.length > 0) {
+            setStoreBranches(res.storeBreakdown)
+          }
         }
       })
       .catch(() => {})
-    return () => {
-      isMounted = false
-    }
+  }
+
+  useEffect(() => {
+    fetchDashboardData()
   }, [])
 
   // Navigation Items
@@ -446,8 +453,8 @@ export default function DashboardPage({ onLogout }) {
                     toast.info('Filter Applied', `Displaying analytics for ${period.toUpperCase()}`)
                   }}
                   onExport={() => toast.success('Report Exported', 'Store summary PDF & CSV exported successfully!')}
-                  totalOrders="548"
-                  activeBranches="4 Outlets"
+                  totalOrders={statsData ? `${statsData.totalOrdersCount || 0}` : '0'}
+                  activeBranches={statsData ? `${statsData.activeStoresCount || 0} Outlets` : '0 Outlets'}
                 />
 
                 {/* 4 KPI Metrics in Indian Rupees (₹) */}
@@ -489,10 +496,21 @@ export default function DashboardPage({ onLogout }) {
                 </div>
 
                 {/* Orders Volume, Trajectory Graph & Fulfillment Breakdown */}
-                <OrdersAnalyticsSection />
+                <OrdersAnalyticsSection
+                  orderTrajectoryData={dashboardData?.orderTrajectoryData}
+                  fulfillmentPipeline={dashboardData?.fulfillmentPipeline}
+                  channelDistribution={dashboardData?.channelDistribution}
+                  statsData={statsData}
+                />
 
                 {/* Customer Growth, Retention Graph & Segmentation Analysis */}
-                <CustomerAnalyticsSection />
+                <CustomerAnalyticsSection
+                  customerGrowthData={dashboardData?.customerGrowthData}
+                  customerSegments={dashboardData?.customerSegments}
+                  neighborhoodDensities={dashboardData?.neighborhoodDensities}
+                  totalCustomers={statsData?.totalCustomers}
+                  statsData={statsData}
+                />
 
                 {/* Middle Grid: Store Outlets Monitor + Quick Actions */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -518,7 +536,12 @@ export default function DashboardPage({ onLogout }) {
                     </div>
 
                     <div className="divide-y divide-slate-100">
-                      {storeBranches.map((store) => (
+                      {storeBranches.length === 0 ? (
+                        <div className="py-8 text-center text-xs text-slate-400">
+                          No store branches found in database.
+                        </div>
+                      ) : (
+                        storeBranches.map((store) => (
                         <div
                           key={store.id}
                           className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/60 rounded-xl px-2 transition-colors"
@@ -557,7 +580,7 @@ export default function DashboardPage({ onLogout }) {
                             </span>
                           </div>
                         </div>
-                      ))}
+                      )))}
                     </div>
                   </div>
 
@@ -582,7 +605,9 @@ export default function DashboardPage({ onLogout }) {
                           <FontAwesomeIcon icon={faStore} />
                         </div>
                         <p className="text-xs font-bold text-slate-800">Store Outlets</p>
-                        <p className="text-[10px] text-slate-400">4 Locations</p>
+                        <p className="text-[10px] text-slate-400">
+                          {statsData?.totalStoresCount !== undefined ? `${statsData.totalStoresCount} Locations` : '0 Locations'}
+                        </p>
                       </button>
 
                       <button
@@ -594,7 +619,9 @@ export default function DashboardPage({ onLogout }) {
                           <FontAwesomeIcon icon={faUsers} />
                         </div>
                         <p className="text-xs font-bold text-slate-800">Customers</p>
-                        <p className="text-[10px] text-slate-400">Directory</p>
+                        <p className="text-[10px] text-slate-400">
+                          {statsData?.totalCustomers !== undefined ? `${statsData.totalCustomers} Accounts` : 'Directory'}
+                        </p>
                       </button>
 
                       <button
@@ -630,7 +657,10 @@ export default function DashboardPage({ onLogout }) {
                       </span>
                       <button
                         type="button"
-                        onClick={() => toast.success('Sync Refreshed', 'Database telemetry up to date.')}
+                        onClick={() => {
+                          fetchDashboardData()
+                          toast.success('Sync Refreshed', 'Database telemetry up to date.')
+                        }}
                         className="text-slate-400 hover:text-slate-800 cursor-pointer"
                         title="Refresh data"
                       >

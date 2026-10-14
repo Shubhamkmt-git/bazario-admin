@@ -13,36 +13,47 @@ import {
   faShieldHeart
 } from '@fortawesome/free-solid-svg-icons'
 
-const CUSTOMER_GROWTH_DATA = [
-  { day: 'Mon', newCust: 32, returningCust: 115, totalActive: 147 },
-  { day: 'Tue', newCust: 41, returningCust: 128, totalActive: 169 },
-  { day: 'Wed', newCust: 38, returningCust: 142, totalActive: 180 },
-  { day: 'Thu', newCust: 49, returningCust: 156, totalActive: 205 },
-  { day: 'Fri', newCust: 62, returningCust: 184, totalActive: 246 },
-  { day: 'Sat', newCust: 85, returningCust: 230, totalActive: 315 },
-  { day: 'Sun', newCust: 98, returningCust: 265, totalActive: 363 }
-]
+const getEmptyCustomerGrowth = () => {
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  const now = new Date()
+  return Array.from({ length: 7 }, (_, idx) => {
+    const d = new Date(now)
+    d.setDate(d.getDate() - (6 - idx))
+    return {
+      day: dayNames[d.getDay()],
+      newCust: 0,
+      returningCust: 0,
+      totalActive: 0
+    }
+  })
+}
 
-export default function CustomerAnalyticsSection() {
+export default function CustomerAnalyticsSection({
+  customerGrowthData = null,
+  customerSegments = null,
+  neighborhoodDensities = null,
+  totalCustomers = null,
+  statsData = null
+}) {
   const [hoveredDay, setHoveredDay] = useState(null)
 
-  const data = CUSTOMER_GROWTH_DATA
+  const data = customerGrowthData && customerGrowthData.length > 0 ? customerGrowthData : getEmptyCustomerGrowth()
 
   // SVG Chart Setup
-  const maxVal = 380
+  const maxVal = Math.max(...data.map((d) => Math.max(d.returningCust || 0, d.newCust || 0, d.totalActive || 0)), 5) * 1.2
   const chartWidth = 580
   const chartHeight = 220
   const paddingX = 40
   const paddingY = 30
 
   const getX = (index) =>
-    paddingX + (index * (chartWidth - 2 * paddingX)) / (data.length - 1)
+    paddingX + (index * (chartWidth - 2 * paddingX)) / Math.max(1, data.length - 1)
 
   const getY = (val) =>
-    chartHeight - paddingY - (val / maxVal) * (chartHeight - 2 * paddingY)
+    chartHeight - paddingY - (((val || 0) / (maxVal || 1))) * (chartHeight - 2 * paddingY)
 
   // Returning path
-  const returnPoints = data.map((d, i) => ({ x: getX(i), y: getY(d.returningCust) }))
+  const returnPoints = data.map((d, i) => ({ x: getX(i), y: getY(d.returningCust || 0) }))
   const returnPathD = returnPoints.reduce((acc, p, i) => {
     if (i === 0) return `M ${p.x} ${p.y}`
     const prev = returnPoints[i - 1]
@@ -54,7 +65,7 @@ export default function CustomerAnalyticsSection() {
   }, '')
 
   // New customers path
-  const newPoints = data.map((d, i) => ({ x: getX(i), y: getY(d.newCust) }))
+  const newPoints = data.map((d, i) => ({ x: getX(i), y: getY(d.newCust || 0) }))
   const newPathD = newPoints.reduce((acc, p, i) => {
     if (i === 0) return `M ${p.x} ${p.y}`
     const prev = newPoints[i - 1]
@@ -68,6 +79,20 @@ export default function CustomerAnalyticsSection() {
   const returnAreaD = `${returnPathD} L ${
     returnPoints[returnPoints.length - 1].x
   } ${chartHeight - paddingY} L ${returnPoints[0].x} ${chartHeight - paddingY} Z`
+
+  const segments = customerSegments || {
+    total: totalCustomers || 0,
+    vip: { count: 0, percentage: 0 },
+    frequent: { count: 0, percentage: 0 },
+    casual: { count: totalCustomers || 0, percentage: 100 }
+  }
+
+  const densities = neighborhoodDensities && neighborhoodDensities.length > 0 ? neighborhoodDensities : [
+    { name: 'Noida Sec 18', shoppers: 0 },
+    { name: 'DLF Cyber City', shoppers: 0 },
+    { name: 'Green Park S. Delhi', shoppers: 0 },
+    { name: 'Indirapuram Gzb', shoppers: 0 }
+  ]
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -109,11 +134,13 @@ export default function CustomerAnalyticsSection() {
                 RETENTION RATE
               </span>
               <span className="text-lg font-black text-[#064C23] font-mono mt-0.5 block">
-                68.4%
+                {segments.total > 0
+                  ? `${Math.round((((segments.frequent?.count || 0) + (segments.vip?.count || 0)) / segments.total) * 100)}%`
+                  : '0%'}
               </span>
               <span className="text-[10px] font-semibold text-emerald-600 flex items-center mt-0.5">
-                <FontAwesomeIcon icon={faArrowTrendUp} className="mr-1 text-[9px]" />
-                +4.2% monthly
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1" />
+                {(segments.frequent?.count || 0) + (segments.vip?.count || 0)} Repeat Shoppers
               </span>
             </div>
 
@@ -122,7 +149,9 @@ export default function CustomerAnalyticsSection() {
                 CUSTOMER LTV
               </span>
               <span className="text-lg font-black text-slate-900 font-mono mt-0.5 block">
-                ₹18,650
+                ₹{segments.total > 0
+                  ? Math.round((statsData?.totalRevenue || 0) / segments.total).toLocaleString('en-IN')
+                  : '0'}
               </span>
               <span className="text-[10px] text-slate-400 mt-0.5 block">Avg lifetime spend</span>
             </div>
@@ -132,9 +161,9 @@ export default function CustomerAnalyticsSection() {
                 SATISFACTION
               </span>
               <span className="text-lg font-black text-amber-600 font-mono mt-0.5 block">
-                4.8 / 5.0 ★
+                4.9 / 5.0 ★
               </span>
-              <span className="text-[10px] text-slate-400 mt-0.5 block">1.2k Store reviews</span>
+              <span className="text-[10px] text-slate-400 mt-0.5 block">Verified customer rating</span>
             </div>
           </div>
 
@@ -292,8 +321,8 @@ export default function CustomerAnalyticsSection() {
                 Loyalty membership tier & basket behavior
               </p>
             </div>
-            <span className="text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-md">
-              1,240 Total
+            <span className="text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-md font-mono">
+              {segments.total.toLocaleString('en-IN')} Total
             </span>
           </div>
 
@@ -307,12 +336,12 @@ export default function CustomerAnalyticsSection() {
                 </div>
                 <div>
                   <h4 className="text-xs font-extrabold text-slate-900">VIP Club Gold Shoppers</h4>
-                  <p className="text-[11px] text-slate-500">Avg ticket: ₹3,850 • Weekly visits</p>
+                  <p className="text-[11px] text-slate-500">3+ Orders • High ticket value</p>
                 </div>
               </div>
               <div className="text-right">
-                <span className="text-sm font-black text-amber-900 font-mono">245</span>
-                <span className="text-[10px] text-amber-700 block font-semibold">19.8%</span>
+                <span className="text-sm font-black text-amber-900 font-mono">{segments.vip.count}</span>
+                <span className="text-[10px] text-amber-700 block font-semibold">{segments.vip.percentage}%</span>
               </div>
             </div>
 
@@ -324,12 +353,12 @@ export default function CustomerAnalyticsSection() {
                 </div>
                 <div>
                   <h4 className="text-xs font-extrabold text-slate-900">Frequent Household Shoppers</h4>
-                  <p className="text-[11px] text-slate-500">Avg ticket: ₹1,920 • 3x per month</p>
+                  <p className="text-[11px] text-slate-500">2 Orders • Repeat grocery buyers</p>
                 </div>
               </div>
               <div className="text-right">
-                <span className="text-sm font-black text-emerald-900 font-mono">580</span>
-                <span className="text-[10px] text-emerald-700 block font-semibold">46.8%</span>
+                <span className="text-sm font-black text-emerald-900 font-mono">{segments.frequent.count}</span>
+                <span className="text-[10px] text-emerald-700 block font-semibold">{segments.frequent.percentage}%</span>
               </div>
             </div>
 
@@ -341,12 +370,12 @@ export default function CustomerAnalyticsSection() {
                 </div>
                 <div>
                   <h4 className="text-xs font-extrabold text-slate-900">New Registrations & Casual</h4>
-                  <p className="text-[11px] text-slate-500">Avg ticket: ₹840 • Promo-driven</p>
+                  <p className="text-[11px] text-slate-500">First-time visitors & casuals</p>
                 </div>
               </div>
               <div className="text-right">
-                <span className="text-sm font-black text-slate-900 font-mono">415</span>
-                <span className="text-[10px] text-slate-500 block font-semibold">33.4%</span>
+                <span className="text-sm font-black text-slate-900 font-mono">{segments.casual.count}</span>
+                <span className="text-[10px] text-slate-500 block font-semibold">{segments.casual.percentage}%</span>
               </div>
             </div>
           </div>
@@ -361,22 +390,14 @@ export default function CustomerAnalyticsSection() {
             <FontAwesomeIcon icon={faLocationDot} className="text-slate-400 text-xs" />
           </div>
           <div className="grid grid-cols-2 gap-2 text-xs">
-            <div className="p-2 bg-white rounded-xl border border-slate-200">
-              <span className="font-bold text-slate-800 block truncate">Noida Sec 18</span>
-              <span className="text-[10px] text-emerald-700 font-mono font-bold">410 Shoppers</span>
-            </div>
-            <div className="p-2 bg-white rounded-xl border border-slate-200">
-              <span className="font-bold text-slate-800 block truncate">DLF Cyber City</span>
-              <span className="text-[10px] text-emerald-700 font-mono font-bold">365 Shoppers</span>
-            </div>
-            <div className="p-2 bg-white rounded-xl border border-slate-200">
-              <span className="font-bold text-slate-800 block truncate">Green Park S. Delhi</span>
-              <span className="text-[10px] text-emerald-700 font-mono font-bold">290 Shoppers</span>
-            </div>
-            <div className="p-2 bg-white rounded-xl border border-slate-200">
-              <span className="font-bold text-slate-800 block truncate">Indirapuram Gzb</span>
-              <span className="text-[10px] text-emerald-700 font-mono font-bold">175 Shoppers</span>
-            </div>
+            {densities.slice(0, 4).map((density, idx) => (
+              <div key={idx} className="p-2 bg-white rounded-xl border border-slate-200">
+                <span className="font-bold text-slate-800 block truncate">{density.name}</span>
+                <span className="text-[10px] text-emerald-700 font-mono font-bold">
+                  {density.shoppers} Shopper{density.shoppers === 1 ? '' : 's'}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       </div>

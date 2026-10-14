@@ -50,12 +50,12 @@ export default function DashboardWelcomeBanner({
           <div className="flex flex-wrap items-center gap-3 pt-1">
             <div className="bg-black/25 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-white/10 flex items-center space-x-2 text-xs">
               <FontAwesomeIcon icon={faCartShopping} className="text-emerald-300 text-xs" />
-              <span className="text-emerald-100/70">Today's Orders:</span>
+              <span className="text-emerald-100/70">Orders Processed:</span>
               <span className="font-extrabold text-white font-mono">{totalOrders}</span>
             </div>
             <div className="bg-black/25 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-white/10 flex items-center space-x-2 text-xs">
               <FontAwesomeIcon icon={faStore} className="text-amber-300 text-xs" />
-              <span className="text-emerald-100/70">Store Branches:</span>
+              <span className="text-emerald-100/70">Active Outlets:</span>
               <span className="font-extrabold text-white">{activeBranches}</span>
             </div>
           </div>

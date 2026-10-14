@@ -15,7 +15,7 @@ function LoginBlade({ onLoginSuccess }) {
   const [errorMessage, setErrorMessage] = useState('')
 
   const VALID_EMAIL = 'admin@bazario.com'
-  const VALID_PASSWORD = 'BazarioStore@2026'
+  const VALID_PASSWORD = 'admin123'
 
   const handleSubmit = async (e) => {
     e.preventDefault()
