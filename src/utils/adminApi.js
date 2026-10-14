@@ -549,3 +549,9 @@ export const getStorePackersApi = async (storeId) => {
   return await adminApi(`/store-manager/packers${query}`);
 };
 
+export const getStoreManagerDashboardStatsApi = async (storeId) => {
+  const query = storeId ? `?storeId=${encodeURIComponent(storeId)}` : '';
+  return await adminApi(`/store-manager/dashboard/stats${query}`);
+};
+
+

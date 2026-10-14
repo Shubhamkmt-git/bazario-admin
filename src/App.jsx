@@ -467,11 +467,7 @@ export default function App() {
   const handleLoginSuccess = (role = 'Admin') => {
     localStorage.setItem('bazario_admin_auth', 'true')
     setIsAuthenticated(true)
-    if (role === 'Store Manager') {
-      window.location.hash = '#/store-inventory'
-    } else {
-      window.location.hash = '#/dashboard'
-    }
+    window.location.hash = '#/dashboard'
   }
 
   const handleLogout = () => {

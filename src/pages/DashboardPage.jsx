@@ -34,6 +34,7 @@ import {
   StaffManageView,
   StorePackersView,
   ManageOffersView,
+  StoreManagerDashboardView,
   DashboardWelcomeBanner,
   OrdersAnalyticsSection,
   CustomerAnalyticsSection
@@ -507,8 +508,14 @@ export default function DashboardPage({ onLogout }) {
             )}
             {activeTab === 'manage-offers' && <ManageOffersView />}
             {activeTab === 'dashboard' && (
-              <>
-                {/* Enhanced Welcome Banner with Integrated Logo Image Box */}
+              isStoreManager ? (
+                <StoreManagerDashboardView
+                  currentUser={currentUser}
+                  onNavigate={handleSelectTab}
+                />
+              ) : (
+                <>
+                  {/* Enhanced Welcome Banner with Integrated Logo Image Box */}
                 <DashboardWelcomeBanner
                   dateFilter={dateFilter}
                   onDateFilterChange={(period) => {
@@ -827,6 +834,7 @@ export default function DashboardPage({ onLogout }) {
                   </div>
                 </div>
               </>
+              )
             )}
           </main>
 
