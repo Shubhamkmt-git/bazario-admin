@@ -13,6 +13,7 @@ import {
 import Button from '../ui/Button'
 import ActionButton from '../ui/ActionButton'
 import ToggleButton from '../ui/ToggleButton'
+import Pagination from '../ui/Pagination'
 
 export default function CustomerListView({
   customers = [],
@@ -24,6 +25,8 @@ export default function CustomerListView({
 }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
 
   const filteredCustomers = customers.filter((customer) => {
     const matchesStatus =
@@ -34,6 +37,13 @@ export default function CustomerListView({
       (customer.phone && customer.phone.includes(searchQuery))
     return matchesStatus && matchesSearch
   })
+
+  const totalPages = Math.max(1, Math.ceil(filteredCustomers.length / itemsPerPage))
+  const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages)
+  const paginatedCustomers = filteredCustomers.slice(
+    (safeCurrentPage - 1) * itemsPerPage,
+    safeCurrentPage * itemsPerPage
+  )
 
   return (
     <div className="w-full space-y-6 pb-20">
@@ -122,11 +132,11 @@ export default function CustomerListView({
             </thead>
             <tbody className="divide-y divide-slate-200">
               {filteredCustomers.length > 0 ? (
-                filteredCustomers.map((customer, index) => (
+                paginatedCustomers.map((customer, index) => (
                   <tr key={customer.id} className="hover:bg-slate-50/75 transition-colors">
                     {/* Index */}
                     <td className="px-6 py-4 font-bold text-slate-400 font-mono">
-                      #{index + 1}
+                      #{(safeCurrentPage - 1) * itemsPerPage + index + 1}
                     </td>
 
                     {/* Customer Name & Avatar */}
@@ -213,6 +223,23 @@ export default function CustomerListView({
             </tbody>
           </table>
         </div>
+
+        {/* Centralized Pagination Bar */}
+        {filteredCustomers.length > 0 && (
+          <div className="p-4 sm:p-5 border-t border-slate-100 bg-slate-50/40">
+            <Pagination
+              currentPage={safeCurrentPage}
+              totalItems={filteredCustomers.length}
+              itemsPerPage={itemsPerPage}
+              onPageChange={(page) => setCurrentPage(page)}
+              onItemsPerPageChange={(limit) => {
+                setItemsPerPage(limit)
+                setCurrentPage(1)
+              }}
+              itemsPerPageOptions={[10, 20, 50, 100]}
+            />
+          </div>
+        )}
       </div>
     </div>
   )

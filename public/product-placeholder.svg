@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#e2e8f0"/>
+    </linearGradient>
+    <linearGradient id="primaryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="400" height="400" rx="24" fill="url(#bgGrad)"/>
+  <rect x="4" y="4" width="392" height="392" rx="20" fill="none" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="6 6"/>
+
+  <!-- Package Illustration -->
+  <g transform="translate(130, 110)">
+    <!-- Grocery Bag Silhouette -->
+    <path d="M20 50 L120 50 L110 160 L30 160 Z" fill="#ffffff" stroke="#94a3b8" stroke-width="4" stroke-linejoin="round"/>
+    <!-- Bag Handles -->
+    <path d="M45 50 C45 20, 95 20, 95 50" fill="none" stroke="url(#primaryGrad)" stroke-width="6" stroke-linecap="round"/>
+    
+    <!-- Accent Sparkle / Leaf -->
+    <circle cx="70" cy="105" r="28" fill="#ecfdf5"/>
+    <path d="M70 88 C70 88, 86 100, 86 112 C86 122, 78 126, 70 126 C62 126, 54 122, 54 112 C54 100, 70 88, 70 88 Z" fill="url(#primaryGrad)"/>
+    
+    <!-- Speed delivery lines -->
+    <line x1="8" y1="90" x2="18" y2="90" stroke="#10b981" stroke-width="3" stroke-linecap="round"/>
+    <line x1="2" y1="110" x2="16" y2="110" stroke="#10b981" stroke-width="3" stroke-linecap="round"/>
+    <line x1="6" y1="130" x2="18" y2="130" stroke="#10b981" stroke-width="3" stroke-linecap="round"/>
+  </g>
+
+  <!-- Typography -->
+  <text x="200" y="300" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="20" font-weight="700" fill="#0f172a" letter-spacing="0.5">
+    Bazario
+  </text>
+  <text x="200" y="324" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="500" fill="#64748b" letter-spacing="0.2">
+    Product Image Coming Soon
+  </text>
+  <rect x="145" y="340" width="110" height="22" rx="11" fill="#ecfdf5"/>
+  <text x="200" y="355" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="700" fill="#059669">
+    100% GENUINE
+  </text>
+</svg>

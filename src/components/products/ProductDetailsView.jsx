@@ -24,7 +24,7 @@ export default function ProductDetailsView({ product, onBack, onEdit }) {
     ? product.galleryImages.filter(Boolean)
     : product?.image
     ? [product.image]
-    : ['/supermart-bg.jpg']
+    : ['/product-placeholder.svg']
 
   const [activeImageIndex, setActiveImageIndex] = useState(0)
 
@@ -128,11 +128,12 @@ export default function ProductDetailsView({ product, onBack, onEdit }) {
             {/* Main Stage Image */}
             <div className="w-full aspect-video sm:aspect-[16/9] max-h-[420px] rounded-2xl bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center relative">
               <img
-                src={gallery[activeImageIndex] || '/supermart-bg.jpg'}
+                src={gallery[activeImageIndex] || '/product-placeholder.svg'}
                 alt={product.title}
                 className="w-full h-full object-contain p-4"
                 onError={(e) => {
-                  e.target.src = '/supermart-bg.jpg'
+                  e.target.onerror = null
+                  e.target.src = '/product-placeholder.svg'
                 }}
               />
               {discountPercent > 0 && (
@@ -157,9 +158,13 @@ export default function ProductDetailsView({ product, onBack, onEdit }) {
                     }`}
                   >
                     <img
-                      src={img || '/supermart-bg.jpg'}
+                      src={img || '/product-placeholder.svg'}
                       alt={`Thumb ${idx + 1}`}
                       className="w-full h-full object-cover rounded-lg"
+                      onError={(e) => {
+                        e.target.onerror = null
+                        e.target.src = '/product-placeholder.svg'
+                      }}
                     />
                   </button>
                 ))}

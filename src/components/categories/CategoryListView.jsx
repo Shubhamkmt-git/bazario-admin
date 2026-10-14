@@ -9,7 +9,8 @@ import {
 import {
   Button,
   ActionButton,
-  ToggleButton
+  ToggleButton,
+  Pagination
 } from '../index'
 
 export default function CategoryListView({
@@ -24,6 +25,8 @@ export default function CategoryListView({
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all') // 'all' | 'Active' | 'Inactive'
   const [featuredFilter, setFeaturedFilter] = useState('all') // 'all' | 'featured' | 'standard'
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
 
   // Filter logic
   const filteredCategories = categories.filter((c) => {
@@ -48,6 +51,13 @@ export default function CategoryListView({
   // Sort by sortingOrder
   const sortedCategories = [...filteredCategories].sort(
     (a, b) => (Number(a.sortingOrder) || 0) - (Number(b.sortingOrder) || 0)
+  )
+
+  const totalPages = Math.max(1, Math.ceil(sortedCategories.length / itemsPerPage))
+  const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages)
+  const paginatedCategories = sortedCategories.slice(
+    (safeCurrentPage - 1) * itemsPerPage,
+    safeCurrentPage * itemsPerPage
   )
 
   return (
@@ -165,7 +175,7 @@ export default function CategoryListView({
             </thead>
             <tbody className="divide-y divide-slate-200">
               {sortedCategories.length > 0 ? (
-                sortedCategories.map((category) => (
+                paginatedCategories.map((category) => (
                   <tr key={category.id} className="hover:bg-slate-50/75 transition-colors">
                     {/* Order */}
                     <td className="px-6 py-4 text-center">
@@ -263,6 +273,23 @@ export default function CategoryListView({
             </tbody>
           </table>
         </div>
+
+        {/* Centralized Pagination Bar */}
+        {sortedCategories.length > 0 && (
+          <div className="p-4 sm:p-5 border-t border-slate-100 bg-slate-50/40">
+            <Pagination
+              currentPage={safeCurrentPage}
+              totalItems={sortedCategories.length}
+              itemsPerPage={itemsPerPage}
+              onPageChange={(page) => setCurrentPage(page)}
+              onItemsPerPageChange={(limit) => {
+                setItemsPerPage(limit)
+                setCurrentPage(1)
+              }}
+              itemsPerPageOptions={[10, 20, 50, 100]}
+            />
+          </div>
+        )}
       </div>
     </div>
   )

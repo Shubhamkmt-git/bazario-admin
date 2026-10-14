@@ -292,7 +292,7 @@ export default function EditProductView({ product, onBack, onSave }) {
     }
 
     const filteredGallery = formData.galleryImages.filter(Boolean)
-    const primaryImg = formData.image || filteredGallery[0] || product?.image || '/supermart-bg.jpg'
+    const primaryImg = formData.image || filteredGallery[0] || product?.image || '/product-placeholder.svg'
 
     const updatedProduct = {
       ...product,

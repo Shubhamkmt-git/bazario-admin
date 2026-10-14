@@ -12,6 +12,7 @@ import {
 import Button from '../../ui/Button'
 import ActionButton from '../../ui/ActionButton'
 import ToggleButton from '../../ui/ToggleButton'
+import Pagination from '../../ui/Pagination'
 
 export default function UserListView({
   users = [],
@@ -24,6 +25,8 @@ export default function UserListView({
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [roleFilter, setRoleFilter] = useState('all')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
 
   // Extract unique roles for filter
   const uniqueRoles = ['all', ...Array.from(new Set(users.map((u) => u.role).filter(Boolean)))]
@@ -40,6 +43,13 @@ export default function UserListView({
       (user.role && user.role.toLowerCase().includes(searchQuery.toLowerCase()))
     return matchesStatus && matchesRole && matchesSearch
   })
+
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / itemsPerPage))
+  const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages)
+  const paginatedUsers = filteredUsers.slice(
+    (safeCurrentPage - 1) * itemsPerPage,
+    safeCurrentPage * itemsPerPage
+  )
 
   return (
     <div className="w-full space-y-6 pb-20">
@@ -147,11 +157,11 @@ export default function UserListView({
             </thead>
             <tbody className="divide-y divide-slate-200">
               {filteredUsers.length > 0 ? (
-                filteredUsers.map((user, index) => (
+                paginatedUsers.map((user, index) => (
                   <tr key={user.id} className="hover:bg-slate-50/75 transition-colors">
                     {/* Index */}
                     <td className="px-6 py-4 font-bold text-slate-400 font-mono">
-                      #{index + 1}
+                      #{(safeCurrentPage - 1) * itemsPerPage + index + 1}
                     </td>
 
                     {/* Admin Profile & Avatar */}
@@ -255,6 +265,23 @@ export default function UserListView({
             </tbody>
           </table>
         </div>
+
+        {/* Centralized Pagination Bar */}
+        {filteredUsers.length > 0 && (
+          <div className="p-4 sm:p-5 border-t border-slate-100 bg-slate-50/40">
+            <Pagination
+              currentPage={safeCurrentPage}
+              totalItems={filteredUsers.length}
+              itemsPerPage={itemsPerPage}
+              onPageChange={(page) => setCurrentPage(page)}
+              onItemsPerPageChange={(limit) => {
+                setItemsPerPage(limit)
+                setCurrentPage(1)
+              }}
+              itemsPerPageOptions={[10, 20, 50, 100]}
+            />
+          </div>
+        )}
       </div>
     </div>
   )

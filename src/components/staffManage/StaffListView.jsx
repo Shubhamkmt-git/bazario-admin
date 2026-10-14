@@ -16,7 +16,8 @@ import {
 import {
   Button,
   ActionButton,
-  ToggleButton
+  ToggleButton,
+  Pagination
 } from '../index'
 
 export default function StaffListView({
@@ -31,6 +32,8 @@ export default function StaffListView({
   const [storeFilter, setStoreFilter] = useState('all')
   const [roleFilter, setRoleFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
 
   // Extract unique stores for filtering
   const storeOptions = useMemo(() => {
@@ -77,7 +80,15 @@ export default function StaffListView({
     setStoreFilter('all')
     setRoleFilter('all')
     setStatusFilter('all')
+    setCurrentPage(1)
   }
+
+  const totalPages = Math.max(1, Math.ceil(filteredStaff.length / itemsPerPage))
+  const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages)
+  const paginatedStaff = filteredStaff.slice(
+    (safeCurrentPage - 1) * itemsPerPage,
+    safeCurrentPage * itemsPerPage
+  )
 
   return (
     <div className="space-y-6">
@@ -220,11 +231,11 @@ export default function StaffListView({
             </thead>
             <tbody className="divide-y divide-slate-200">
               {filteredStaff.length > 0 ? (
-                filteredStaff.map((staff, idx) => (
+                paginatedStaff.map((staff, idx) => (
                   <tr key={staff.id} className="hover:bg-slate-50/75 transition-colors">
                     {/* Index */}
                     <td className="px-6 py-4 text-center font-mono font-bold text-xs text-slate-400">
-                      #{idx + 1}
+                      #{(safeCurrentPage - 1) * itemsPerPage + idx + 1}
                     </td>
 
                     {/* Staff Image & Name */}
@@ -360,6 +371,23 @@ export default function StaffListView({
             </tbody>
           </table>
         </div>
+
+        {/* Centralized Pagination Bar */}
+        {filteredStaff.length > 0 && (
+          <div className="p-4 sm:p-5 border-t border-slate-100 bg-slate-50/40">
+            <Pagination
+              currentPage={safeCurrentPage}
+              totalItems={filteredStaff.length}
+              itemsPerPage={itemsPerPage}
+              onPageChange={(page) => setCurrentPage(page)}
+              onItemsPerPageChange={(limit) => {
+                setItemsPerPage(limit)
+                setCurrentPage(1)
+              }}
+              itemsPerPageOptions={[10, 20, 50, 100]}
+            />
+          </div>
+        )}
       </div>
     </div>
   )

@@ -270,7 +270,7 @@ export default function AddProductView({ onBack, onSave }) {
     }
 
     const filteredGallery = formData.galleryImages.filter(Boolean)
-    const primaryImg = formData.image || filteredGallery[0] || '/supermart-bg.jpg'
+    const primaryImg = formData.image || filteredGallery[0] || '/product-placeholder.svg'
 
     const newProduct = {
       id: Date.now(),

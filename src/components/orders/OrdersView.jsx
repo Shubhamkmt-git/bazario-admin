@@ -27,6 +27,7 @@ import Button from '../ui/Button'
 import ActionButton from '../ui/ActionButton'
 import Modal from '../ui/Modal'
 import AlertModal from '../ui/AlertModal'
+import Pagination from '../ui/Pagination'
 import {
   getAdminOrdersApi,
   getStoreOrdersApi,
@@ -286,6 +287,21 @@ export default function OrdersView({ currentUser }) {
     return matchesFilter && matchesSearch
   })
 
+  // Pagination state and page slicing
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [orderFilter, searchQuery])
+
+  const totalPages = Math.max(1, Math.ceil(filteredOrders.length / itemsPerPage))
+  const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages)
+  const paginatedOrders = filteredOrders.slice(
+    (safeCurrentPage - 1) * itemsPerPage,
+    safeCurrentPage * itemsPerPage
+  )
+
   // Status Badge Helper
   const renderStatusBadge = (status) => {
     switch (status) {
@@ -491,7 +507,7 @@ export default function OrdersView({ currentUser }) {
             </thead>
             <tbody className="divide-y divide-slate-200">
               {filteredOrders.length > 0 ? (
-                filteredOrders.map((order) => (
+                paginatedOrders.map((order) => (
                   <tr key={order.rawId || order.orderNumber} className="hover:bg-slate-50/75 transition-colors">
                     {/* Order ID & Time */}
                     <td className="px-6 py-4">
@@ -636,6 +652,23 @@ export default function OrdersView({ currentUser }) {
             </tbody>
           </table>
         </div>
+
+        {/* Centralized Pagination Bar */}
+        {filteredOrders.length > 0 && (
+          <div className="p-4 sm:p-5 border-t border-slate-100 bg-slate-50/40">
+            <Pagination
+              currentPage={safeCurrentPage}
+              totalItems={filteredOrders.length}
+              itemsPerPage={itemsPerPage}
+              onPageChange={(page) => setCurrentPage(page)}
+              onItemsPerPageChange={(limit) => {
+                setItemsPerPage(limit)
+                setCurrentPage(1)
+              }}
+              itemsPerPageOptions={[10, 20, 50, 100]}
+            />
+          </div>
+        )}
       </div>
 
       {/* 3b. IN-STORE PACKER SELECTION MODAL */}

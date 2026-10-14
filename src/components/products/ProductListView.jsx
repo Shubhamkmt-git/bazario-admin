@@ -53,47 +53,55 @@ const getInitialLimit = () => {
 
 export default function ProductListView({
   products = [],
+  totalItems: serverTotalItems,
+  currentPage: serverCurrentPage,
+  itemsPerPage: serverItemsPerPage,
+  onPageChange: serverOnPageChange,
+  onLimitChange: serverOnLimitChange,
+  searchQuery: serverSearchQuery,
+  onSearchChange: serverOnSearchChange,
+  selectedCategory: serverSelectedCategory,
+  onCategoryChange: serverOnCategoryChange,
+  selectedBrand: serverSelectedBrand,
+  onBrandChange: serverOnBrandChange,
+  selectedStatus: serverSelectedStatus,
+  onStatusChange: serverOnStatusChange,
+  categoriesList: serverCategoriesList,
+  loading = false,
   onAddNew,
   onView,
   onEdit,
   onDelete,
   onToggleStatus
 }) {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('all')
-  const [selectedBrand, setSelectedBrand] = useState('all')
-  const [selectedStatus, setSelectedStatus] = useState('all')
+  const isServerDriven = serverTotalItems !== undefined
 
-  // Pagination states with persistent reload support
-  const [currentPage, setCurrentPage] = useState(getInitialPage)
-  const [itemsPerPage, setItemsPerPage] = useState(getInitialLimit)
+  // Local state fallbacks if not server-driven
+  const [localSearchQuery, setLocalSearchQuery] = useState('')
+  const [localSelectedCategory, setLocalSelectedCategory] = useState('all')
+  const [localSelectedBrand, setLocalSelectedBrand] = useState('all')
+  const [localSelectedStatus, setLocalSelectedStatus] = useState('all')
+  const [localCurrentPage, setLocalCurrentPage] = useState(getInitialPage)
+  const [localItemsPerPage, setLocalItemsPerPage] = useState(getInitialLimit)
 
-  // Listen to browser navigation / hash change
-  useEffect(() => {
-    const handleHashChange = () => {
-      try {
-        const hashQuery = window.location.hash.includes('?')
-          ? window.location.hash.split('?')[1]
-          : ''
-        const params = new URLSearchParams(hashQuery)
-        const p = parseInt(params.get('page'), 10)
-        if (p && p > 0 && p !== currentPage) {
-          setCurrentPage(p)
-        }
-      } catch (e) {}
-    }
-    window.addEventListener('hashchange', handleHashChange)
-    return () => window.removeEventListener('hashchange', handleHashChange)
-  }, [currentPage])
+  const searchQuery = isServerDriven ? (serverSearchQuery ?? '') : localSearchQuery
+  const selectedCategory = isServerDriven ? (serverSelectedCategory ?? 'all') : localSelectedCategory
+  const selectedBrand = isServerDriven ? (serverSelectedBrand ?? 'all') : localSelectedBrand
+  const selectedStatus = isServerDriven ? (serverSelectedStatus ?? 'all') : localSelectedStatus
+  const currentPage = isServerDriven ? (serverCurrentPage ?? 1) : localCurrentPage
+  const itemsPerPage = isServerDriven ? (serverItemsPerPage ?? 10) : localItemsPerPage
 
   // Extract unique categories & brands for filter dropdowns
   const categoriesList = useMemo(() => {
+    if (serverCategoriesList && Array.isArray(serverCategoriesList) && serverCategoriesList.length > 0) {
+      return serverCategoriesList
+    }
     const set = new Set()
     products.forEach((p) => {
       if (p.category) set.add(p.category)
     })
     return Array.from(set)
-  }, [products])
+  }, [products, serverCategoriesList])
 
   const brandsList = useMemo(() => {
     const set = new Set()
@@ -103,8 +111,9 @@ export default function ProductListView({
     return Array.from(set)
   }, [products])
 
-  // Filtered Products
+  // Filtered Products (if client-side) or pass-through (if server-side)
   const filteredProducts = useMemo(() => {
+    if (isServerDriven) return products
     return products.filter((item) => {
       const q = searchQuery.toLowerCase().trim()
       const matchesSearch =
@@ -126,89 +135,87 @@ export default function ProductListView({
 
       return matchesSearch && matchesCat && matchesBrand && matchesStatus
     })
-  }, [products, searchQuery, selectedCategory, selectedBrand, selectedStatus])
+  }, [isServerDriven, products, searchQuery, selectedCategory, selectedBrand, selectedStatus])
 
-  // Pagination calculation with safety clamping
-  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / itemsPerPage))
+  const totalCount = isServerDriven ? serverTotalItems : filteredProducts.length
+  const totalPages = Math.max(1, Math.ceil(totalCount / itemsPerPage))
   const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages)
 
   const paginatedProducts = useMemo(() => {
+    if (isServerDriven) return products
     const startIndex = (safeCurrentPage - 1) * itemsPerPage
     return filteredProducts.slice(startIndex, startIndex + itemsPerPage)
-  }, [filteredProducts, safeCurrentPage, itemsPerPage])
+  }, [isServerDriven, products, filteredProducts, safeCurrentPage, itemsPerPage])
 
-  // Page change handler
+  // Handlers
   const handlePageChange = (newPage) => {
-    setCurrentPage(newPage)
-    try {
-      sessionStorage.setItem('bazario_products_page', String(newPage))
-      const baseHash = window.location.hash.split('?')[0] || '#/products'
-      const newHash = `${baseHash}?page=${newPage}&limit=${itemsPerPage}`
-      window.history.replaceState(null, '', newHash)
-    } catch (e) {}
+    if (isServerDriven && serverOnPageChange) {
+      serverOnPageChange(newPage)
+    } else {
+      setLocalCurrentPage(newPage)
+    }
   }
 
-  // Items per page change handler
   const handleLimitChange = (newLimit) => {
-    setItemsPerPage(newLimit)
-    setCurrentPage(1)
-    try {
-      sessionStorage.setItem('bazario_products_limit', String(newLimit))
-      sessionStorage.setItem('bazario_products_page', '1')
-      const baseHash = window.location.hash.split('?')[0] || '#/products'
-      const newHash = `${baseHash}?page=1&limit=${newLimit}`
-      window.history.replaceState(null, '', newHash)
-    } catch (e) {}
+    if (isServerDriven && serverOnLimitChange) {
+      serverOnLimitChange(newLimit)
+    } else {
+      setLocalItemsPerPage(newLimit)
+      setLocalCurrentPage(1)
+    }
   }
 
-  // Filter change handlers that automatically reset to page 1 for reliable searching
   const handleSearchChange = (val) => {
-    setSearchQuery(val)
-    setCurrentPage(1)
-    try {
-      sessionStorage.setItem('bazario_products_page', '1')
-      const baseHash = window.location.hash.split('?')[0] || '#/products'
-      window.history.replaceState(null, '', `${baseHash}?page=1&limit=${itemsPerPage}`)
-    } catch (e) {}
+    if (isServerDriven && serverOnSearchChange) {
+      serverOnSearchChange(val)
+    } else {
+      setLocalSearchQuery(val)
+      setLocalCurrentPage(1)
+    }
   }
 
   const handleCategoryChange = (val) => {
-    setSelectedCategory(val)
-    setCurrentPage(1)
-    try {
-      sessionStorage.setItem('bazario_products_page', '1')
-      const baseHash = window.location.hash.split('?')[0] || '#/products'
-      window.history.replaceState(null, '', `${baseHash}?page=1&limit=${itemsPerPage}`)
-    } catch (e) {}
+    if (isServerDriven && serverOnCategoryChange) {
+      serverOnCategoryChange(val)
+    } else {
+      setLocalSelectedCategory(val)
+      setLocalCurrentPage(1)
+    }
   }
 
   const handleBrandChange = (val) => {
-    setSelectedBrand(val)
-    setCurrentPage(1)
-    try {
-      sessionStorage.setItem('bazario_products_page', '1')
-      const baseHash = window.location.hash.split('?')[0] || '#/products'
-      window.history.replaceState(null, '', `${baseHash}?page=1&limit=${itemsPerPage}`)
-    } catch (e) {}
+    if (isServerDriven && serverOnBrandChange) {
+      serverOnBrandChange(val)
+    } else {
+      setLocalSelectedBrand(val)
+      setLocalCurrentPage(1)
+    }
   }
 
   const handleStatusChange = (val) => {
-    setSelectedStatus(val)
-    setCurrentPage(1)
-    try {
-      sessionStorage.setItem('bazario_products_page', '1')
-      const baseHash = window.location.hash.split('?')[0] || '#/products'
-      window.history.replaceState(null, '', `${baseHash}?page=1&limit=${itemsPerPage}`)
-    } catch (e) {}
+    if (isServerDriven && serverOnStatusChange) {
+      serverOnStatusChange(val)
+    } else {
+      setLocalSelectedStatus(val)
+      setLocalCurrentPage(1)
+    }
   }
 
   // Reset all filters
   const handleResetFilters = () => {
-    setSearchQuery('')
-    setSelectedCategory('all')
-    setSelectedBrand('all')
-    setSelectedStatus('all')
-    setCurrentPage(1)
+    if (isServerDriven) {
+      if (serverOnSearchChange) serverOnSearchChange('')
+      if (serverOnCategoryChange) serverOnCategoryChange('all')
+      if (serverOnBrandChange) serverOnBrandChange('all')
+      if (serverOnStatusChange) serverOnStatusChange('all')
+      if (serverOnPageChange) serverOnPageChange(1)
+    } else {
+      setLocalSearchQuery('')
+      setLocalSelectedCategory('all')
+      setLocalSelectedBrand('all')
+      setLocalSelectedStatus('all')
+      setLocalCurrentPage(1)
+    }
     try {
       sessionStorage.setItem('bazario_products_page', '1')
       const baseHash = window.location.hash.split('?')[0] || '#/products'
@@ -329,7 +336,7 @@ export default function ProductListView({
         <div className="flex flex-wrap items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
           <div>
             Showing Page <span className="font-bold text-slate-900">{safeCurrentPage}</span> of{' '}
-            <span className="font-bold text-slate-900">{totalPages}</span> ({filteredProducts.length} matching products)
+            <span className="font-bold text-slate-900">{totalPages}</span> ({totalCount.toLocaleString('en-IN')} matching products)
           </div>
           <div className="flex items-center space-x-3">
             <span className="flex items-center">
@@ -391,7 +398,7 @@ export default function ProductListView({
               <tbody className="divide-y divide-slate-100 text-xs font-medium text-slate-700">
                 {paginatedProducts.map((prod) => {
                   const primaryImg =
-                    prod.galleryImages?.[0] || prod.image || '/supermart-bg.jpg'
+                    prod.galleryImages?.[0] || prod.image || '/product-placeholder.svg'
                   const galleryCount = Array.isArray(prod.galleryImages)
                     ? prod.galleryImages.filter(Boolean).length
                     : (prod.image ? 1 : 0)
@@ -426,7 +433,8 @@ export default function ProductListView({
                                 alt={prod.title}
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
-                                  e.target.style.display = 'none'
+                                  e.target.onerror = null
+                                  e.target.src = '/product-placeholder.svg'
                                 }}
                               />
                             ) : (
@@ -582,11 +590,11 @@ export default function ProductListView({
         )}
 
         {/* Centralized Pagination Bar */}
-        {filteredProducts.length > 0 && (
+        {totalCount > 0 && (
           <div className="p-4 sm:p-5 border-t border-slate-100 bg-slate-50/40">
             <Pagination
               currentPage={safeCurrentPage}
-              totalItems={filteredProducts.length}
+              totalItems={totalCount}
               itemsPerPage={itemsPerPage}
               onPageChange={handlePageChange}
               onItemsPerPageChange={handleLimitChange}

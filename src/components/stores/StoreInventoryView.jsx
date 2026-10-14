@@ -23,6 +23,7 @@ import {
   updateStoreStatusApi,
   getAdminStoresApi
 } from '../../utils/adminApi'
+import Pagination from '../ui/Pagination'
 
 export default function StoreInventoryView({ currentUser }) {
   const toast = useToast()
@@ -36,6 +37,12 @@ export default function StoreInventoryView({ currentUser }) {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [lowStockOnly, setLowStockOnly] = useState(false)
   const [categories, setCategories] = useState([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, selectedCategory, lowStockOnly, activeStoreId])
 
   // Quick adjust modal state
   const [adjustModal, setAdjustModal] = useState({
@@ -194,6 +201,13 @@ export default function StoreInventoryView({ currentUser }) {
 
     return matchesSearch && matchesCategory && matchesLowStock
   })
+
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / itemsPerPage))
+  const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages)
+  const paginatedItems = filteredItems.slice(
+    (safeCurrentPage - 1) * itemsPerPage,
+    safeCurrentPage * itemsPerPage
+  )
 
   const lowStockCount = inventory.filter(i => i.isLowStock).length
 
@@ -360,7 +374,7 @@ export default function StoreInventoryView({ currentUser }) {
                   </td>
                 </tr>
               ) : (
-                filteredItems.map((item) => (
+                paginatedItems.map((item) => (
                   <tr key={item.productId} className="hover:bg-slate-50/70 transition-colors">
                     {/* Product Info */}
                     <td className="py-3.5 px-6">
@@ -481,6 +495,23 @@ export default function StoreInventoryView({ currentUser }) {
             </tbody>
           </table>
         </div>
+
+        {/* Centralized Pagination Bar */}
+        {filteredItems.length > 0 && (
+          <div className="p-4 sm:p-5 border-t border-slate-100 bg-slate-50/40">
+            <Pagination
+              currentPage={safeCurrentPage}
+              totalItems={filteredItems.length}
+              itemsPerPage={itemsPerPage}
+              onPageChange={(page) => setCurrentPage(page)}
+              onItemsPerPageChange={(limit) => {
+                setItemsPerPage(limit)
+                setCurrentPage(1)
+              }}
+              itemsPerPageOptions={[10, 20, 50, 100]}
+            />
+          </div>
+        )}
       </div>
 
       {/* 5. Stock Adjustment Modal */}

@@ -29,7 +29,7 @@ export default function ManageOffersView() {
         title: o.title || `Promo ${o.code || ''}`,
         code: o.code || '',
         redirectionUrl: o.redirectionUrl || '/offers',
-        image: o.image || '/supermart-bg.jpg',
+        image: o.image || '/product-placeholder.svg',
         sortingOrder: o.sortingOrder || idx + 1,
         status: o.active ? 'Active' : (o.status || 'Active'),
         discount: o.discount || (o.discountValue ? `${o.discountValue}%` : ''),

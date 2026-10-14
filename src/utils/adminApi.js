@@ -518,31 +518,34 @@ export const getStoreOrdersApi = async (params = {}) => {
   return await adminApi(`/store-manager/orders${query ? '?' + query : ''}`);
 };
 
-export const updateStoreOrderStatusApi = async (orderId, data) => {
+export const updateStoreOrderStatusApi = async (orderId, dataOrStatus, assignedRider = null, note = '') => {
+  const body = typeof dataOrStatus === 'object' ? dataOrStatus : { status: dataOrStatus, assignedRider, note };
   return await adminApi(`/store-manager/orders/${orderId}/status`, {
     method: 'PUT',
-    body: JSON.stringify(data),
+    body: JSON.stringify(body),
   });
 };
 
 export const getStoreDetailsApi = async (storeId) => {
-  const query = storeId ? `?storeId=${storeId}` : '';
+  const query = storeId ? `?storeId=${encodeURIComponent(storeId)}` : '';
   return await adminApi(`/store-manager/store${query}`);
 };
 
 export const updateStoreStatusApi = async (status, storeId) => {
-  const query = storeId ? `?storeId=${storeId}` : '';
+  const query = storeId ? `?storeId=${encodeURIComponent(storeId)}` : '';
   return await adminApi(`/store-manager/store/status${query}`, {
     method: 'PATCH',
     body: JSON.stringify({ status }),
   });
 };
 
-export const getStoreRidersApi = async () => {
-  return await adminApi('/store-manager/riders');
+export const getStoreRidersApi = async (storeId) => {
+  const query = storeId ? `?storeId=${encodeURIComponent(storeId)}` : '';
+  return await adminApi(`/store-manager/riders${query}`);
 };
 
-export const getStorePackersApi = async () => {
-  return await adminApi('/store-manager/packers');
+export const getStorePackersApi = async (storeId) => {
+  const query = storeId ? `?storeId=${encodeURIComponent(storeId)}` : '';
+  return await adminApi(`/store-manager/packers${query}`);
 };
 

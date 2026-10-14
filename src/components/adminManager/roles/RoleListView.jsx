@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faShieldHalved,
@@ -11,6 +11,7 @@ import {
 import Button from '../../ui/Button'
 import ActionButton from '../../ui/ActionButton'
 import ToggleButton from '../../ui/ToggleButton'
+import Pagination from '../../ui/Pagination'
 
 export default function RoleListView({
   roles = [],
@@ -22,6 +23,12 @@ export default function RoleListView({
 }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, statusFilter])
 
   const filteredRoles = [...roles]
     .sort((a, b) => (Number(a.sortingOrder) || 999) - (Number(b.sortingOrder) || 999))
@@ -33,6 +40,13 @@ export default function RoleListView({
         (role.subtitle && role.subtitle.toLowerCase().includes(searchQuery.toLowerCase()))
       return matchesStatus && matchesSearch
     })
+
+  const totalPages = Math.max(1, Math.ceil(filteredRoles.length / itemsPerPage))
+  const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages)
+  const paginatedRoles = filteredRoles.slice(
+    (safeCurrentPage - 1) * itemsPerPage,
+    safeCurrentPage * itemsPerPage
+  )
 
   return (
     <div className="w-full space-y-6 pb-20">
@@ -120,82 +134,85 @@ export default function RoleListView({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
-              {filteredRoles.length > 0 ? (
-                filteredRoles.map((role, index) => (
-                  <tr key={role.id} className="hover:bg-slate-50/75 transition-colors">
-                    {/* Index */}
-                    <td className="px-6 py-4 font-bold text-slate-400 font-mono">
-                      #{index + 1}
-                    </td>
+              {paginatedRoles.length > 0 ? (
+                paginatedRoles.map((role, index) => {
+                  const globalIndex = (safeCurrentPage - 1) * itemsPerPage + index + 1
+                  return (
+                    <tr key={role.id} className="hover:bg-slate-50/75 transition-colors">
+                      {/* Index */}
+                      <td className="px-6 py-4 font-bold text-slate-400 font-mono">
+                        #{globalIndex}
+                      </td>
 
-                    {/* Sorting Order */}
-                    <td className="px-6 py-4 font-mono font-bold text-slate-700">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-slate-100 border border-slate-200">
-                        {role.sortingOrder ?? index + 1}
-                      </span>
-                    </td>
-
-                    {/* Title */}
-                    <td className="px-6 py-4">
-                      <button
-                        type="button"
-                        onClick={() => onView(role)}
-                        className="font-bold text-slate-900 text-sm hover:text-[#064C23] text-left cursor-pointer transition-colors"
-                      >
-                        {role.title}
-                      </button>
-                      {role.isSystem && (
-                        <span className="text-[10px] uppercase font-bold text-slate-400 block mt-0.5">
-                          System Default
+                      {/* Sorting Order */}
+                      <td className="px-6 py-4 font-mono font-bold text-slate-700">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-slate-100 border border-slate-200">
+                          {role.sortingOrder ?? globalIndex}
                         </span>
-                      )}
-                    </td>
+                      </td>
 
-                    {/* Subtitle */}
-                    <td className="px-6 py-4 text-xs font-medium text-slate-600 max-w-[280px]">
-                      <p className="line-clamp-2">{role.subtitle || 'General role'}</p>
-                    </td>
+                      {/* Title */}
+                      <td className="px-6 py-4">
+                        <button
+                          type="button"
+                          onClick={() => onView(role)}
+                          className="font-bold text-slate-900 text-sm hover:text-[#064C23] text-left cursor-pointer transition-colors"
+                        >
+                          {role.title}
+                        </button>
+                        {role.isSystem && (
+                          <span className="text-[10px] uppercase font-bold text-slate-400 block mt-0.5">
+                            System Default
+                          </span>
+                        )}
+                      </td>
 
-                    {/* Permissions count badge */}
-                    <td className="px-6 py-4">
-                      <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 bg-amber-50 text-amber-800 border border-amber-200 rounded-lg text-xs font-bold font-mono">
-                        <FontAwesomeIcon icon={faKey} className="text-[10px]" />
-                        <span>{role.permissions?.length || 0} Granted</span>
-                      </span>
-                    </td>
+                      {/* Subtitle */}
+                      <td className="px-6 py-4 text-xs font-medium text-slate-600 max-w-[280px]">
+                        <p className="line-clamp-2">{role.subtitle || 'General role'}</p>
+                      </td>
 
-                    {/* Status Toggle */}
-                    <td className="px-6 py-4">
-                      <ToggleButton
-                        size="sm"
-                        checked={role.status === 'Active'}
-                        onChange={() => onToggleStatus(role)}
-                        activeColor="#064C23"
-                      />
-                    </td>
+                      {/* Permissions count badge */}
+                      <td className="px-6 py-4">
+                        <span className="inline-flex items-center space-x-1.5 px-2.5 py-1 bg-amber-50 text-amber-800 border border-amber-200 rounded-lg text-xs font-bold font-mono">
+                          <FontAwesomeIcon icon={faKey} className="text-[10px]" />
+                          <span>{role.permissions?.length || 0} Granted</span>
+                        </span>
+                      </td>
 
-                    {/* Actions */}
-                    <td className="px-6 py-4 text-right space-x-1.5 whitespace-nowrap">
-                      <ActionButton
-                        action="view"
-                        onClick={() => onView(role)}
-                        title="View Full Page"
-                      />
-                      <ActionButton
-                        action="edit"
-                        onClick={() => onEdit(role)}
-                        title="Edit Full Page"
-                      />
-                      {!role.isSystem && (
-                        <ActionButton
-                          action="delete"
-                          onClick={() => onDelete(role)}
-                          title="Delete Role"
+                      {/* Status Toggle */}
+                      <td className="px-6 py-4">
+                        <ToggleButton
+                          size="sm"
+                          checked={role.status === 'Active'}
+                          onChange={() => onToggleStatus(role)}
+                          activeColor="#064C23"
                         />
-                      )}
-                    </td>
-                  </tr>
-                ))
+                      </td>
+
+                      {/* Actions */}
+                      <td className="px-6 py-4 text-right space-x-1.5 whitespace-nowrap">
+                        <ActionButton
+                          action="view"
+                          onClick={() => onView(role)}
+                          title="View Full Page"
+                        />
+                        <ActionButton
+                          action="edit"
+                          onClick={() => onEdit(role)}
+                          title="Edit Full Page"
+                        />
+                        {!role.isSystem && (
+                          <ActionButton
+                            action="delete"
+                            onClick={() => onDelete(role)}
+                            title="Delete Role"
+                          />
+                        )}
+                      </td>
+                    </tr>
+                  )
+                })
               ) : (
                 <tr>
                   <td colSpan="7" className="px-6 py-12 text-center text-slate-400 text-xs">
@@ -206,6 +223,19 @@ export default function RoleListView({
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Controls */}
+        <Pagination
+          currentPage={safeCurrentPage}
+          totalItems={filteredRoles.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={(page) => setCurrentPage(page)}
+          onItemsPerPageChange={(limit) => {
+            setItemsPerPage(limit)
+            setCurrentPage(1)
+          }}
+          itemsPerPageOptions={[10, 20, 50, 100]}
+        />
       </div>
     </div>
   )

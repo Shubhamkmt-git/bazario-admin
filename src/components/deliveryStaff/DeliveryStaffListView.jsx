@@ -10,7 +10,8 @@ import {
 import {
   Button,
   ActionButton,
-  ToggleButton
+  ToggleButton,
+  Pagination
 } from '../index'
 
 export default function DeliveryStaffListView({
@@ -23,6 +24,8 @@ export default function DeliveryStaffListView({
 }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all') // 'all' | 'Active' | 'Inactive'
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
 
   // Filter logic
   const filteredStaff = staffMembers.filter((staff) => {
@@ -37,6 +40,13 @@ export default function DeliveryStaffListView({
     const matchesStatus = statusFilter === 'all' ? true : staff.status === statusFilter
     return matchesSearch && matchesStatus
   })
+
+  const totalPages = Math.max(1, Math.ceil(filteredStaff.length / itemsPerPage))
+  const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages)
+  const paginatedStaff = filteredStaff.slice(
+    (safeCurrentPage - 1) * itemsPerPage,
+    safeCurrentPage * itemsPerPage
+  )
 
   return (
     <div className="space-y-6">
@@ -127,11 +137,11 @@ export default function DeliveryStaffListView({
             </thead>
             <tbody className="divide-y divide-slate-200">
               {filteredStaff.length > 0 ? (
-                filteredStaff.map((staff, idx) => (
+                paginatedStaff.map((staff, idx) => (
                   <tr key={staff.id} className="hover:bg-slate-50/75 transition-colors">
                     {/* Index */}
                     <td className="px-6 py-4 text-center font-mono font-bold text-xs text-slate-400">
-                      #{idx + 1}
+                      #{(safeCurrentPage - 1) * itemsPerPage + idx + 1}
                     </td>
 
                     {/* Staff Name & Avatar */}
@@ -229,6 +239,23 @@ export default function DeliveryStaffListView({
             </tbody>
           </table>
         </div>
+
+        {/* Centralized Pagination Bar */}
+        {filteredStaff.length > 0 && (
+          <div className="p-4 sm:p-5 border-t border-slate-100 bg-slate-50/40">
+            <Pagination
+              currentPage={safeCurrentPage}
+              totalItems={filteredStaff.length}
+              itemsPerPage={itemsPerPage}
+              onPageChange={(page) => setCurrentPage(page)}
+              onItemsPerPageChange={(limit) => {
+                setItemsPerPage(limit)
+                setCurrentPage(1)
+              }}
+              itemsPerPageOptions={[10, 20, 50, 100]}
+            />
+          </div>
+        )}
       </div>
     </div>
   )

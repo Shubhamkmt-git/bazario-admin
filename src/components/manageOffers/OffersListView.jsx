@@ -13,7 +13,8 @@ import {
 import {
   Button,
   ActionButton,
-  ToggleButton
+  ToggleButton,
+  Pagination
 } from '../index'
 
 export default function OffersListView({
@@ -26,6 +27,8 @@ export default function OffersListView({
 }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all') // 'all' | 'Active' | 'Inactive'
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
 
   // Filter offers based on search and status
   const filteredOffers = offers.filter((offer) => {
@@ -39,6 +42,13 @@ export default function OffersListView({
   // Sort by sortingOrder
   const sortedOffers = [...filteredOffers].sort(
     (a, b) => (Number(a.sortingOrder) || 0) - (Number(b.sortingOrder) || 0)
+  )
+
+  const totalPages = Math.max(1, Math.ceil(sortedOffers.length / itemsPerPage))
+  const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages)
+  const paginatedOffers = sortedOffers.slice(
+    (safeCurrentPage - 1) * itemsPerPage,
+    safeCurrentPage * itemsPerPage
   )
 
   const activeCount = offers.filter((o) => o.status === 'Active').length
@@ -149,7 +159,7 @@ export default function OffersListView({
                   </td>
                 </tr>
               ) : (
-                sortedOffers.map((offer) => (
+                paginatedOffers.map((offer) => (
                   <tr key={offer.id} className="hover:bg-slate-50/80 transition-colors">
                     {/* Sorting Order */}
                     <td className="px-6 py-4 text-center">
@@ -265,6 +275,23 @@ export default function OffersListView({
             </tbody>
           </table>
         </div>
+
+        {/* Centralized Pagination Bar */}
+        {sortedOffers.length > 0 && (
+          <div className="p-4 sm:p-5 border-t border-slate-100 bg-slate-50/40">
+            <Pagination
+              currentPage={safeCurrentPage}
+              totalItems={sortedOffers.length}
+              itemsPerPage={itemsPerPage}
+              onPageChange={(page) => setCurrentPage(page)}
+              onItemsPerPageChange={(limit) => {
+                setItemsPerPage(limit)
+                setCurrentPage(1)
+              }}
+              itemsPerPageOptions={[10, 20, 50, 100]}
+            />
+          </div>
+        )}
       </div>
     </div>
   )

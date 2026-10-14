@@ -14,6 +14,7 @@ import {
 import Button from '../ui/Button'
 import ActionButton from '../ui/ActionButton'
 import ToggleButton from '../ui/ToggleButton'
+import Pagination from '../ui/Pagination'
 
 export default function StoreListView({
   stores = [],
@@ -25,6 +26,8 @@ export default function StoreListView({
 }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
 
   const filteredStores = [...stores]
     .sort((a, b) => (Number(a.sortingOrder) || 999) - (Number(b.sortingOrder) || 999))
@@ -37,6 +40,13 @@ export default function StoreListView({
         (store.coordinates && store.coordinates.includes(searchQuery))
       return matchesStatus && matchesSearch
     })
+
+  const totalPages = Math.max(1, Math.ceil(filteredStores.length / itemsPerPage))
+  const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages)
+  const paginatedStores = filteredStores.slice(
+    (safeCurrentPage - 1) * itemsPerPage,
+    safeCurrentPage * itemsPerPage
+  )
 
   return (
     <div className="w-full space-y-6 pb-20">
@@ -124,7 +134,7 @@ export default function StoreListView({
             </thead>
             <tbody className="divide-y divide-slate-200">
               {filteredStores.length > 0 ? (
-                filteredStores.map((store, index) => (
+                paginatedStores.map((store, index) => (
                   <tr key={store.id} className="hover:bg-slate-50/75 transition-colors">
                     {/* Sorting Order */}
                     <td className="px-6 py-4 font-mono font-bold text-slate-700">
@@ -260,6 +270,23 @@ export default function StoreListView({
             </tbody>
           </table>
         </div>
+
+        {/* Centralized Pagination Bar */}
+        {filteredStores.length > 0 && (
+          <div className="p-4 sm:p-5 border-t border-slate-100 bg-slate-50/40">
+            <Pagination
+              currentPage={safeCurrentPage}
+              totalItems={filteredStores.length}
+              itemsPerPage={itemsPerPage}
+              onPageChange={(page) => setCurrentPage(page)}
+              onItemsPerPageChange={(limit) => {
+                setItemsPerPage(limit)
+                setCurrentPage(1)
+              }}
+              itemsPerPageOptions={[10, 20, 50, 100]}
+            />
+          </div>
+        )}
       </div>
     </div>
   )

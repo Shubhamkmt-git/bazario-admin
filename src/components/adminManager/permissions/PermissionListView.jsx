@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faKey,
@@ -13,6 +13,7 @@ import { useToast } from '../../../context/ToastContext'
 import Button from '../../ui/Button'
 import ActionButton from '../../ui/ActionButton'
 import ToggleButton from '../../ui/ToggleButton'
+import Pagination from '../../ui/Pagination'
 
 export default function PermissionListView({
   permissions = [],
@@ -25,6 +26,12 @@ export default function PermissionListView({
   const toast = useToast()
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage, setItemsPerPage] = useState(10)
+
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchQuery, statusFilter])
 
   const filteredPermissions = [...permissions]
     .sort((a, b) => (Number(a.sortingOrder) || 999) - (Number(b.sortingOrder) || 999))
@@ -36,6 +43,13 @@ export default function PermissionListView({
         perm.slug.toLowerCase().includes(searchQuery.toLowerCase())
       return matchesStatus && matchesSearch
     })
+
+  const totalPages = Math.max(1, Math.ceil(filteredPermissions.length / itemsPerPage))
+  const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages)
+  const paginatedPermissions = filteredPermissions.slice(
+    (safeCurrentPage - 1) * itemsPerPage,
+    safeCurrentPage * itemsPerPage
+  )
 
   const handleCopySlug = (slug) => {
     navigator.clipboard.writeText(slug)
@@ -127,78 +141,81 @@ export default function PermissionListView({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200">
-              {filteredPermissions.length > 0 ? (
-                filteredPermissions.map((perm, index) => (
-                  <tr key={perm.id} className="hover:bg-slate-50/75 transition-colors">
-                    {/* Index */}
-                    <td className="px-6 py-4 font-bold text-slate-400 font-mono">
-                      #{index + 1}
-                    </td>
+              {paginatedPermissions.length > 0 ? (
+                paginatedPermissions.map((perm, index) => {
+                  const globalIndex = (safeCurrentPage - 1) * itemsPerPage + index + 1
+                  return (
+                    <tr key={perm.id} className="hover:bg-slate-50/75 transition-colors">
+                      {/* Index */}
+                      <td className="px-6 py-4 font-bold text-slate-400 font-mono">
+                        #{globalIndex}
+                      </td>
 
-                    {/* Sorting Order */}
-                    <td className="px-6 py-4 font-mono font-bold text-slate-700">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-slate-100 border border-slate-200">
-                        {perm.sortingOrder ?? index + 1}
-                      </span>
-                    </td>
+                      {/* Sorting Order */}
+                      <td className="px-6 py-4 font-mono font-bold text-slate-700">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-slate-100 border border-slate-200">
+                          {perm.sortingOrder ?? globalIndex}
+                        </span>
+                      </td>
 
-                    {/* Title */}
-                    <td className="px-6 py-4">
-                      <button
-                        type="button"
-                        onClick={() => onView(perm)}
-                        className="font-bold text-slate-900 text-sm hover:text-[#064C23] text-left cursor-pointer transition-colors"
-                      >
-                        {perm.title}
-                      </button>
-                    </td>
-
-                    {/* Slug */}
-                    <td className="px-6 py-4 font-mono text-xs">
-                      <div className="inline-flex items-center space-x-1.5 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 text-slate-700">
-                        <FontAwesomeIcon icon={faLink} className="text-[#064C23] text-[10px]" />
-                        <span className="font-bold">{perm.slug}</span>
+                      {/* Title */}
+                      <td className="px-6 py-4">
                         <button
                           type="button"
-                          onClick={() => handleCopySlug(perm.slug)}
-                          className="text-slate-400 hover:text-slate-700 cursor-pointer ml-1"
-                          title="Copy slug"
+                          onClick={() => onView(perm)}
+                          className="font-bold text-slate-900 text-sm hover:text-[#064C23] text-left cursor-pointer transition-colors"
                         >
-                          <FontAwesomeIcon icon={faCopy} className="text-[10px]" />
+                          {perm.title}
                         </button>
-                      </div>
-                    </td>
+                      </td>
 
-                    {/* Status Toggle */}
-                    <td className="px-6 py-4">
-                      <ToggleButton
-                        size="sm"
-                        checked={perm.status === 'Active'}
-                        onChange={() => onToggleStatus(perm)}
-                        activeColor="#064C23"
-                      />
-                    </td>
+                      {/* Slug */}
+                      <td className="px-6 py-4 font-mono text-xs">
+                        <div className="inline-flex items-center space-x-1.5 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 text-slate-700">
+                          <FontAwesomeIcon icon={faLink} className="text-[#064C23] text-[10px]" />
+                          <span className="font-bold">{perm.slug}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleCopySlug(perm.slug)}
+                            className="text-slate-400 hover:text-slate-700 cursor-pointer ml-1"
+                            title="Copy slug"
+                          >
+                            <FontAwesomeIcon icon={faCopy} className="text-[10px]" />
+                          </button>
+                        </div>
+                      </td>
 
-                    {/* Actions */}
-                    <td className="px-6 py-4 text-right space-x-1.5 whitespace-nowrap">
-                      <ActionButton
-                        action="view"
-                        onClick={() => onView(perm)}
-                        title="View Full Page"
-                      />
-                      <ActionButton
-                        action="edit"
-                        onClick={() => onEdit(perm)}
-                        title="Edit Full Page"
-                      />
-                      <ActionButton
-                        action="delete"
-                        onClick={() => onDelete(perm)}
-                        title="Delete Permission"
-                      />
-                    </td>
-                  </tr>
-                ))
+                      {/* Status Toggle */}
+                      <td className="px-6 py-4">
+                        <ToggleButton
+                          size="sm"
+                          checked={perm.status === 'Active'}
+                          onChange={() => onToggleStatus(perm)}
+                          activeColor="#064C23"
+                        />
+                      </td>
+
+                      {/* Actions */}
+                      <td className="px-6 py-4 text-right space-x-1.5 whitespace-nowrap">
+                        <ActionButton
+                          action="view"
+                          onClick={() => onView(perm)}
+                          title="View Full Page"
+                        />
+                        <ActionButton
+                          action="edit"
+                          onClick={() => onEdit(perm)}
+                          title="Edit Full Page"
+                        />
+                        <ActionButton
+                          action="delete"
+                          onClick={() => onDelete(perm)}
+                          title="Delete Permission"
+                        />
+                      </td>
+                    </tr>
+                  )
+                })
               ) : (
                 <tr>
                   <td colSpan="6" className="px-6 py-12 text-center text-slate-400 text-xs">
@@ -209,6 +226,19 @@ export default function PermissionListView({
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Controls */}
+        <Pagination
+          currentPage={safeCurrentPage}
+          totalItems={filteredPermissions.length}
+          itemsPerPage={itemsPerPage}
+          onPageChange={(page) => setCurrentPage(page)}
+          onItemsPerPageChange={(limit) => {
+            setItemsPerPage(limit)
+            setCurrentPage(1)
+          }}
+          itemsPerPageOptions={[10, 20, 50, 100]}
+        />
       </div>
     </div>
   )
