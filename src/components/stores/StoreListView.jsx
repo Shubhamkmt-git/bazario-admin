@@ -7,7 +7,9 @@ import {
   faDoorOpen,
   faDoorClosed,
   faPhone,
-  faUserTie
+  faUserTie,
+  faBoxOpen,
+  faMotorcycle
 } from '@fortawesome/free-solid-svg-icons'
 import Button from '../ui/Button'
 import ActionButton from '../ui/ActionButton'
@@ -115,7 +117,7 @@ export default function StoreListView({
                 <th className="px-6 py-4 w-20">Order</th>
                 <th className="px-6 py-4">Store Outlet</th>
                 <th className="px-6 py-4">Area & Subtitle</th>
-                <th className="px-6 py-4">Assigned Managers</th>
+                <th className="px-6 py-4">Assigned Personnel (Team & Fleet)</th>
                 <th className="px-6 py-4">Status</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
@@ -160,39 +162,62 @@ export default function StoreListView({
                       <p className="line-clamp-2">{store.subtitle}</p>
                     </td>
 
-                    {/* Assigned Managers */}
+                    {/* Assigned Personnel: Managers, Packers, Delivery Fleet */}
                     <td className="px-6 py-4">
-                      {store.managers && store.managers.length > 0 ? (
-                        <div className="space-y-1">
-                          <div className="flex flex-wrap gap-1.5 items-center">
-                            {store.managers.map((m) => (
-                              <button
-                                key={m.id}
-                                type="button"
-                                onClick={() => onView(store)}
-                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 transition-colors cursor-pointer"
-                                title={`Store Manager: ${m.name} (${m.email || 'No email'})`}
-                              >
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
-                                <span className="truncate max-w-[120px]">{m.name}</span>
-                              </button>
-                            ))}
+                      {(() => {
+                        const mCount = store.managerCount ?? (store.managers ? store.managers.length : 0)
+                        const pCount = store.packerCount ?? (store.packers ? store.packers.length : 0)
+                        const rCount = store.riderCount ?? store.deliveryCount ?? (store.deliveryStaff ? store.deliveryStaff.length : 0)
+
+                        return (
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            {/* Managers Badge */}
+                            <button
+                              type="button"
+                              onClick={() => onView(store)}
+                              className={`inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-colors cursor-pointer ${
+                                mCount > 0
+                                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
+                                  : 'bg-slate-100 text-slate-400 border-slate-200 hover:text-slate-700'
+                              }`}
+                              title="Assigned Store Managers"
+                            >
+                              <FontAwesomeIcon icon={faUserTie} className="text-[10px]" />
+                              <span>{mCount} {mCount === 1 ? 'Manager' : 'Managers'}</span>
+                            </button>
+
+                            {/* Packers Badge */}
+                            <button
+                              type="button"
+                              onClick={() => onView(store)}
+                              className={`inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-colors cursor-pointer ${
+                                pCount > 0
+                                  ? 'bg-blue-50 text-blue-800 border-blue-200 hover:bg-blue-100'
+                                  : 'bg-slate-100 text-slate-400 border-slate-200 hover:text-slate-700'
+                              }`}
+                              title="Assigned Order Packers & Pickers"
+                            >
+                              <FontAwesomeIcon icon={faBoxOpen} className="text-[10px]" />
+                              <span>{pCount} {pCount === 1 ? 'Packer' : 'Packers'}</span>
+                            </button>
+
+                            {/* Fleet Riders Badge */}
+                            <button
+                              type="button"
+                              onClick={() => onView(store)}
+                              className={`inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-colors cursor-pointer ${
+                                rCount > 0
+                                  ? 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100'
+                                  : 'bg-slate-100 text-slate-400 border-slate-200 hover:text-slate-700'
+                              }`}
+                              title="Assigned Delivery Fleet / Riders"
+                            >
+                              <FontAwesomeIcon icon={faMotorcycle} className="text-[10px]" />
+                              <span>{rCount} {rCount === 1 ? 'Rider' : 'Riders'}</span>
+                            </button>
                           </div>
-                          <p className="text-[10px] text-slate-400 font-medium">
-                            {store.managers.length} {store.managers.length === 1 ? 'manager' : 'managers'} assigned
-                          </p>
-                        </div>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => onView(store)}
-                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200/80 hover:bg-amber-100 transition-colors cursor-pointer"
-                          title="Assign managers to this store"
-                        >
-                          <FontAwesomeIcon icon={faUserTie} className="text-[10px]" />
-                          <span>+ Assign Manager</span>
-                        </button>
-                      )}
+                        )
+                      })()}
                     </td>
 
                     {/* Status Toggle */}

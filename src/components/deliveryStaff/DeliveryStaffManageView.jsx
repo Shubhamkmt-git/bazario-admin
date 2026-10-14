@@ -5,30 +5,40 @@ import DeliveryStaffListView from './DeliveryStaffListView'
 import AddDeliveryStaffView from './AddDeliveryStaffView'
 import EditDeliveryStaffView from './EditDeliveryStaffView'
 import DeliveryStaffDetailsView from './DeliveryStaffDetailsView'
-import { getAdminDeliveryStaffApi } from '../../utils/adminApi'
+import { getAdminDeliveryStaffApi, getStoreRidersApi } from '../../utils/adminApi'
 
 const DELIVERY_STAFF_STORAGE_KEY = 'bazario_delivery_staff'
 
-export default function DeliveryStaffManageView() {
+export default function DeliveryStaffManageView({ currentUser }) {
   const toast = useToast()
+  const isStoreManager = currentUser?.role === 'Store Manager'
 
   // Storage State
   const [staffMembers, setStaffMembers] = useState([])
 
   const fetchDeliveryStaff = async () => {
     try {
-      const res = await getAdminDeliveryStaffApi()
-      const list = res.staff || res.deliveryStaff || res.data || []
+      let list = []
+      if (isStoreManager) {
+        const res = await getStoreRidersApi()
+        list = res.riders || []
+      } else {
+        const res = await getAdminDeliveryStaffApi()
+        list = res.staff || res.deliveryStaff || res.data || []
+      }
+
       const formatted = (Array.isArray(list) ? list : []).map((s, idx) => ({
         id: s._id || s.id || idx + 1,
-        _id: s._id,
+        _id: s._id || s.id,
         riderId: s.riderId || `BAZ-DRV-${1000 + idx + 1}`,
         name: s.name || 'Delivery Partner',
         mobileNumber: s.phone || s.mobileNumber || '+91 98765 43210',
         email: s.email || '',
-        belongToStore: s.store?.title || s.belongToStore || 'Bazario Central Hub',
+        belongToStore: s.store?.title || s.store?.name || s.belongToStore || currentUser?.store?.name || 'Branch Hub',
         image: s.image || '',
-        status: s.status || 'Active'
+        status: s.status || 'Active',
+        vehicleType: s.vehicleType || 'Bike',
+        vehicleNumber: s.vehicleNumber || ''
       }))
       setStaffMembers(formatted)
     } catch (err) {

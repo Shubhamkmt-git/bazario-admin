@@ -21,17 +21,27 @@ import {
   faIdCard,
   faLock,
   faXmark,
-  faCheckCircle
+  faCheckCircle,
+  faBoxOpen,
+  faBoxesPacking,
+  faTruck,
+  faMotorcycle,
+  faStar,
+  faUsers
 } from '@fortawesome/free-solid-svg-icons'
 import { useToast } from '../../context/ToastContext'
 import Button from '../ui/Button'
 import BackButton from '../ui/BackButton'
 import ToggleButton from '../ui/ToggleButton'
 import {
-  getStoreManagersApi,
-  assignStoreManagerApi,
-  unassignStoreManagerApi,
-  getAdminStaffApi
+  getStoreStaffApi,
+  assignStoreStaffApi,
+  unassignStoreStaffApi,
+  getStoreDeliveryStaffApi,
+  assignStoreDeliveryStaffApi,
+  unassignStoreDeliveryStaffApi,
+  getAdminStaffApi,
+  getAdminDeliveryStaffApi
 } from '../../utils/adminApi'
 
 // Utility to open Google Maps safely in new tab
@@ -61,118 +71,217 @@ export default function StoreDetailsView({
 }) {
   const toast = useToast()
 
+  const [activeRosterTab, setActiveRosterTab] = useState('packers') // 'managers' | 'packers' | 'riders' | 'all'
   const [managers, setManagers] = useState(store?.managers || [])
-  const [loadingManagers, setLoadingManagers] = useState(false)
+  const [packers, setPackers] = useState(store?.packers || [])
+  const [riders, setRiders] = useState(store?.deliveryStaff || [])
+  const [loadingRoster, setLoadingRoster] = useState(false)
 
-  // Manager Assignment Modal state
+  // Assignment Modal state
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false)
+  const [assignCategory, setAssignCategory] = useState('packer') // 'manager' | 'packer' | 'rider'
   const [modalTab, setModalTab] = useState('existing') // 'existing' | 'new'
-  const [existingStaffList, setExistingStaffList] = useState([])
-  const [selectedStaffId, setSelectedStaffId] = useState('')
+  const [existingOptions, setExistingOptions] = useState([])
+  const [selectedEntityId, setSelectedEntityId] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // New Manager Form State
-  const [newManagerForm, setNewManagerForm] = useState({
+  // New Staff / Rider Form State
+  const [newForm, setNewForm] = useState({
     name: '',
     fathersName: '',
     email: '',
     phone: '',
-    password: 'manager123'
+    role: 'Order Packer',
+    vehicleType: 'Bike',
+    vehicleNumber: '',
+    password: 'staff123'
   })
 
-  const loadManagers = async () => {
+  // Load all staff & riders for this store
+  const loadRoster = async () => {
     if (!store?.id) return
     try {
-      setLoadingManagers(true)
-      const res = await getStoreManagersApi(store.id)
-      const list = res.managers || res.data || []
-      setManagers(list)
+      setLoadingRoster(true)
+      const [staffRes, ridersRes] = await Promise.allSettled([
+        getStoreStaffApi(store.id),
+        getStoreDeliveryStaffApi(store.id)
+      ])
+
+      if (staffRes.status === 'fulfilled' && staffRes.value) {
+        const staffData = staffRes.value
+        setManagers(staffData.managers || [])
+        setPackers(staffData.packers || [])
+      }
+
+      if (ridersRes.status === 'fulfilled' && ridersRes.value) {
+        const ridersData = ridersRes.value
+        setRiders(ridersData.riders || ridersData.deliveryStaff || [])
+      }
     } catch (err) {
-      console.warn('Failed to load store managers:', err)
+      console.warn('Failed to load store roster:', err)
     } finally {
-      setLoadingManagers(false)
+      setLoadingRoster(false)
     }
   }
 
   useEffect(() => {
     if (store?.id) {
-      loadManagers()
+      loadRoster()
     }
   }, [store?.id])
 
-  const openAssignModal = async () => {
+  // Open Assignment Modal
+  const openAssignModalFor = async (category = 'packer') => {
+    setAssignCategory(category)
     setIsAssignModalOpen(true)
+    setModalTab('existing')
+    setSelectedEntityId('')
+
     try {
-      const res = await getAdminStaffApi()
-      const list = res.staff || res.data || []
-      // Show all Store Managers or staff that can be assigned
-      const storeManagers = list.filter((s) => s.role === 'Store Manager' || !s.storeId)
-      setExistingStaffList(storeManagers)
-      if (storeManagers.length > 0) {
-        setSelectedStaffId(storeManagers[0].id)
+      if (category === 'rider') {
+        const res = await getAdminDeliveryStaffApi()
+        const list = res.deliveryStaff || res.riders || res.data || []
+        // Riders not assigned or assigned to other stores
+        setExistingOptions(list)
+        if (list.length > 0) setSelectedEntityId(list[0].id)
+      } else {
+        const res = await getAdminStaffApi()
+        const list = res.staff || res.data || []
+        if (category === 'manager') {
+          const filtered = list.filter((s) => s.role === 'Store Manager' || !s.storeId)
+          setExistingOptions(filtered)
+          if (filtered.length > 0) setSelectedEntityId(filtered[0].id)
+        } else {
+          // Packers & Pickers
+          const filtered = list.filter((s) =>
+            s.role?.toLowerCase().includes('pack') ||
+            s.role?.toLowerCase().includes('pick') ||
+            s.role === 'Store Associate' ||
+            !s.storeId
+          )
+          setExistingOptions(filtered)
+          if (filtered.length > 0) setSelectedEntityId(filtered[0].id)
+        }
       }
     } catch (err) {
-      console.warn('Could not load staff list:', err)
+      console.warn('Could not load candidates for assignment:', err)
     }
   }
 
+  // Handle Assigning Existing Candidate
   const handleAssignExisting = async () => {
-    if (!selectedStaffId) {
-      toast.error('Selection Error', 'Please select a staff member to assign.')
+    if (!selectedEntityId) {
+      toast.error('Selection Error', 'Please select a person from the list.')
       return
     }
     setIsSubmitting(true)
     try {
-      const res = await assignStoreManagerApi(store.id, { staffId: selectedStaffId })
-      toast.success('Manager Assigned', res.message || 'Store Manager assigned successfully!')
+      if (assignCategory === 'rider') {
+        const res = await assignStoreDeliveryStaffApi(store.id, { deliveryStaffId: selectedEntityId })
+        toast.success('Rider Assigned', res.message || 'Delivery rider assigned to this store!')
+      } else {
+        const role = assignCategory === 'manager' ? 'Store Manager' : newForm.role || 'Order Packer'
+        const res = await assignStoreStaffApi(store.id, { staffId: selectedEntityId, role })
+        toast.success('Staff Assigned', res.message || 'Staff assigned to this store!')
+      }
       setIsAssignModalOpen(false)
-      loadManagers()
+      loadRoster()
       onRefreshStore?.()
     } catch (err) {
-      toast.error('Assignment Failed', err.message || 'Failed to assign manager.')
+      toast.error('Assignment Failed', err.message || 'Failed to complete assignment.')
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  const handleCreateNewManager = async (e) => {
+  // Handle Onboarding New Candidate directly for this store
+  const handleCreateNew = async (e) => {
     e.preventDefault()
-    if (!newManagerForm.name.trim() || !newManagerForm.email.trim()) {
-      toast.error('Validation Error', 'Name and email are required.')
+    if (!newForm.name.trim()) {
+      toast.error('Validation Error', 'Full name is required.')
       return
     }
     setIsSubmitting(true)
     try {
-      const res = await assignStoreManagerApi(store.id, {
-        name: newManagerForm.name.trim(),
-        fathersName: newManagerForm.fathersName.trim(),
-        email: newManagerForm.email.trim(),
-        phone: newManagerForm.phone.trim(),
-        password: newManagerForm.password.trim() || 'manager123'
-      })
-      toast.success('Manager Created', res.message || 'New Store Manager created and assigned!')
+      if (assignCategory === 'rider') {
+        if (!newForm.phone.trim()) {
+          toast.error('Validation Error', 'Contact mobile number is required.')
+          setIsSubmitting(false)
+          return
+        }
+        const res = await assignStoreDeliveryStaffApi(store.id, {
+          name: newForm.name.trim(),
+          phone: newForm.phone.trim(),
+          email: newForm.email.trim() || undefined,
+          vehicleType: newForm.vehicleType || 'Bike',
+          vehicleNumber: newForm.vehicleNumber.trim() || undefined,
+        })
+        toast.success('Rider Onboarded', res.message || 'New delivery partner onboarded for this store!')
+      } else {
+        if (!newForm.email.trim()) {
+          toast.error('Validation Error', 'Login email is required.')
+          setIsSubmitting(false)
+          return
+        }
+        const role = assignCategory === 'manager' ? 'Store Manager' : (newForm.role || 'Order Packer')
+        const res = await assignStoreStaffApi(store.id, {
+          name: newForm.name.trim(),
+          fathersName: newForm.fathersName.trim(),
+          email: newForm.email.trim(),
+          phone: newForm.phone.trim(),
+          role,
+          password: newForm.password.trim() || 'staff123'
+        })
+        toast.success('Staff Onboarded', res.message || 'New personnel onboarded & assigned!')
+      }
+
       setIsAssignModalOpen(false)
-      setNewManagerForm({ name: '', fathersName: '', email: '', phone: '', password: 'manager123' })
-      loadManagers()
+      setNewForm({
+        name: '',
+        fathersName: '',
+        email: '',
+        phone: '',
+        role: 'Order Packer',
+        vehicleType: 'Bike',
+        vehicleNumber: '',
+        password: 'staff123'
+      })
+      loadRoster()
       onRefreshStore?.()
     } catch (err) {
-      toast.error('Failed to Create Manager', err.message || 'Failed to create manager.')
+      toast.error('Onboarding Failed', err.message || 'Failed to onboard personnel.')
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  const handleUnassignManager = async (manager) => {
-    if (!window.confirm(`Are you sure you want to unassign "${manager.name}" from ${store.title}?`)) {
+  // Unassign Staff (Manager / Packer / Picker)
+  const handleUnassignStaff = async (staffMember) => {
+    if (!window.confirm(`Unassign "${staffMember.name}" (${staffMember.role}) from ${store.title}?`)) {
       return
     }
     try {
-      const res = await unassignStoreManagerApi(store.id, manager.id || manager._id)
-      toast.info('Manager Unassigned', res.message || `Manager ${manager.name} unassigned.`)
-      loadManagers()
+      const res = await unassignStoreStaffApi(store.id, staffMember.id || staffMember._id)
+      toast.info('Staff Unassigned', res.message || `Unassigned ${staffMember.name}.`)
+      loadRoster()
       onRefreshStore?.()
     } catch (err) {
-      toast.error('Unassign Error', err.message || 'Failed to unassign manager.')
+      toast.error('Unassign Error', err.message || 'Failed to unassign staff.')
+    }
+  }
+
+  // Unassign Delivery Rider
+  const handleUnassignRider = async (rider) => {
+    if (!window.confirm(`Unassign Delivery Rider "${rider.name}" from ${store.title}?`)) {
+      return
+    }
+    try {
+      const res = await unassignStoreDeliveryStaffApi(store.id, rider.id || rider._id)
+      toast.info('Rider Unassigned', res.message || `Unassigned ${rider.name}.`)
+      loadRoster()
+      onRefreshStore?.()
+    } catch (err) {
+      toast.error('Unassign Error', err.message || 'Failed to unassign rider.')
     }
   }
 
@@ -198,7 +307,7 @@ export default function StoreDetailsView({
           <div>
             <div className="flex items-center space-x-2">
               <span className="text-xs font-bold uppercase tracking-wider text-[#064C23]">
-                Store Details
+                Store Details & Roster
               </span>
               <span className="text-xs font-mono font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">
                 Order #{store.sortingOrder || 1}
@@ -238,68 +347,115 @@ export default function StoreDetailsView({
           </div>
           <Button
             variant="primary"
-            size="sm"
+            size="md"
             onClick={() => onEdit(store)}
             icon={<FontAwesomeIcon icon={faPenToSquare} className="text-xs" />}
           >
             Edit Store
           </Button>
-          <Button
-            variant="cancel"
-            size="sm"
-            className="text-rose-600 hover:bg-rose-50 border-rose-200"
+          <button
+            type="button"
             onClick={() => onDelete(store)}
-            icon={<FontAwesomeIcon icon={faTrashCan} className="text-xs" />}
+            className="w-10 h-10 rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-600 flex items-center justify-center transition-all cursor-pointer shadow-xs active:scale-95"
+            title="Delete this store branch"
           >
-            Delete
-          </Button>
+            <FontAwesomeIcon icon={faTrashCan} className="text-sm" />
+          </button>
         </div>
       </div>
 
-      {/* Full-width Details Showcase Card */}
-      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-xs overflow-hidden">
-        {/* Top Banner Image with Live Overlay */}
-        <div className="relative h-64 sm:h-80 w-full overflow-hidden bg-slate-900">
-          <img
-            src={store.image || '/supermart-bg.jpg'}
-            alt={store.title}
-            className="w-full h-full object-cover opacity-90"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-          
-          <div className="absolute bottom-6 left-6 right-6 flex flex-col md:flex-row md:items-end justify-between gap-4 text-white">
-            <div className="space-y-1 max-w-2xl">
-              <div className="flex items-center space-x-2 mb-1">
-                <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-[#A44F37] text-white shadow-xs">
-                  <FontAwesomeIcon icon={faStore} className="mr-1.5 text-[11px]" />
-                  Bazario Supermarket
+      {/* Main Grid Content */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        {/* Left Column (4 cols): Store Image, Summary & Dark Store Badge */}
+        <div className="lg:col-span-4 space-y-6">
+          <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
+            <div className="relative h-56 w-full bg-slate-100 overflow-hidden group">
+              <img
+                src={store.image || '/supermart-bg.jpg'}
+                alt={store.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+              
+              <div className="absolute bottom-4 left-4 right-4 text-white">
+                <span className="inline-flex items-center text-[10px] font-black uppercase tracking-wider bg-[#064C23] text-white px-2.5 py-1 rounded-lg shadow-xs mb-1.5">
+                  {store.isDarkStore ? '10-Min Dark Store' : 'Walk-in Supermarket'}
                 </span>
-                <span className="px-2 py-0.5 rounded-lg text-xs font-mono font-bold bg-white/20 text-white backdrop-blur-xs">
-                  Priority #{store.sortingOrder || 1}
-                </span>
+                <h3 className="text-lg font-black leading-tight drop-shadow-xs">
+                  {store.name || store.title}
+                </h3>
+                <p className="text-xs text-white/80 line-clamp-1">
+                  {store.subtitle || store.location}
+                </p>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-black">{store.title}</h2>
-              <p className="text-sm text-slate-200">{store.subtitle}</p>
             </div>
 
-            <button
-              type="button"
-              onClick={() => openGoogleMaps(store.googleUrl, store.coordinates, store.title)}
-              className="inline-flex items-center space-x-2 px-4 py-2.5 bg-white hover:bg-slate-100 text-[#064C23] rounded-2xl text-xs font-extrabold transition-all shadow-lg self-start md:self-auto shrink-0 cursor-pointer group active:scale-95"
-            >
-              <FontAwesomeIcon icon={faMapLocationDot} className="text-sm text-[#A44F37]" />
-              <span>Navigate via Google Maps</span>
-              <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-[10px] group-hover:translate-x-0.5 transition-transform" />
-            </button>
+            {/* Quick Metrics Strip */}
+            <div className="p-5 grid grid-cols-3 divide-x divide-slate-100 text-center border-b border-slate-100 bg-slate-50/50">
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase">Managers</p>
+                <p className="text-base font-black text-slate-800">{managers.length}</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase">Packers</p>
+                <p className="text-base font-black text-[#064C23]">{packers.length}</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold text-slate-400 uppercase">Fleet Riders</p>
+                <p className="text-base font-black text-amber-700">{riders.length}</p>
+              </div>
+            </div>
+
+            {/* Address & Logistics Info */}
+            <div className="p-6 space-y-4">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  Full Physical Address
+                </span>
+                <p className="text-xs font-semibold text-slate-800 mt-1 flex items-start space-x-2">
+                  <FontAwesomeIcon icon={faLocationDot} className="text-[#064C23] mt-0.5 shrink-0" />
+                  <span>{store.address || store.subtitle || 'Address not configured'}</span>
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">City / State</span>
+                  <p className="font-semibold text-slate-700">{store.city || 'Noida'}, {store.state || 'UP'}</p>
+                </div>
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Pincode</span>
+                  <p className="font-semibold text-slate-700 font-mono">{store.pincode || '201301'}</p>
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Covered Delivery Pincodes</span>
+                <div className="flex flex-wrap gap-1.5 mt-1.5">
+                  {store.pincodes && store.pincodes.length > 0 ? (
+                    store.pincodes.map((pin) => (
+                      <span key={pin} className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-mono text-[11px] font-bold border border-slate-200">
+                        {pin}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-xs text-slate-400 italic">No specific service pincodes set</span>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Grid Overview of Store Metadata */}
-        <div className="p-6 sm:p-8 space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        {/* Right Column (8 cols): Personnel Roster (Managers, Packers, Riders) & Operations */}
+        <div className="lg:col-span-8 space-y-6">
+
+          {/* Quick Info 4 Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             
             {/* Card 1: GPS Coordinates */}
-            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-2">
+            <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold uppercase text-slate-400">GPS Coordinates</span>
                 <button
@@ -319,7 +475,7 @@ export default function StoreDetailsView({
             </div>
 
             {/* Card 2: Contact Phone */}
-            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-2">
+            <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold uppercase text-slate-400">Store Contact</span>
                 <FontAwesomeIcon icon={faPhone} className="text-slate-400 text-xs" />
@@ -331,7 +487,7 @@ export default function StoreDetailsView({
             </div>
 
             {/* Card 3: Operating Hours */}
-            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-2">
+            <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold uppercase text-slate-400">Opening Hours</span>
                 <FontAwesomeIcon icon={faClock} className="text-slate-400 text-xs" />
@@ -342,8 +498,8 @@ export default function StoreDetailsView({
               <p className="text-[11px] text-slate-500">Daily business schedule</p>
             </div>
 
-            {/* Card 4: Sorting Order & Priority */}
-            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-2">
+            {/* Card 4: Display Order */}
+            <div className="p-5 rounded-2xl bg-white border border-slate-200/90 shadow-2xs space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold uppercase text-slate-400">Display Order</span>
                 <FontAwesomeIcon icon={faSort} className="text-[#064C23] text-xs" />
@@ -355,111 +511,368 @@ export default function StoreDetailsView({
             </div>
           </div>
 
-          {/* Dedicated Section: Assigned Store Managers (Multiple Managers Supported) */}
-          <div className="p-6 sm:p-7 rounded-3xl bg-slate-50/90 border border-slate-200 space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 pb-4">
-              <div className="space-y-0.5">
-                <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 rounded-xl bg-[#064C23]/10 text-[#064C23] flex items-center justify-center text-sm">
-                    <FontAwesomeIcon icon={faUserTie} />
+          {/* DEDICATED STORE PERSONNEL ROSTER: Managers, Packers & Delivery Fleet */}
+          <div className="p-6 sm:p-7 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+              <div>
+                <div className="flex items-center space-x-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-[#064C23]/10 text-[#064C23] flex items-center justify-center text-base">
+                    <FontAwesomeIcon icon={faUsers} />
                   </div>
-                  <h3 className="text-base font-extrabold text-slate-900">
-                    Assigned Store Managers
-                  </h3>
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-100 text-[#064C23] border border-emerald-300">
-                    {managers.length} {managers.length === 1 ? 'Manager' : 'Managers'} Assigned
-                  </span>
+                  <div>
+                    <h3 className="text-base sm:text-lg font-extrabold text-slate-900">
+                      Assigned Personnel & Fulfillment Team
+                    </h3>
+                    <p className="text-xs text-slate-500">
+                      Staff, Packers, and Delivery Fleet assigned by Super Admin to this store branch.
+                    </p>
+                  </div>
                 </div>
-                <p className="text-xs text-slate-500 pl-10">
-                  Multiple managers can be assigned to this branch to manage inventory, stock availability, and branch orders.
-                </p>
               </div>
 
-              <Button
-                variant="primary"
-                size="sm"
-                onClick={openAssignModal}
-                icon={<FontAwesomeIcon icon={faPlus} className="text-xs" />}
-              >
-                Assign / Add Manager
-              </Button>
+              {/* Add / Assign Buttons Dropdown / Action */}
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => openAssignModalFor('packer')}
+                  icon={<FontAwesomeIcon icon={faBoxOpen} className="text-xs" />}
+                >
+                  + Assign Packer
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => openAssignModalFor('rider')}
+                  icon={<FontAwesomeIcon icon={faTruck} className="text-xs" />}
+                >
+                  + Assign Rider
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => openAssignModalFor('manager')}
+                  icon={<FontAwesomeIcon icon={faUserTie} className="text-xs" />}
+                >
+                  + Assign Manager
+                </Button>
+              </div>
             </div>
 
-            {/* Managers Cards Grid */}
-            {managers.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-1">
-                {managers.map((m) => (
-                  <div
-                    key={m.id || m._id}
-                    className="p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs hover:border-[#064C23]/40 transition-all flex flex-col justify-between space-y-3 group"
+            {/* Roster Segmented Tabs */}
+            <div className="flex items-center space-x-2 border-b border-slate-100 pb-2 text-xs font-bold overflow-x-auto">
+              <button
+                type="button"
+                onClick={() => setActiveRosterTab('packers')}
+                className={`px-3.5 py-2 rounded-xl transition-all cursor-pointer flex items-center space-x-2 ${
+                  activeRosterTab === 'packers'
+                    ? 'bg-[#064C23] text-white shadow-xs'
+                    : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <FontAwesomeIcon icon={faBoxOpen} />
+                <span>Packers & Pickers</span>
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${activeRosterTab === 'packers' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'}`}>
+                  {packers.length}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveRosterTab('managers')}
+                className={`px-3.5 py-2 rounded-xl transition-all cursor-pointer flex items-center space-x-2 ${
+                  activeRosterTab === 'managers'
+                    ? 'bg-[#064C23] text-white shadow-xs'
+                    : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <FontAwesomeIcon icon={faUserTie} />
+                <span>Store Managers</span>
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${activeRosterTab === 'managers' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'}`}>
+                  {managers.length}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveRosterTab('riders')}
+                className={`px-3.5 py-2 rounded-xl transition-all cursor-pointer flex items-center space-x-2 ${
+                  activeRosterTab === 'riders'
+                    ? 'bg-[#064C23] text-white shadow-xs'
+                    : 'text-slate-600 hover:bg-slate-100'
+                }`}
+              >
+                <FontAwesomeIcon icon={faMotorcycle} />
+                <span>Delivery Fleet</span>
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-black ${activeRosterTab === 'riders' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'}`}>
+                  {riders.length}
+                </span>
+              </button>
+            </div>
+
+            {/* 1. PACKERS & PICKERS TAB CONTENT */}
+            {activeRosterTab === 'packers' && (
+              <div className="space-y-4 pt-1">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-slate-500">
+                    Order Pickers & Packers pick supermarket items from dark store shelves and prepare grocery bags.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => openAssignModalFor('packer')}
+                    className="text-xs font-bold text-[#064C23] hover:underline cursor-pointer"
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center space-x-3 min-w-0">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#064C23] to-[#A44F37] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
-                          {m.name
-                            ? m.name
-                                .split(' ')
-                                .map((n) => n[0])
-                                .join('')
-                                .slice(0, 2)
-                                .toUpperCase()
-                            : 'SM'}
-                        </div>
-                        <div className="min-w-0">
-                          <h4 className="text-sm font-bold text-slate-900 truncate">
-                            {m.name}
-                          </h4>
-                          {m.fathersName && (
-                            <span className="text-[11px] text-slate-400 block truncate">
-                              S/O {m.fathersName}
-                            </span>
-                          )}
-                          <span className="inline-flex items-center text-[10px] font-extrabold text-[#064C23] bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 mt-0.5">
-                            <FontAwesomeIcon icon={faShieldHalved} className="mr-1 text-[8px]" />
-                            Store Manager
-                          </span>
-                        </div>
-                      </div>
+                    + Add another packer
+                  </button>
+                </div>
 
-                      <button
-                        type="button"
-                        onClick={() => handleUnassignManager(m)}
-                        className="text-slate-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 transition-colors"
-                        title="Unassign Manager from this Store"
+                {packers.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                    {packers.map((p) => (
+                      <div
+                        key={p.id || p._id}
+                        className="p-4 rounded-2xl bg-slate-50/70 border border-slate-200 hover:border-[#064C23]/40 transition-all flex flex-col justify-between space-y-3 group shadow-2xs"
                       >
-                        <FontAwesomeIcon icon={faTrashCan} className="text-xs" />
-                      </button>
-                    </div>
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center space-x-3 min-w-0">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#064C23] to-[#25854b] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-2xs">
+                              <FontAwesomeIcon icon={faBoxOpen} />
+                            </div>
+                            <div className="min-w-0">
+                              <h4 className="text-sm font-bold text-slate-900 truncate">
+                                {p.name}
+                              </h4>
+                              {p.fathersName && (
+                                <span className="text-[11px] text-slate-400 block truncate">
+                                  S/O {p.fathersName}
+                                </span>
+                              )}
+                              <span className="inline-flex items-center text-[10px] font-extrabold text-[#064C23] bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 mt-0.5">
+                                {p.role || 'Order Packer'}
+                              </span>
+                            </div>
+                          </div>
 
-                    <div className="pt-2 border-t border-slate-100 text-xs space-y-1">
-                      <div className="flex items-center text-slate-600 truncate">
-                        <FontAwesomeIcon icon={faEnvelope} className="w-3.5 text-slate-400 mr-1.5 text-[10px]" />
-                        <span className="truncate">{m.email}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleUnassignStaff(p)}
+                            className="text-slate-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 transition-colors"
+                            title="Unassign Packer from this store"
+                          >
+                            <FontAwesomeIcon icon={faTrashCan} className="text-xs" />
+                          </button>
+                        </div>
+
+                        <div className="pt-2 border-t border-slate-200/80 text-xs space-y-1">
+                          <div className="flex items-center text-slate-600 truncate">
+                            <FontAwesomeIcon icon={faEnvelope} className="w-3.5 text-slate-400 mr-1.5 text-[10px]" />
+                            <span className="truncate">{p.email || 'No email'}</span>
+                          </div>
+                          <div className="flex items-center font-mono text-slate-700">
+                            <FontAwesomeIcon icon={faPhone} className="w-3.5 text-[#064C23] mr-1.5 text-[10px]" />
+                            <span>{p.phone || 'No phone'}</span>
+                          </div>
+                        </div>
                       </div>
-                      <div className="flex items-center font-mono text-slate-700">
-                        <FontAwesomeIcon icon={faPhone} className="w-3.5 text-[#064C23] mr-1.5 text-[10px]" />
-                        <span>{m.phone || 'No phone'}</span>
-                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-300 space-y-2">
+                    <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center mx-auto text-xl">
+                      <FontAwesomeIcon icon={faBoxOpen} />
+                    </div>
+                    <h4 className="text-sm font-bold text-slate-800">No Packers Assigned Yet</h4>
+                    <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                      Assign an existing packer or picker from staff directory, or onboard a new packer for this branch.
+                    </p>
+                    <div className="pt-1">
+                      <Button variant="primary" size="sm" onClick={() => openAssignModalFor('packer')}>
+                        Assign Packer Now
+                      </Button>
                     </div>
                   </div>
-                ))}
+                )}
               </div>
-            ) : (
-              <div className="p-8 text-center bg-white rounded-2xl border border-dashed border-slate-300 space-y-2">
-                <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center mx-auto text-xl">
-                  <FontAwesomeIcon icon={faUserTie} />
+            )}
+
+            {/* 2. STORE MANAGERS TAB CONTENT */}
+            {activeRosterTab === 'managers' && (
+              <div className="space-y-4 pt-1">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-slate-500">
+                    Store Managers have access to the Store Manager portal to adjust inventory and process incoming branch orders.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => openAssignModalFor('manager')}
+                    className="text-xs font-bold text-[#064C23] hover:underline cursor-pointer"
+                  >
+                    + Add another manager
+                  </button>
                 </div>
-                <h4 className="text-sm font-bold text-slate-800">
-                  No Store Manager Assigned
-                </h4>
-                <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                  This store does not have any assigned manager yet. Click the button below to assign an existing staff manager or onboard a new manager.
-                </p>
-                <div className="pt-1">
-                  <Button variant="primary" size="sm" onClick={openAssignModal}>
-                    Assign Manager Now
-                  </Button>
+
+                {managers.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                    {managers.map((m) => (
+                      <div
+                        key={m.id || m._id}
+                        className="p-4 rounded-2xl bg-slate-50/70 border border-slate-200 hover:border-[#064C23]/40 transition-all flex flex-col justify-between space-y-3 group shadow-2xs"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center space-x-3 min-w-0">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#064C23] to-[#A44F37] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs">
+                              {m.name
+                                ? m.name
+                                    .split(' ')
+                                    .map((n) => n[0])
+                                    .join('')
+                                    .slice(0, 2)
+                                    .toUpperCase()
+                                : 'SM'}
+                            </div>
+                            <div className="min-w-0">
+                              <h4 className="text-sm font-bold text-slate-900 truncate">
+                                {m.name}
+                              </h4>
+                              {m.fathersName && (
+                                <span className="text-[11px] text-slate-400 block truncate">
+                                  S/O {m.fathersName}
+                                </span>
+                              )}
+                              <span className="inline-flex items-center text-[10px] font-extrabold text-[#064C23] bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 mt-0.5">
+                                <FontAwesomeIcon icon={faShieldHalved} className="mr-1 text-[8px]" />
+                                Store Manager
+                              </span>
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => handleUnassignStaff(m)}
+                            className="text-slate-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 transition-colors"
+                            title="Unassign Manager from this Store"
+                          >
+                            <FontAwesomeIcon icon={faTrashCan} className="text-xs" />
+                          </button>
+                        </div>
+
+                        <div className="pt-2 border-t border-slate-200/80 text-xs space-y-1">
+                          <div className="flex items-center text-slate-600 truncate">
+                            <FontAwesomeIcon icon={faEnvelope} className="w-3.5 text-slate-400 mr-1.5 text-[10px]" />
+                            <span className="truncate">{m.email}</span>
+                          </div>
+                          <div className="flex items-center font-mono text-slate-700">
+                            <FontAwesomeIcon icon={faPhone} className="w-3.5 text-[#064C23] mr-1.5 text-[10px]" />
+                            <span>{m.phone || 'No phone'}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-300 space-y-2">
+                    <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center mx-auto text-xl">
+                      <FontAwesomeIcon icon={faUserTie} />
+                    </div>
+                    <h4 className="text-sm font-bold text-slate-800">No Store Manager Assigned</h4>
+                    <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                      This store does not have any assigned manager yet.
+                    </p>
+                    <div className="pt-1">
+                      <Button variant="primary" size="sm" onClick={() => openAssignModalFor('manager')}>
+                        Assign Manager Now
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* 3. DELIVERY FLEET TAB CONTENT */}
+            {activeRosterTab === 'riders' && (
+              <div className="space-y-4 pt-1">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-slate-500">
+                    Delivery partners assigned for 10-15 minute grocery deliveries within this store's coverage radius.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => openAssignModalFor('rider')}
+                    className="text-xs font-bold text-[#064C23] hover:underline cursor-pointer"
+                  >
+                    + Add delivery rider
+                  </button>
                 </div>
+
+                {riders.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                    {riders.map((r) => (
+                      <div
+                        key={r.id || r._id}
+                        className="p-4 rounded-2xl bg-slate-50/70 border border-slate-200 hover:border-[#064C23]/40 transition-all flex flex-col justify-between space-y-3 group shadow-2xs"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center space-x-3 min-w-0">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-600 to-amber-700 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-2xs">
+                              <FontAwesomeIcon icon={faMotorcycle} />
+                            </div>
+                            <div className="min-w-0">
+                              <h4 className="text-sm font-bold text-slate-900 truncate">
+                                {r.name}
+                              </h4>
+                              <div className="flex items-center space-x-1.5 mt-0.5">
+                                <span className="inline-flex items-center text-[10px] font-extrabold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">
+                                  {r.vehicleType || 'Bike'}
+                                </span>
+                                {r.rating && (
+                                  <span className="text-[10px] font-bold text-amber-600 flex items-center">
+                                    <FontAwesomeIcon icon={faStar} className="mr-0.5 text-[8px]" />
+                                    {r.rating}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => handleUnassignRider(r)}
+                            className="text-slate-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50 transition-colors"
+                            title="Unassign Rider from this store"
+                          >
+                            <FontAwesomeIcon icon={faTrashCan} className="text-xs" />
+                          </button>
+                        </div>
+
+                        <div className="pt-2 border-t border-slate-200/80 text-xs space-y-1">
+                          <div className="flex items-center font-mono text-slate-700">
+                            <FontAwesomeIcon icon={faPhone} className="w-3.5 text-[#064C23] mr-1.5 text-[10px]" />
+                            <span>{r.phone || 'No phone'}</span>
+                          </div>
+                          <div className="flex items-center text-slate-500 text-[11px]">
+                            <FontAwesomeIcon icon={faTruck} className="w-3.5 text-slate-400 mr-1.5 text-[10px]" />
+                            <span>{r.vehicleNumber ? `Reg: ${r.vehicleNumber}` : 'Status: ' + (r.status || 'Active')}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-300 space-y-2">
+                    <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center mx-auto text-xl">
+                      <FontAwesomeIcon icon={faMotorcycle} />
+                    </div>
+                    <h4 className="text-sm font-bold text-slate-800">No Delivery Fleet Assigned</h4>
+                    <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                      Assign delivery riders to fulfill orders from this dark store branch.
+                    </p>
+                    <div className="pt-1">
+                      <Button variant="primary" size="sm" onClick={() => openAssignModalFor('rider')}>
+                        Assign Rider Now
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -507,7 +920,7 @@ export default function StoreDetailsView({
         </div>
       </div>
 
-      {/* Interactive Modal: Assign or Onboard Store Manager */}
+      {/* Interactive Modal: Assign or Onboard Personnel (Manager / Packer / Rider) */}
       {isAssignModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl border border-slate-200 overflow-hidden animate-fadeIn">
@@ -515,14 +928,26 @@ export default function StoreDetailsView({
             <div className="p-6 border-b border-slate-100 flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 rounded-2xl bg-[#064C23]/10 text-[#064C23] flex items-center justify-center text-lg">
-                  <FontAwesomeIcon icon={faUserTie} />
+                  <FontAwesomeIcon
+                    icon={
+                      assignCategory === 'rider'
+                        ? faMotorcycle
+                        : assignCategory === 'packer'
+                        ? faBoxOpen
+                        : faUserTie
+                    }
+                  />
                 </div>
                 <div>
                   <h3 className="text-lg font-black text-slate-900">
-                    Assign Store Manager
+                    {assignCategory === 'rider'
+                      ? 'Assign Delivery Rider'
+                      : assignCategory === 'packer'
+                      ? 'Assign Order Packer / Picker'
+                      : 'Assign Store Manager'}
                   </h3>
                   <p className="text-xs text-slate-500">
-                    Assigning manager for: <strong className="text-slate-800">{store.title}</strong>
+                    Store Branch: <strong className="text-slate-800">{store.title}</strong>
                   </p>
                 </div>
               </div>
@@ -546,7 +971,7 @@ export default function StoreDetailsView({
                     : 'border-transparent text-slate-400 hover:text-slate-700'
                 }`}
               >
-                Select Existing Staff Manager
+                Select from Registered Personnel
               </button>
               <button
                 type="button"
@@ -557,7 +982,7 @@ export default function StoreDetailsView({
                     : 'border-transparent text-slate-400 hover:text-slate-700'
                 }`}
               >
-                Onboard New Manager for this Branch
+                Onboard New for this Store
               </button>
             </div>
 
@@ -567,23 +992,46 @@ export default function StoreDetailsView({
                 <div className="space-y-4">
                   <div>
                     <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
-                      Choose Manager from Staff Directory
+                      Choose candidate to assign:
                     </label>
-                    <select
-                      value={selectedStaffId}
-                      onChange={(e) => setSelectedStaffId(e.target.value)}
-                      className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 outline-none focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 transition-all cursor-pointer"
-                    >
-                      {existingStaffList.map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.name} ({s.email}) {s.storeName ? `[Current: ${s.storeName}]` : '[Unassigned]'}
-                        </option>
-                      ))}
-                    </select>
-                    <p className="text-[11px] text-slate-400 mt-1.5">
-                      Selecting an existing staff member will reassign them as Store Manager for <strong>{store.title}</strong>.
+                    {existingOptions.length > 0 ? (
+                      <select
+                        value={selectedEntityId}
+                        onChange={(e) => setSelectedEntityId(e.target.value)}
+                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 outline-none focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 transition-all cursor-pointer"
+                      >
+                        {existingOptions.map((opt) => (
+                          <option key={opt.id} value={opt.id}>
+                            {opt.name} {opt.role ? `(${opt.role})` : `(${opt.vehicleType || 'Rider'})`} - {opt.phone || opt.email}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <p className="text-xs text-amber-700 bg-amber-50 p-3 rounded-xl border border-amber-200">
+                        No candidates found in directory. Use the "Onboard New" tab above to create and assign one immediately!
+                      </p>
+                    )}
+                    <p className="text-[11px] text-slate-400 mt-2">
+                      This user will be linked to <strong>{store.title}</strong> and will be visible in this store's roster.
                     </p>
                   </div>
+
+                  {assignCategory === 'packer' && (
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                        Role Designation
+                      </label>
+                      <select
+                        value={newForm.role}
+                        onChange={(e) => setNewForm({ ...newForm, role: e.target.value })}
+                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 outline-none focus:bg-white focus:border-[#064C23]"
+                      >
+                        <option value="Order Packer">Order Packer</option>
+                        <option value="Order Picker">Order Picker</option>
+                        <option value="Store Associate">Store Associate</option>
+                      </select>
+                    </div>
+                  )}
 
                   <div className="pt-4 flex items-center justify-end space-x-2.5">
                     <Button variant="outline" size="sm" onClick={() => setIsAssignModalOpen(false)}>
@@ -593,14 +1041,14 @@ export default function StoreDetailsView({
                       variant="primary"
                       size="sm"
                       onClick={handleAssignExisting}
-                      disabled={isSubmitting || !selectedStaffId}
+                      disabled={isSubmitting || !selectedEntityId}
                     >
-                      {isSubmitting ? 'Assigning...' : 'Assign Manager'}
+                      {isSubmitting ? 'Assigning...' : 'Assign to this Store'}
                     </Button>
                   </div>
                 </div>
               ) : (
-                <form onSubmit={handleCreateNewManager} className="space-y-4">
+                <form onSubmit={handleCreateNew} className="space-y-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-bold uppercase text-slate-700 mb-1">
@@ -609,74 +1057,112 @@ export default function StoreDetailsView({
                       <input
                         type="text"
                         required
-                        placeholder="e.g. Ramesh Verma"
-                        value={newManagerForm.name}
-                        onChange={(e) => setNewManagerForm({ ...newManagerForm, name: e.target.value })}
+                        placeholder="e.g. Deepak Rawat"
+                        value={newForm.name}
+                        onChange={(e) => setNewForm({ ...newForm, name: e.target.value })}
                         className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 outline-none focus:bg-white focus:border-[#064C23]"
                       />
                     </div>
-                    <div>
-                      <label className="block text-xs font-bold uppercase text-slate-700 mb-1">
-                        Father's Name
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Suresh Verma"
-                        value={newManagerForm.fathersName}
-                        onChange={(e) => setNewManagerForm({ ...newManagerForm, fathersName: e.target.value })}
-                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 outline-none focus:bg-white focus:border-[#064C23]"
-                      />
-                    </div>
+
+                    {assignCategory === 'rider' ? (
+                      <div>
+                        <label className="block text-xs font-bold uppercase text-slate-700 mb-1">
+                          Vehicle Type
+                        </label>
+                        <select
+                          value={newForm.vehicleType}
+                          onChange={(e) => setNewForm({ ...newForm, vehicleType: e.target.value })}
+                          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 outline-none focus:bg-white focus:border-[#064C23]"
+                        >
+                          <option value="Bike">Motorbike</option>
+                          <option value="Scooter">Scooter / Activa</option>
+                          <option value="EV Scooter">Electric Bike / EV</option>
+                          <option value="Bicycle">Bicycle</option>
+                        </select>
+                      </div>
+                    ) : (
+                      <div>
+                        <label className="block text-xs font-bold uppercase text-slate-700 mb-1">
+                          Father's Name
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Mahesh Rawat"
+                          value={newForm.fathersName}
+                          onChange={(e) => setNewForm({ ...newForm, fathersName: e.target.value })}
+                          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 outline-none focus:bg-white focus:border-[#064C23]"
+                        />
+                      </div>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                       <label className="block text-xs font-bold uppercase text-slate-700 mb-1">
-                        Login Email <span className="text-rose-500">*</span>
+                        Contact Mobile <span className="text-rose-500">*</span>
                       </label>
                       <input
-                        type="email"
+                        type="tel"
                         required
-                        placeholder="manager.branch@bazario.com"
-                        value={newManagerForm.email}
-                        onChange={(e) => setNewManagerForm({ ...newManagerForm, email: e.target.value })}
+                        placeholder="+91 98765 43210"
+                        value={newForm.phone}
+                        onChange={(e) => setNewForm({ ...newForm, phone: e.target.value })}
                         className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 outline-none focus:bg-white focus:border-[#064C23]"
                       />
                     </div>
                     <div>
                       <label className="block text-xs font-bold uppercase text-slate-700 mb-1">
-                        Contact Mobile
+                        Email Address {assignCategory !== 'rider' && <span className="text-rose-500">*</span>}
                       </label>
                       <input
-                        type="tel"
-                        placeholder="+91 98765 43210"
-                        value={newManagerForm.phone}
-                        onChange={(e) => setNewManagerForm({ ...newManagerForm, phone: e.target.value })}
+                        type="email"
+                        required={assignCategory !== 'rider'}
+                        placeholder="packer@bazario.com"
+                        value={newForm.email}
+                        onChange={(e) => setNewForm({ ...newForm, email: e.target.value })}
                         className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 outline-none focus:bg-white focus:border-[#064C23]"
                       />
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-bold uppercase text-slate-700 mb-1">
-                      Portal Password
-                    </label>
-                    <input
-                      type="password"
-                      placeholder="••••••••"
-                      value={newManagerForm.password}
-                      onChange={(e) => setNewManagerForm({ ...newManagerForm, password: e.target.value })}
-                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 outline-none focus:bg-white focus:border-[#064C23]"
-                    />
-                    <p className="text-[11px] text-slate-400 mt-1">Default credentials for Store Manager portal login</p>
-                  </div>
+                  {assignCategory === 'packer' && (
+                    <div>
+                      <label className="block text-xs font-bold uppercase text-slate-700 mb-1">
+                        Role Type
+                      </label>
+                      <select
+                        value={newForm.role}
+                        onChange={(e) => setNewForm({ ...newForm, role: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 outline-none focus:bg-white focus:border-[#064C23]"
+                      >
+                        <option value="Order Packer">Order Packer</option>
+                        <option value="Order Picker">Order Picker</option>
+                        <option value="Store Associate">Store Associate</option>
+                      </select>
+                    </div>
+                  )}
+
+                  {assignCategory === 'rider' && (
+                    <div>
+                      <label className="block text-xs font-bold uppercase text-slate-700 mb-1">
+                        Vehicle Number (Registration Plate)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. UP 16 AB 1234"
+                        value={newForm.vehicleNumber}
+                        onChange={(e) => setNewForm({ ...newForm, vehicleNumber: e.target.value })}
+                        className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 outline-none focus:bg-white focus:border-[#064C23]"
+                      />
+                    </div>
+                  )}
 
                   <div className="pt-2 flex items-center justify-end space-x-2.5">
                     <Button variant="outline" size="sm" type="button" onClick={() => setIsAssignModalOpen(false)}>
                       Cancel
                     </Button>
                     <Button variant="primary" size="sm" type="submit" disabled={isSubmitting}>
-                      {isSubmitting ? 'Creating...' : 'Create & Assign to Store'}
+                      {isSubmitting ? 'Onboarding...' : 'Onboard & Assign to Store'}
                     </Button>
                   </div>
                 </form>

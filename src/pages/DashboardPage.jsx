@@ -32,6 +32,7 @@ import {
   DeliveryStaffManageView,
   ProductManageView,
   StaffManageView,
+  StorePackersView,
   ManageOffersView,
   DashboardWelcomeBanner,
   OrdersAnalyticsSection,
@@ -57,6 +58,7 @@ import {
   faMagnifyingGlass,
   faStore,
   faTruck,
+  faBoxOpen,
   faWallet,
   faBasketShopping,
   faReceipt,
@@ -135,6 +137,13 @@ export default function DashboardPage({ onLogout }) {
       return 'delivery-staff'
     }
     if (
+      baseTab === 'packers' ||
+      baseTab === 'store-packers' ||
+      baseTab === 'packer'
+    ) {
+      return 'packers'
+    }
+    if (
       baseTab === 'products' ||
       baseTab === 'product-manage' ||
       baseTab === 'product'
@@ -170,6 +179,7 @@ export default function DashboardPage({ onLogout }) {
       'stores',
       'customers',
       'delivery-staff',
+      'packers',
       'staff-manage',
       'products',
       'product-categories',
@@ -267,10 +277,11 @@ export default function DashboardPage({ onLogout }) {
   // Navigation Items - Filtered based on Role
   const navItems = isStoreManager
     ? [
-        { id: 'dashboard', name: 'Branch Dashboard', icon: faChartLine },
+        { id: 'dashboard', name: 'Dashboard', icon: faChartLine },
         { id: 'store-inventory', name: 'Stock & Inventory Control', icon: faBoxesStacked },
-        { id: 'orders', name: 'Branch Orders Queue', icon: faCartShopping },
-        { id: 'delivery-staff', name: 'Branch Delivery Fleet', icon: faTruck },
+        { id: 'orders', name: 'Orders', icon: faCartShopping },
+        { id: 'packers', name: 'Store Packers', icon: faBoxOpen },
+        { id: 'delivery-staff', name: 'Delivery Staff', icon: faTruck },
       ]
     : [
         { id: 'dashboard', name: 'Dashboard', icon: faChartLine },
@@ -423,17 +434,19 @@ export default function DashboardPage({ onLogout }) {
           onMenuToggle={() => setSidebarOpen((prev) => !prev)}
           title={
             activeTab === 'store-inventory'
-              ? (isStoreManager ? 'Branch Stock & Inventory Control' : 'Multi-Store Stock Control')
+              ? (isStoreManager ? 'Stock & Inventory Control' : 'Multi-Store Stock Control')
               : activeTab === 'orders'
-              ? (isStoreManager ? 'Branch Orders Queue' : 'Orders Management')
+              ? (isStoreManager ? 'Orders Queue' : 'Orders Management')
               : activeTab === 'settings'
               ? 'Store Settings'
+              : activeTab === 'packers'
+              ? 'Store Packers & In-Store Staff'
               : activeTab === 'stores'
               ? 'Store Locations & Outlets'
               : activeTab === 'customers'
               ? 'Customers'
               : activeTab === 'delivery-staff'
-              ? (isStoreManager ? 'Branch Delivery Fleet' : 'Delivery Staff')
+              ? 'Delivery Staff'
               : activeTab === 'staff-manage'
               ? 'Staff Manage'
               : activeTab === 'products'
@@ -460,7 +473,7 @@ export default function DashboardPage({ onLogout }) {
               ? 'Hero Banner Manage'
               : activeTab === 'manage-offers'
               ? 'Manage Offers'
-              : (isStoreManager ? 'Branch Dashboard' : 'Dashboard')
+              : 'Dashboard'
           }
           onLogout={onLogout}
           className="shrink-0"
@@ -470,11 +483,12 @@ export default function DashboardPage({ onLogout }) {
         <div className="flex-1 overflow-y-auto min-h-0 flex flex-col justify-between scrollbar-thin">
           <main className="p-4 sm:p-6 lg:p-8 space-y-6 flex-1 pb-16">
             {activeTab === 'store-inventory' && <StoreInventoryView currentUser={currentUser} />}
-            {activeTab === 'orders' && <OrdersView />}
+            {activeTab === 'orders' && <OrdersView currentUser={currentUser} />}
+            {activeTab === 'packers' && <StorePackersView currentUser={currentUser} />}
             {activeTab === 'settings' && <SettingsView />}
             {activeTab === 'stores' && <StoresView />}
             {activeTab === 'customers' && <CustomersView />}
-            {activeTab === 'delivery-staff' && <DeliveryStaffManageView />}
+            {activeTab === 'delivery-staff' && <DeliveryStaffManageView currentUser={currentUser} />}
             {activeTab === 'staff-manage' && <StaffManageView />}
             {activeTab === 'products' && <ProductManageView />}
             {(activeTab === 'product-categories' || activeTab === 'product-category') && (

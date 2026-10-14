@@ -185,6 +185,40 @@ export const unassignStoreManagerApi = async (storeId, staffId) => {
   });
 };
 
+export const getStoreStaffApi = async (storeId) => {
+  return await adminApi(`/admin/stores/${storeId}/staff`);
+};
+
+export const assignStoreStaffApi = async (storeId, data) => {
+  return await adminApi(`/admin/stores/${storeId}/staff`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+};
+
+export const unassignStoreStaffApi = async (storeId, staffId) => {
+  return await adminApi(`/admin/stores/${storeId}/staff/${staffId}`, {
+    method: 'DELETE',
+  });
+};
+
+export const getStoreDeliveryStaffApi = async (storeId) => {
+  return await adminApi(`/admin/stores/${storeId}/delivery-staff`);
+};
+
+export const assignStoreDeliveryStaffApi = async (storeId, data) => {
+  return await adminApi(`/admin/stores/${storeId}/delivery-staff`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+};
+
+export const unassignStoreDeliveryStaffApi = async (storeId, riderId) => {
+  return await adminApi(`/admin/stores/${storeId}/delivery-staff/${riderId}`, {
+    method: 'DELETE',
+  });
+};
+
 // 7. Customers Management
 export const getAdminCustomersApi = async (params = {}) => {
   const query = new URLSearchParams(params).toString();
@@ -506,5 +540,9 @@ export const updateStoreStatusApi = async (status, storeId) => {
 
 export const getStoreRidersApi = async () => {
   return await adminApi('/store-manager/riders');
+};
+
+export const getStorePackersApi = async () => {
+  return await adminApi('/store-manager/packers');
 };
 
