@@ -5,7 +5,8 @@ import {
   Button,
   InputField,
   ImageUploadFrame,
-  BackButton
+  BackButton,
+  RichTextEditor
 } from '../index'
 import { useToast } from '../../context/ToastContext'
 
@@ -153,17 +154,16 @@ export default function AddCategoryView({ onBack, onSave, categoriesCount = 0 })
           </div>
         </div>
 
-        {/* Bottom Section: Description */}
+        {/* Bottom Section: Description (TinyMCE) */}
         <div className="space-y-1.5 pt-4 border-t border-slate-100">
           <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
-            DESCRIPTION
+            DESCRIPTION (TINYMCE RICH TEXT)
           </label>
-          <textarea
-            rows={4}
-            placeholder="Enter detailed description of grocery products in this category..."
+          <RichTextEditor
             value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 outline-none focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 transition-all leading-relaxed"
+            onChange={(content) => setFormData({ ...formData, description: content })}
+            placeholder="Enter detailed description of grocery products in this category..."
+            height={260}
           />
         </div>
 

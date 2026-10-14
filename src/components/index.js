@@ -14,6 +14,8 @@ export { default as FormLayout, FormSection, FormRow, FormActions } from './ui/F
 export { default as Modal } from './ui/Modal'
 export { default as AlertModal } from './ui/AlertModal'
 export { default as Toast } from './ui/Toast'
+export { default as Pagination } from './ui/Pagination'
+export { default as RichTextEditor } from './ui/RichTextEditor'
 
 // Route View Components
 export { default as OrdersView } from './orders/OrdersView'

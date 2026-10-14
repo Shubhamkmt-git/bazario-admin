@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import {
   faPlus,
@@ -16,8 +16,40 @@ import {
 import {
   Button,
   ActionButton,
-  ToggleButton
+  ToggleButton,
+  Pagination
 } from '../index'
+
+// Helper to get initial page & limit from URL hash params or sessionStorage
+const getInitialPage = () => {
+  try {
+    const hashQuery = window.location.hash.includes('?')
+      ? window.location.hash.split('?')[1]
+      : ''
+    const params = new URLSearchParams(hashQuery || window.location.search)
+    const pageParam = parseInt(params.get('page'), 10)
+    if (pageParam && pageParam > 0) return pageParam
+
+    const saved = parseInt(sessionStorage.getItem('bazario_products_page'), 10)
+    if (saved && saved > 0) return saved
+  } catch (e) {}
+  return 1
+}
+
+const getInitialLimit = () => {
+  try {
+    const hashQuery = window.location.hash.includes('?')
+      ? window.location.hash.split('?')[1]
+      : ''
+    const params = new URLSearchParams(hashQuery || window.location.search)
+    const limitParam = parseInt(params.get('limit'), 10)
+    if (limitParam && limitParam > 0) return limitParam
+
+    const saved = parseInt(sessionStorage.getItem('bazario_products_limit'), 10)
+    if (saved && saved > 0) return saved
+  } catch (e) {}
+  return 10
+}
 
 export default function ProductListView({
   products = [],
@@ -31,6 +63,28 @@ export default function ProductListView({
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [selectedBrand, setSelectedBrand] = useState('all')
   const [selectedStatus, setSelectedStatus] = useState('all')
+
+  // Pagination states with persistent reload support
+  const [currentPage, setCurrentPage] = useState(getInitialPage)
+  const [itemsPerPage, setItemsPerPage] = useState(getInitialLimit)
+
+  // Listen to browser navigation / hash change
+  useEffect(() => {
+    const handleHashChange = () => {
+      try {
+        const hashQuery = window.location.hash.includes('?')
+          ? window.location.hash.split('?')[1]
+          : ''
+        const params = new URLSearchParams(hashQuery)
+        const p = parseInt(params.get('page'), 10)
+        if (p && p > 0 && p !== currentPage) {
+          setCurrentPage(p)
+        }
+      } catch (e) {}
+    }
+    window.addEventListener('hashchange', handleHashChange)
+    return () => window.removeEventListener('hashchange', handleHashChange)
+  }, [currentPage])
 
   // Extract unique categories & brands for filter dropdowns
   const categoriesList = useMemo(() => {
@@ -74,12 +128,92 @@ export default function ProductListView({
     })
   }, [products, searchQuery, selectedCategory, selectedBrand, selectedStatus])
 
+  // Pagination calculation with safety clamping
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / itemsPerPage))
+  const safeCurrentPage = Math.min(Math.max(1, currentPage), totalPages)
+
+  const paginatedProducts = useMemo(() => {
+    const startIndex = (safeCurrentPage - 1) * itemsPerPage
+    return filteredProducts.slice(startIndex, startIndex + itemsPerPage)
+  }, [filteredProducts, safeCurrentPage, itemsPerPage])
+
+  // Page change handler
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage)
+    try {
+      sessionStorage.setItem('bazario_products_page', String(newPage))
+      const baseHash = window.location.hash.split('?')[0] || '#/products'
+      const newHash = `${baseHash}?page=${newPage}&limit=${itemsPerPage}`
+      window.history.replaceState(null, '', newHash)
+    } catch (e) {}
+  }
+
+  // Items per page change handler
+  const handleLimitChange = (newLimit) => {
+    setItemsPerPage(newLimit)
+    setCurrentPage(1)
+    try {
+      sessionStorage.setItem('bazario_products_limit', String(newLimit))
+      sessionStorage.setItem('bazario_products_page', '1')
+      const baseHash = window.location.hash.split('?')[0] || '#/products'
+      const newHash = `${baseHash}?page=1&limit=${newLimit}`
+      window.history.replaceState(null, '', newHash)
+    } catch (e) {}
+  }
+
+  // Filter change handlers that automatically reset to page 1 for reliable searching
+  const handleSearchChange = (val) => {
+    setSearchQuery(val)
+    setCurrentPage(1)
+    try {
+      sessionStorage.setItem('bazario_products_page', '1')
+      const baseHash = window.location.hash.split('?')[0] || '#/products'
+      window.history.replaceState(null, '', `${baseHash}?page=1&limit=${itemsPerPage}`)
+    } catch (e) {}
+  }
+
+  const handleCategoryChange = (val) => {
+    setSelectedCategory(val)
+    setCurrentPage(1)
+    try {
+      sessionStorage.setItem('bazario_products_page', '1')
+      const baseHash = window.location.hash.split('?')[0] || '#/products'
+      window.history.replaceState(null, '', `${baseHash}?page=1&limit=${itemsPerPage}`)
+    } catch (e) {}
+  }
+
+  const handleBrandChange = (val) => {
+    setSelectedBrand(val)
+    setCurrentPage(1)
+    try {
+      sessionStorage.setItem('bazario_products_page', '1')
+      const baseHash = window.location.hash.split('?')[0] || '#/products'
+      window.history.replaceState(null, '', `${baseHash}?page=1&limit=${itemsPerPage}`)
+    } catch (e) {}
+  }
+
+  const handleStatusChange = (val) => {
+    setSelectedStatus(val)
+    setCurrentPage(1)
+    try {
+      sessionStorage.setItem('bazario_products_page', '1')
+      const baseHash = window.location.hash.split('?')[0] || '#/products'
+      window.history.replaceState(null, '', `${baseHash}?page=1&limit=${itemsPerPage}`)
+    } catch (e) {}
+  }
+
   // Reset all filters
   const handleResetFilters = () => {
     setSearchQuery('')
     setSelectedCategory('all')
     setSelectedBrand('all')
     setSelectedStatus('all')
+    setCurrentPage(1)
+    try {
+      sessionStorage.setItem('bazario_products_page', '1')
+      const baseHash = window.location.hash.split('?')[0] || '#/products'
+      window.history.replaceState(null, '', `${baseHash}?page=1&limit=${itemsPerPage}`)
+    } catch (e) {}
   }
 
   return (
@@ -126,7 +260,7 @@ export default function ProductListView({
             <input
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
               placeholder="Search by title, brand, SKU or keywords..."
               className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 outline-none focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 transition-all font-medium"
             />
@@ -136,7 +270,7 @@ export default function ProductListView({
           <div className="lg:col-span-3">
             <select
               value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
+              onChange={(e) => handleCategoryChange(e.target.value)}
               className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 outline-none focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 transition-all cursor-pointer"
             >
               <option value="all">All Categories</option>
@@ -152,7 +286,7 @@ export default function ProductListView({
           <div className="lg:col-span-2">
             <select
               value={selectedBrand}
-              onChange={(e) => setSelectedBrand(e.target.value)}
+              onChange={(e) => handleBrandChange(e.target.value)}
               className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 outline-none focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 transition-all cursor-pointer"
             >
               <option value="all">All Brands</option>
@@ -168,7 +302,7 @@ export default function ProductListView({
           <div className="lg:col-span-2">
             <select
               value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
+              onChange={(e) => handleStatusChange(e.target.value)}
               className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 outline-none focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 transition-all cursor-pointer"
             >
               <option value="all">All Status</option>
@@ -183,7 +317,7 @@ export default function ProductListView({
               type="button"
               onClick={handleResetFilters}
               title="Reset all filters"
-              className="w-full h-[42px] flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors text-xs font-bold"
+              className="w-full h-[42px] flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-colors text-xs font-bold cursor-pointer"
             >
               <FontAwesomeIcon icon={faRotateRight} className="mr-1.5 text-xs" />
               Reset
@@ -194,8 +328,8 @@ export default function ProductListView({
         {/* Quick Summary Pill Bar */}
         <div className="flex flex-wrap items-center justify-between text-xs text-slate-500 pt-2 border-t border-slate-100">
           <div>
-            Showing <span className="font-bold text-slate-900">{filteredProducts.length}</span> of{' '}
-            <span className="font-bold text-slate-900">{products.length}</span> products
+            Showing Page <span className="font-bold text-slate-900">{safeCurrentPage}</span> of{' '}
+            <span className="font-bold text-slate-900">{totalPages}</span> ({filteredProducts.length} matching products)
           </div>
           <div className="flex items-center space-x-3">
             <span className="flex items-center">
@@ -255,7 +389,7 @@ export default function ProductListView({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs font-medium text-slate-700">
-                {filteredProducts.map((prod) => {
+                {paginatedProducts.map((prod) => {
                   const primaryImg =
                     prod.galleryImages?.[0] || prod.image || '/supermart-bg.jpg'
                   const galleryCount = Array.isArray(prod.galleryImages)
@@ -279,7 +413,7 @@ export default function ProductListView({
 
                   return (
                     <tr
-                      key={prod.id}
+                      key={prod.id || prod._id}
                       className="hover:bg-slate-50/60 transition-colors group"
                     >
                       {/* Product Image & Title */}
@@ -312,7 +446,7 @@ export default function ProductListView({
                               {prod.title}
                             </p>
                             <p className="text-[11px] text-slate-400 font-mono">
-                              SKU: {prod.sku || `BZ-PRD-${String(prod.id).slice(-4)}`}
+                              SKU: {prod.sku || `BZ-PRD-${String(prod.id || prod._id).slice(-4)}`}
                             </p>
                             {keywords.length > 0 && (
                               <div className="flex flex-wrap gap-1 mt-1">
@@ -404,7 +538,7 @@ export default function ProductListView({
                         <div className="flex flex-col items-center">
                           <ToggleButton
                             checked={prod.status === 'Active'}
-                            onChange={() => onToggleStatus(prod.id)}
+                            onChange={() => onToggleStatus(prod.id || prod._id)}
                             size="sm"
                           />
                           <span
@@ -444,6 +578,20 @@ export default function ProductListView({
                 })}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* Centralized Pagination Bar */}
+        {filteredProducts.length > 0 && (
+          <div className="p-4 sm:p-5 border-t border-slate-100 bg-slate-50/40">
+            <Pagination
+              currentPage={safeCurrentPage}
+              totalItems={filteredProducts.length}
+              itemsPerPage={itemsPerPage}
+              onPageChange={handlePageChange}
+              onItemsPerPageChange={handleLimitChange}
+              itemsPerPageOptions={[10, 20, 50, 100]}
+            />
           </div>
         )}
       </div>
