@@ -107,12 +107,15 @@ export default function StaffManageView() {
     try {
       const res = await createAdminStaffApi({
         name: newStaff.name,
+        fathersName: newStaff.fathersName || '',
         email: newStaff.email,
-        phone: newStaff.mobilenumber,
-        mobilenumber: newStaff.mobilenumber,
+        phone: newStaff.mobilenumber || newStaff.phone,
+        mobilenumber: newStaff.mobilenumber || newStaff.phone,
         store: newStaff.store,
         storeName: newStaff.store,
-        role: 'Staff',
+        storeId: newStaff.storeId || null,
+        role: newStaff.role || 'Store Associate',
+        password: newStaff.password || 'staff123',
         status: newStaff.status || 'Active',
         image: newStaff.image || ''
       })
@@ -122,15 +125,16 @@ export default function StaffManageView() {
         ...created,
         id: created._id || created.id || Date.now(),
         staffId: created.staffId || newStaff.staffId || 'BAZ-STF-' + String(created._id || Date.now()).slice(-4).toUpperCase(),
-        store: newStaff.store,
+        store: created.storeName || newStaff.store,
+        role: created.role || newStaff.role,
         mobilenumber: newStaff.mobilenumber
       }
       setStaffList((prev) => [formatted, ...prev])
-      toast.success('Staff Added', `"${newStaff.name}" has been onboarded successfully.`)
+      toast.success('Staff Added', `"${newStaff.name}" onboarded as ${newStaff.role || 'Staff'}!`)
     } catch (err) {
       console.warn('Backend staff save failed, saving locally:', err)
       setStaffList((prev) => [newStaff, ...prev])
-      toast.success('Staff Added', `"${newStaff.name}" has been onboarded successfully.`)
+      toast.success('Staff Added', `"${newStaff.name}" onboarded as ${newStaff.role || 'Staff'}!`)
     }
     goToList()
   }
@@ -140,13 +144,17 @@ export default function StaffManageView() {
       const targetId = updatedStaff._id || updatedStaff.id
       await updateAdminStaffApi(targetId, {
         name: updatedStaff.name,
+        fathersName: updatedStaff.fathersName,
         email: updatedStaff.email,
-        phone: updatedStaff.mobilenumber,
-        mobilenumber: updatedStaff.mobilenumber,
+        phone: updatedStaff.mobilenumber || updatedStaff.phone,
+        mobilenumber: updatedStaff.mobilenumber || updatedStaff.phone,
         store: updatedStaff.store,
         storeName: updatedStaff.store,
+        storeId: updatedStaff.storeId || null,
+        role: updatedStaff.role,
         status: updatedStaff.status,
-        image: updatedStaff.image
+        image: updatedStaff.image,
+        ...(updatedStaff.password ? { password: updatedStaff.password } : {})
       })
     } catch (err) {
       console.warn('Backend update failed:', err)

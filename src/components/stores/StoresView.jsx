@@ -26,7 +26,7 @@ export default function StoresView() {
       const list = res.stores || res.data || []
       const formatted = (Array.isArray(list) ? list : []).map((s, idx) => ({
         id: s._id || s.id || idx + 1,
-        _id: s._id,
+        _id: s._id || s.id,
         sortingOrder: s.sortingOrder || idx + 1,
         title: s.title || s.name,
         subtitle: s.subtitle || s.address || '',
@@ -36,6 +36,8 @@ export default function StoresView() {
         status: s.status || 'Open',
         phone: s.phone || '+91 98111 22334',
         operatingHours: s.operatingHours || '7:00 AM - 11:00 PM',
+        managers: s.managers || [],
+        managerCount: s.managerCount || (s.managers || []).length,
       }))
       setStores(formatted)
     } catch (err) {

@@ -23,9 +23,8 @@ import { uploadImageApi } from '../../../utils/adminApi'
 
 const DEFAULT_ROLES = [
   'Super Admin',
-  'Store Manager',
-  'Inventory Lead',
-  'Customer Support Agent',
+  'Operations Admin',
+  'Customer Support Admin',
 ]
 
 export default function AddUserView({ onBack, onSave }) {
@@ -54,7 +53,7 @@ export default function AddUserView({ onBack, onSave }) {
     email: '',
     phone: '',
     password: '',
-    role: 'Store Manager',
+    role: 'Super Admin',
     avatar: null,
     status: 'Active',
   })
@@ -339,6 +338,7 @@ export default function AddUserView({ onBack, onSave }) {
                 )}
               </div>
             </div>
+
           </div>
 
           {/* Section 3: Status Toggle Card */}

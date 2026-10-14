@@ -7,7 +7,9 @@ import {
   faCircleCheck,
   faCircleXmark,
   faStore,
-  faUserGroup
+  faUserGroup,
+  faShieldHalved,
+  faIdCard
 } from '@fortawesome/free-solid-svg-icons'
 import { Button, BackButton } from '../index'
 
@@ -97,21 +99,27 @@ export default function StaffDetailsView({ staff, onBack, onEdit }) {
           <div className="flex-1 space-y-2 text-center sm:text-left">
             <div className="flex items-center justify-center sm:justify-start space-x-2">
               <span className="text-xs font-bold uppercase tracking-wider text-[#064C23]">
-                Supermarket Store Staff
+                Store Personnel
               </span>
               <span className="px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[11px] font-mono font-bold">
                 {staff.staffId || `BAZ-STF-0${staff.id}`}
               </span>
             </div>
             <h2 className="text-2xl font-black text-slate-900">{staff.name}</h2>
+            {staff.fathersName && (
+              <p className="text-xs text-slate-500 flex items-center justify-center sm:justify-start">
+                <FontAwesomeIcon icon={faIdCard} className="mr-1.5 text-slate-400" />
+                <span>Father's Name: <strong className="text-slate-700 font-semibold">{staff.fathersName}</strong></span>
+              </p>
+            )}
             <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
+              <span className="inline-flex items-center px-3 py-1 rounded-xl bg-emerald-50 text-[#064C23] border border-emerald-300 font-bold text-xs shadow-2xs">
+                <FontAwesomeIcon icon={faShieldHalved} className="mr-1.5 text-xs text-[#064C23]" />
+                Role: {staff.role || 'Store Associate'}
+              </span>
               <span className="inline-flex items-center px-2.5 py-1 rounded-xl bg-[#064C23]/10 text-[#064C23] font-bold text-xs">
                 <FontAwesomeIcon icon={faStore} className="mr-1.5 text-xs" />
-                Store: {staff.store || 'Bazario Central Superstore #01'}
-              </span>
-              <span className="inline-flex items-center px-2.5 py-1 rounded-xl bg-slate-100 text-slate-700 font-semibold text-xs">
-                <FontAwesomeIcon icon={faUserGroup} className="mr-1.5 text-xs text-slate-500" />
-                Operations Team
+                Store: {staff.storeName || staff.store || 'Bazario Central Superstore #01'}
               </span>
             </div>
           </div>

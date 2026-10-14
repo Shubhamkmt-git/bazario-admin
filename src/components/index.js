@@ -31,6 +31,7 @@ export { default as AddCategoryView } from './categories/AddCategoryView'
 export { default as EditCategoryView } from './categories/EditCategoryView'
 export { default as CategoryDetailsView } from './categories/CategoryDetailsView'
 export { default as StoresView } from './stores/StoresView'
+export { default as StoreInventoryView } from './stores/StoreInventoryView'
 export { default as CustomersView } from './customers/CustomersView'
 export { default as SettingsView } from './settings/SettingsView'
 // Admin Manager Views

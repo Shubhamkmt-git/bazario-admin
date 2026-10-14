@@ -51,10 +51,10 @@ export default function UserListView({
           </div>
           <div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              Admin Users & Staff
+              Admin Users
             </h1>
             <p className="text-xs sm:text-sm text-slate-500">
-              Manage system administrator accounts, security credentials, contact profiles, and role permissions.
+              Manage central system administrator accounts, security credentials, contact profiles, and administrative permissions.
             </p>
           </div>
         </div>

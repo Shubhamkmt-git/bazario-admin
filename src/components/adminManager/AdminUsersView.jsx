@@ -92,7 +92,7 @@ export default function AdminUsersView() {
         fathersName: newUser.fathersName || '',
         email: newUser.email,
         password: newUser.password || 'BazarioStore@2026',
-        role: newUser.role || 'Admin',
+        role: newUser.role || 'Super Admin',
         phone: newUser.phone || '',
         avatar: newUser.avatar || null,
         status: newUser.status || 'Active'

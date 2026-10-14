@@ -23,9 +23,8 @@ import { uploadImageApi } from '../../../utils/adminApi'
 
 const DEFAULT_ROLES = [
   'Super Admin',
-  'Store Manager',
-  'Inventory Lead',
-  'Customer Support Agent',
+  'Operations Admin',
+  'Customer Support Admin',
 ]
 
 export default function EditUserView({ user, onBack, onSave }) {
@@ -54,7 +53,7 @@ export default function EditUserView({ user, onBack, onSave }) {
     email: user?.email || '',
     phone: user?.phone || '',
     password: '',
-    role: user?.role || 'Store Manager',
+    role: user?.role || 'Super Admin',
     avatar: user?.avatar || null,
     status: user?.status || 'Active',
   })
@@ -67,7 +66,7 @@ export default function EditUserView({ user, onBack, onSave }) {
         email: user.email || '',
         phone: user.phone || '',
         password: '',
-        role: user.role || 'Store Manager',
+        role: user.role || 'Super Admin',
         avatar: user.avatar || null,
         status: user.status || 'Active',
       })
@@ -350,6 +349,7 @@ export default function EditUserView({ user, onBack, onSave }) {
                 )}
               </div>
             </div>
+
           </div>
 
           {/* Section 3: Status Toggle Card */}

@@ -168,6 +168,23 @@ export const deleteAdminStoreApi = async (id) => {
   });
 };
 
+export const getStoreManagersApi = async (storeId) => {
+  return await adminApi(`/admin/stores/${storeId}/managers`);
+};
+
+export const assignStoreManagerApi = async (storeId, data) => {
+  return await adminApi(`/admin/stores/${storeId}/managers`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+};
+
+export const unassignStoreManagerApi = async (storeId, staffId) => {
+  return await adminApi(`/admin/stores/${storeId}/managers/${staffId}`, {
+    method: 'DELETE',
+  });
+};
+
 // 7. Customers Management
 export const getAdminCustomersApi = async (params = {}) => {
   const query = new URLSearchParams(params).toString();
@@ -415,3 +432,79 @@ export const updateAdminHomeSectionsApi = async (data) => {
     body: JSON.stringify(data),
   });
 };
+
+// ============================================================================
+// 12. STORE MANAGER PORTAL APIS (Stock Control, Branch Orders, Branch Ops)
+// ============================================================================
+export const storeManagerLoginApi = async (email, password) => {
+  const res = await adminApi('/store-manager/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+  });
+  if (res.token) {
+    localStorage.setItem('bazario_admin_token', res.token);
+    localStorage.setItem('bazario_admin_auth', 'true');
+    const userObj = {
+      ...(res.manager || {}),
+      role: 'Store Manager',
+      store: res.store
+    };
+    localStorage.setItem('bazario_admin_user', JSON.stringify(userObj));
+  }
+  return res;
+};
+
+export const getStoreManagerProfileApi = async () => {
+  return await adminApi('/store-manager/auth/me');
+};
+
+export const getStoreInventoryApi = async (params = {}) => {
+  const query = new URLSearchParams(params).toString();
+  return await adminApi(`/store-manager/inventory${query ? '?' + query : ''}`);
+};
+
+export const updateStoreProductStockApi = async (productId, data, storeId) => {
+  const query = storeId ? `?storeId=${storeId}` : '';
+  return await adminApi(`/store-manager/inventory/${productId}${query}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+};
+
+export const adjustStoreStockApi = async (productId, adjustment, reason, storeId) => {
+  const query = storeId ? `?storeId=${storeId}` : '';
+  return await adminApi(`/store-manager/inventory/adjust${query}`, {
+    method: 'POST',
+    body: JSON.stringify({ productId, adjustment, reason, storeId }),
+  });
+};
+
+export const getStoreOrdersApi = async (params = {}) => {
+  const query = new URLSearchParams(params).toString();
+  return await adminApi(`/store-manager/orders${query ? '?' + query : ''}`);
+};
+
+export const updateStoreOrderStatusApi = async (orderId, data) => {
+  return await adminApi(`/store-manager/orders/${orderId}/status`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+};
+
+export const getStoreDetailsApi = async (storeId) => {
+  const query = storeId ? `?storeId=${storeId}` : '';
+  return await adminApi(`/store-manager/store${query}`);
+};
+
+export const updateStoreStatusApi = async (status, storeId) => {
+  const query = storeId ? `?storeId=${storeId}` : '';
+  return await adminApi(`/store-manager/store/status${query}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  });
+};
+
+export const getStoreRidersApi = async () => {
+  return await adminApi('/store-manager/riders');
+};
+

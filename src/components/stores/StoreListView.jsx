@@ -6,7 +6,8 @@ import {
   faMagnifyingGlass,
   faDoorOpen,
   faDoorClosed,
-  faPhone
+  faPhone,
+  faUserTie
 } from '@fortawesome/free-solid-svg-icons'
 import Button from '../ui/Button'
 import ActionButton from '../ui/ActionButton'
@@ -114,6 +115,7 @@ export default function StoreListView({
                 <th className="px-6 py-4 w-20">Order</th>
                 <th className="px-6 py-4">Store Outlet</th>
                 <th className="px-6 py-4">Area & Subtitle</th>
+                <th className="px-6 py-4">Assigned Managers</th>
                 <th className="px-6 py-4">Status</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
@@ -154,8 +156,43 @@ export default function StoreListView({
                     </td>
 
                     {/* Subtitle / Area */}
-                    <td className="px-6 py-4 text-xs font-medium text-slate-600 max-w-[280px]">
+                    <td className="px-6 py-4 text-xs font-medium text-slate-600 max-w-[240px]">
                       <p className="line-clamp-2">{store.subtitle}</p>
+                    </td>
+
+                    {/* Assigned Managers */}
+                    <td className="px-6 py-4">
+                      {store.managers && store.managers.length > 0 ? (
+                        <div className="space-y-1">
+                          <div className="flex flex-wrap gap-1.5 items-center">
+                            {store.managers.map((m) => (
+                              <button
+                                key={m.id}
+                                type="button"
+                                onClick={() => onView(store)}
+                                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100 transition-colors cursor-pointer"
+                                title={`Store Manager: ${m.name} (${m.email || 'No email'})`}
+                              >
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                                <span className="truncate max-w-[120px]">{m.name}</span>
+                              </button>
+                            ))}
+                          </div>
+                          <p className="text-[10px] text-slate-400 font-medium">
+                            {store.managers.length} {store.managers.length === 1 ? 'manager' : 'managers'} assigned
+                          </p>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => onView(store)}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200/80 hover:bg-amber-100 transition-colors cursor-pointer"
+                          title="Assign managers to this store"
+                        >
+                          <FontAwesomeIcon icon={faUserTie} className="text-[10px]" />
+                          <span>+ Assign Manager</span>
+                        </button>
+                      )}
                     </td>
 
                     {/* Status Toggle */}
@@ -190,7 +227,7 @@ export default function StoreListView({
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="px-6 py-12 text-center text-slate-400 text-xs">
+                  <td colSpan="6" className="px-6 py-12 text-center text-slate-400 text-xs">
                     No stores found matching your search.
                   </td>
                 </tr>

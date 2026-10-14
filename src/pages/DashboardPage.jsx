@@ -16,6 +16,7 @@ import {
   AlertModal,
   OrdersView,
   StoresView,
+  StoreInventoryView,
   CustomersView,
   SettingsView,
   AdminUsersView,
@@ -159,8 +160,12 @@ export default function DashboardPage({ onLogout }) {
     if (baseTab === 'orders' || baseTab === 'order') {
       return 'orders'
     }
+    if (baseTab === 'store-inventory' || baseTab === 'inventory' || baseTab === 'stock') {
+      return 'store-inventory'
+    }
     const validTabs = [
       'dashboard',
+      'store-inventory',
       'orders',
       'stores',
       'customers',
@@ -201,6 +206,39 @@ export default function DashboardPage({ onLogout }) {
     window.location.hash = `#/${tabId}`
   }
 
+  const isStoreManager = currentUser?.role === 'Store Manager'
+
+  // Restrict Store Managers from accessing Master Catalog creation, CMS, RBAC, etc.
+  useEffect(() => {
+    if (isStoreManager) {
+      const restrictedTabs = [
+        'products',
+        'product-categories',
+        'product-category',
+        'stores',
+        'admin-users',
+        'admin-roles',
+        'admin-permissions',
+        'web-about',
+        'web-topbar',
+        'web-cta',
+        'web-career',
+        'web-homepage',
+        'settings',
+        'manage-offers',
+        'hero-banner-manage',
+        'customers'
+      ]
+      if (restrictedTabs.includes(activeTab)) {
+        toast.info(
+          'Access Restricted',
+          'Store Managers only have access to Stock Control, Branch Orders & Operations.'
+        )
+        handleSelectTab('store-inventory')
+      }
+    }
+  }, [activeTab, isStoreManager])
+
   const [dateFilter, setDateFilter] = useState('today')
   const [searchQuery, setSearchQuery] = useState('')
   const [statsData, setStatsData] = useState(null)
@@ -226,42 +264,50 @@ export default function DashboardPage({ onLogout }) {
     fetchDashboardData()
   }, [])
 
-  // Navigation Items
-  const navItems = [
-    { id: 'dashboard', name: 'Dashboard', icon: faChartLine },
-    { id: 'orders', name: 'Orders', icon: faCartShopping },
-    { id: 'stores', name: 'Stores', icon: faStore },
-    { id: 'customers', name: 'Customers', icon: faUsers },
-    { id: 'delivery-staff', name: 'Delivery Staff', icon: faTruck },
-    { id: 'staff-manage', name: 'Staff Manage', icon: faUserGroup },
-    { id: 'products', name: 'Products', icon: faBoxesStacked },
-    { id: 'product-categories', name: 'Product Category', icon: faTags },
-    { id: 'hero-banner-manage', name: 'Hero Banner Manage', icon: faImages },
-    { id: 'manage-offers', name: 'Manage Offers', icon: faPercent },
-    {
-      id: 'admin-manager',
-      name: 'Admin Manager',
-      icon: faUserShield,
-      children: [
-        { id: 'admin-users', name: 'Admin User', icon: faUserTie },
-        { id: 'admin-roles', name: 'Role', icon: faShieldHalved },
-        { id: 'admin-permissions', name: 'Permission', icon: faKey },
-      ],
-    },
-    {
-      id: 'web-manager',
-      name: 'Web Manager',
-      icon: faGlobe,
-      children: [
-        { id: 'web-about', name: 'About Manage', icon: faCircleInfo },
-        { id: 'web-topbar', name: 'Top-Bar Manage', icon: faWindowMaximize },
-        { id: 'web-cta', name: 'CTA Manage', icon: faBullhorn },
-        { id: 'web-career', name: 'Career Manage', icon: faBriefcase },
-        { id: 'web-homepage', name: 'Home Page Section Heading Manage', icon: faTableCellsLarge },
-      ],
-    },
-    { id: 'settings', name: 'Settings', icon: faGear },
-  ]
+  // Navigation Items - Filtered based on Role
+  const navItems = isStoreManager
+    ? [
+        { id: 'dashboard', name: 'Branch Dashboard', icon: faChartLine },
+        { id: 'store-inventory', name: 'Stock & Inventory Control', icon: faBoxesStacked },
+        { id: 'orders', name: 'Branch Orders Queue', icon: faCartShopping },
+        { id: 'delivery-staff', name: 'Branch Delivery Fleet', icon: faTruck },
+      ]
+    : [
+        { id: 'dashboard', name: 'Dashboard', icon: faChartLine },
+        { id: 'orders', name: 'Orders', icon: faCartShopping },
+        { id: 'stores', name: 'Stores', icon: faStore },
+        { id: 'store-inventory', name: 'Multi-Store Stock Control', icon: faBoxesStacked },
+        { id: 'customers', name: 'Customers', icon: faUsers },
+        { id: 'delivery-staff', name: 'Delivery Staff', icon: faTruck },
+        { id: 'staff-manage', name: 'Staff Manage', icon: faUserGroup },
+        { id: 'products', name: 'Master Products Catalog', icon: faBoxesStacked },
+        { id: 'product-categories', name: 'Product Category', icon: faTags },
+        { id: 'hero-banner-manage', name: 'Hero Banner Manage', icon: faImages },
+        { id: 'manage-offers', name: 'Manage Offers', icon: faPercent },
+        {
+          id: 'admin-manager',
+          name: 'Admin Manager',
+          icon: faUserShield,
+          children: [
+            { id: 'admin-users', name: 'Admin User', icon: faUserTie },
+            { id: 'admin-roles', name: 'Role', icon: faShieldHalved },
+            { id: 'admin-permissions', name: 'Permission', icon: faKey },
+          ],
+        },
+        {
+          id: 'web-manager',
+          name: 'Web Manager',
+          icon: faGlobe,
+          children: [
+            { id: 'web-about', name: 'About Manage', icon: faCircleInfo },
+            { id: 'web-topbar', name: 'Top-Bar Manage', icon: faWindowMaximize },
+            { id: 'web-cta', name: 'CTA Manage', icon: faBullhorn },
+            { id: 'web-career', name: 'Career Manage', icon: faBriefcase },
+            { id: 'web-homepage', name: 'Home Page Section Heading Manage', icon: faTableCellsLarge },
+          ],
+        },
+        { id: 'settings', name: 'Settings', icon: faGear },
+      ]
 
   // KPI Metrics (in Indian Rupees ₹ and system stats)
   const stats = [
@@ -376,8 +422,10 @@ export default function DashboardPage({ onLogout }) {
           user={currentUser}
           onMenuToggle={() => setSidebarOpen((prev) => !prev)}
           title={
-            activeTab === 'orders'
-              ? 'Orders Management'
+            activeTab === 'store-inventory'
+              ? (isStoreManager ? 'Branch Stock & Inventory Control' : 'Multi-Store Stock Control')
+              : activeTab === 'orders'
+              ? (isStoreManager ? 'Branch Orders Queue' : 'Orders Management')
               : activeTab === 'settings'
               ? 'Store Settings'
               : activeTab === 'stores'
@@ -385,7 +433,7 @@ export default function DashboardPage({ onLogout }) {
               : activeTab === 'customers'
               ? 'Customers'
               : activeTab === 'delivery-staff'
-              ? 'Delivery Staff'
+              ? (isStoreManager ? 'Branch Delivery Fleet' : 'Delivery Staff')
               : activeTab === 'staff-manage'
               ? 'Staff Manage'
               : activeTab === 'products'
@@ -412,7 +460,7 @@ export default function DashboardPage({ onLogout }) {
               ? 'Hero Banner Manage'
               : activeTab === 'manage-offers'
               ? 'Manage Offers'
-              : 'Dashboard'
+              : (isStoreManager ? 'Branch Dashboard' : 'Dashboard')
           }
           onLogout={onLogout}
           className="shrink-0"
@@ -421,6 +469,7 @@ export default function DashboardPage({ onLogout }) {
         {/* Scrollable Main Content */}
         <div className="flex-1 overflow-y-auto min-h-0 flex flex-col justify-between scrollbar-thin">
           <main className="p-4 sm:p-6 lg:p-8 space-y-6 flex-1 pb-16">
+            {activeTab === 'store-inventory' && <StoreInventoryView currentUser={currentUser} />}
             {activeTab === 'orders' && <OrdersView />}
             {activeTab === 'settings' && <SettingsView />}
             {activeTab === 'stores' && <StoresView />}

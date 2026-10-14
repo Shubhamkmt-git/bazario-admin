@@ -10,7 +10,8 @@ import {
   faEye,
   faPenToSquare,
   faTrashCan,
-  faRotateRight
+  faRotateRight,
+  faShieldHalved
 } from '@fortawesome/free-solid-svg-icons'
 import {
   Button,
@@ -28,6 +29,7 @@ export default function StaffListView({
 }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [storeFilter, setStoreFilter] = useState('all')
+  const [roleFilter, setRoleFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
 
   // Extract unique stores for filtering
@@ -39,6 +41,15 @@ export default function StaffListView({
     return Array.from(set)
   }, [staffList])
 
+  // Extract unique roles for filtering
+  const roleOptions = useMemo(() => {
+    const set = new Set(['Store Manager', 'Order Packer', 'Order Picker', 'Store Associate', 'Store POC'])
+    staffList.forEach((s) => {
+      if (s.role) set.add(s.role)
+    })
+    return Array.from(set)
+  }, [staffList])
+
   // Filtered staff members
   const filteredStaff = useMemo(() => {
     return staffList.filter((s) => {
@@ -46,21 +57,25 @@ export default function StaffListView({
       const matchesSearch =
         !q ||
         s.name?.toLowerCase().includes(q) ||
+        s.fathersName?.toLowerCase().includes(q) ||
         s.email?.toLowerCase().includes(q) ||
         s.mobilenumber?.toLowerCase().includes(q) ||
         s.store?.toLowerCase().includes(q) ||
+        s.role?.toLowerCase().includes(q) ||
         s.staffId?.toLowerCase().includes(q)
 
       const matchesStore = storeFilter === 'all' || s.store === storeFilter
+      const matchesRole = roleFilter === 'all' || s.role === roleFilter
       const matchesStatus = statusFilter === 'all' || s.status === statusFilter
 
-      return matchesSearch && matchesStore && matchesStatus
+      return matchesSearch && matchesStore && matchesRole && matchesStatus
     })
-  }, [staffList, searchQuery, storeFilter, statusFilter])
+  }, [staffList, searchQuery, storeFilter, roleFilter, statusFilter])
 
   const handleResetFilters = () => {
     setSearchQuery('')
     setStoreFilter('all')
+    setRoleFilter('all')
     setStatusFilter('all')
   }
 
@@ -119,6 +134,24 @@ export default function StaffListView({
 
         {/* Filter Controls */}
         <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto justify-end">
+          {/* Role Filter */}
+          <div className="flex items-center space-x-1.5 bg-slate-50 px-2.5 py-1 rounded-xl border border-slate-200 text-xs">
+            <FontAwesomeIcon icon={faShieldHalved} className="text-[#064C23] text-xs ml-0.5" />
+            <span className="font-bold text-slate-500 uppercase text-[10px]">Role:</span>
+            <select
+              value={roleFilter}
+              onChange={(e) => setRoleFilter(e.target.value)}
+              className="bg-transparent border-none text-xs font-bold text-slate-800 outline-none cursor-pointer py-1 pr-1"
+            >
+              <option value="all">All Roles</option>
+              {roleOptions.map((r) => (
+                <option key={r} value={r}>
+                  {r}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Store Filter */}
           <div className="flex items-center space-x-1.5 bg-slate-50 px-2.5 py-1 rounded-xl border border-slate-200 text-xs">
             <FontAwesomeIcon icon={faStore} className="text-[#064C23] text-xs ml-0.5" />
@@ -157,7 +190,7 @@ export default function StaffListView({
           </div>
 
           {/* Reset Filters */}
-          {(searchQuery || storeFilter !== 'all' || statusFilter !== 'all') && (
+          {(searchQuery || storeFilter !== 'all' || roleFilter !== 'all' || statusFilter !== 'all') && (
             <button
               type="button"
               onClick={handleResetFilters}
@@ -178,9 +211,9 @@ export default function StaffListView({
               <tr>
                 <th className="px-6 py-4 w-16 text-center">#</th>
                 <th className="px-6 py-4">Staff Member</th>
+                <th className="px-6 py-4">Designation / Role</th>
                 <th className="px-6 py-4">Assigned Store</th>
-                <th className="px-6 py-4">Mobile Number</th>
-                <th className="px-6 py-4">Email Address</th>
+                <th className="px-6 py-4">Mobile & Login Email</th>
                 <th className="px-6 py-4 text-center">Status</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
@@ -219,11 +252,34 @@ export default function StaffListView({
                           <span className="font-bold text-slate-900 text-sm block">
                             {staff.name}
                           </span>
-                          <span className="text-[11px] text-slate-400 block font-mono">
+                          {staff.fathersName && (
+                            <span className="text-[11px] text-slate-500 block">
+                              S/O {staff.fathersName}
+                            </span>
+                          )}
+                          <span className="text-[10px] text-slate-400 block font-mono">
                             {staff.staffId || `BAZ-STF-0${staff.id}`}
                           </span>
                         </div>
                       </div>
+                    </td>
+
+                    {/* Role Badge */}
+                    <td className="px-6 py-4">
+                      <span
+                        className={`inline-flex items-center space-x-1.5 px-3 py-1 rounded-xl text-xs font-extrabold border ${
+                          staff.role === 'Store Manager'
+                            ? 'bg-emerald-50 text-[#064C23] border-emerald-300 shadow-2xs'
+                            : staff.role === 'Order Packer'
+                            ? 'bg-amber-50 text-amber-900 border-amber-200'
+                            : staff.role === 'Order Picker'
+                            ? 'bg-sky-50 text-sky-900 border-sky-200'
+                            : 'bg-slate-100 text-slate-700 border-slate-200'
+                        }`}
+                      >
+                        <FontAwesomeIcon icon={faShieldHalved} className="text-[10px]" />
+                        <span>{staff.role || 'Store Associate'}</span>
+                      </span>
                     </td>
 
                     {/* Store */}
@@ -231,24 +287,22 @@ export default function StaffListView({
                       <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-xl bg-[#064C23]/10 text-[#064C23] font-bold text-xs max-w-[220px] truncate">
                         <FontAwesomeIcon icon={faStore} className="text-xs shrink-0" />
                         <span className="truncate">
-                          {staff.store || 'Bazario Central Superstore #01'}
+                          {staff.storeName || staff.store || 'Bazario Central Superstore #01'}
                         </span>
                       </div>
                     </td>
 
-                    {/* Mobile Number */}
+                    {/* Mobile & Email */}
                     <td className="px-6 py-4">
-                      <div className="flex items-center space-x-1.5 font-mono text-xs font-semibold text-slate-700">
-                        <FontAwesomeIcon icon={faPhone} className="text-[#064C23] text-[10px]" />
-                        <span>{staff.mobilenumber || '—'}</span>
-                      </div>
-                    </td>
-
-                    {/* Email */}
-                    <td className="px-6 py-4">
-                      <div className="flex items-center space-x-1.5 text-xs text-slate-600">
-                        <FontAwesomeIcon icon={faEnvelope} className="text-slate-400 text-[10px]" />
-                        <span className="truncate max-w-[180px]">{staff.email || '—'}</span>
+                      <div className="space-y-1">
+                        <div className="flex items-center space-x-1.5 font-mono text-xs font-semibold text-slate-700">
+                          <FontAwesomeIcon icon={faPhone} className="text-[#064C23] text-[10px]" />
+                          <span>{staff.mobilenumber || staff.phone || '—'}</span>
+                        </div>
+                        <div className="flex items-center space-x-1.5 text-xs text-slate-500">
+                          <FontAwesomeIcon icon={faEnvelope} className="text-slate-400 text-[10px]" />
+                          <span className="truncate max-w-[180px]">{staff.email || '—'}</span>
+                        </div>
                       </div>
                     </td>
 
