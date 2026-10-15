@@ -26,6 +26,8 @@ import {
   TopBarManageView,
   CtaManageView,
   CareerManageView,
+  MembershipManageView,
+  OffersBannerManageView,
   HomePageSectionManageView,
   ProductCategoriesView,
   HeroBannerManageView,
@@ -77,7 +79,10 @@ import {
   faTags,
   faImages,
   faUserGroup,
-  faPercent
+  faPercent,
+  faCrown,
+  faGift,
+  faAward
 } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
@@ -196,6 +201,8 @@ export default function DashboardPage({ onLogout }) {
       'web-topbar',
       'web-cta',
       'web-career',
+      'web-membership',
+      'web-offers-banner',
       'web-homepage',
       'settings',
     ]
@@ -234,6 +241,8 @@ export default function DashboardPage({ onLogout }) {
         'web-topbar',
         'web-cta',
         'web-career',
+        'web-membership',
+        'web-offers-banner',
         'web-homepage',
         'settings',
         'manage-offers',
@@ -315,6 +324,8 @@ export default function DashboardPage({ onLogout }) {
             { id: 'web-topbar', name: 'Top-Bar Manage', icon: faWindowMaximize },
             { id: 'web-cta', name: 'CTA Manage', icon: faBullhorn },
             { id: 'web-career', name: 'Career Manage', icon: faBriefcase },
+            { id: 'web-membership', name: 'Membership Manage', icon: faCrown },
+            { id: 'web-offers-banner', name: 'Offers Banner Manage', icon: faGift },
             { id: 'web-homepage', name: 'Home Page Section Heading Manage', icon: faTableCellsLarge },
           ],
         },
@@ -468,6 +479,10 @@ export default function DashboardPage({ onLogout }) {
               ? 'CTA Manage'
               : activeTab === 'web-career'
               ? 'Career Manage'
+              : activeTab === 'web-membership'
+              ? 'Membership Manage'
+              : activeTab === 'web-offers-banner'
+              ? 'Offers & Delivery Banner Manage'
               : activeTab === 'web-homepage'
               ? 'Home Page Section Heading Manage'
               : activeTab === 'web-hero-banner' || activeTab === 'hero-banner-manage'
@@ -502,6 +517,8 @@ export default function DashboardPage({ onLogout }) {
             {activeTab === 'web-topbar' && <TopBarManageView />}
             {activeTab === 'web-cta' && <CtaManageView />}
             {activeTab === 'web-career' && <CareerManageView />}
+            {activeTab === 'web-membership' && <MembershipManageView />}
+            {activeTab === 'web-offers-banner' && <OffersBannerManageView />}
             {activeTab === 'web-homepage' && <HomePageSectionManageView />}
             {(activeTab === 'web-hero-banner' || activeTab === 'hero-banner-manage') && (
               <HeroBannerManageView />

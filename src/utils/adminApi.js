@@ -501,6 +501,28 @@ export const updateAdminHomeSectionsApi = async (data) => {
   });
 };
 
+export const getAdminMembershipApi = async () => {
+  return await adminApi('/admin/web-manager/membership');
+};
+
+export const updateAdminMembershipApi = async (data) => {
+  return await adminApi('/admin/web-manager/membership', {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+};
+
+export const getAdminOffersBannerApi = async () => {
+  return await adminApi('/admin/web-manager/offers-banner');
+};
+
+export const updateAdminOffersBannerApi = async (data) => {
+  return await adminApi('/admin/web-manager/offers-banner', {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+};
+
 // ============================================================================
 // 12. STORE MANAGER PORTAL APIS (Stock Control, Branch Orders, Branch Ops)
 // ============================================================================

@@ -10,7 +10,8 @@ export default function ImageUploadFrame({
   onImageSelect,
   label = '',
   description = 'PNG, JPG, WEBP up to 5MB',
-  aspectRatio = 'square', // 'square' | 'video' | 'banner' | 'auto'
+  aspectRatio = 'square', // 'square' | 'video' | '16:9' | '4:1' | 'banner' | 'auto'
+  recommendedRatio = '', // e.g. "16:9 (1376 × 768 px)"
   className = '',
   maxSizeMB = 5,
   disabled = false,
@@ -27,14 +28,18 @@ export default function ImageUploadFrame({
   const aspectClasses = {
     square: 'aspect-square w-full',
     video: 'aspect-video w-full',
+    '16:9': 'aspect-[16/9] w-full',
+    '16/9': 'aspect-[16/9] w-full',
     banner: 'aspect-[3/1] w-full',
+    '4:1': 'aspect-[4/1] w-full min-h-[110px]',
+    '4/1': 'aspect-[4/1] w-full min-h-[110px]',
     '5:1': 'aspect-[5/1] w-full max-w-full min-h-[110px]',
     '5/1': 'aspect-[5/1] w-full max-w-full min-h-[110px]',
-    'webBanner': 'aspect-[5/1] w-full max-w-full min-h-[110px]',
+    webBanner: 'aspect-[5/1] w-full max-w-full min-h-[110px]',
     '1.5:1': 'aspect-[1.5/1] w-full',
     '1.5/1': 'aspect-[1.5/1] w-full',
     '3/2': 'aspect-[3/2] w-full',
-    'mobileBanner': 'aspect-[1.5/1] w-full',
+    mobileBanner: 'aspect-[1.5/1] w-full',
     auto: 'min-h-[180px]',
   }
 
@@ -106,10 +111,20 @@ export default function ImageUploadFrame({
 
   return (
     <div className={`w-full ${className}`}>
-      {label && (
-        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-          {label}
-        </label>
+      {(label || recommendedRatio) && (
+        <div className="flex items-center justify-between gap-2 mb-2">
+          {label && (
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+              {label}
+            </label>
+          )}
+          {recommendedRatio && (
+            <span className="px-2.5 py-0.5 text-[11px] font-bold rounded-lg bg-emerald-500/10 text-emerald-800 border border-emerald-300/60 inline-flex items-center gap-1.5 shadow-2xs">
+              <FontAwesomeIcon icon={faImage} className="text-[10px] text-emerald-600" />
+              <span>Ratio: {recommendedRatio}</span>
+            </span>
+          )}
+        </div>
       )}
 
       <div
@@ -143,6 +158,11 @@ export default function ImageUploadFrame({
               alt="Uploaded preview"
               className="w-full h-full object-cover rounded-xl"
             />
+            {recommendedRatio && (
+              <div className="absolute top-2.5 right-2.5 z-10 px-2.5 py-1 rounded-lg bg-slate-900/75 backdrop-blur-md text-white text-[10px] font-bold tracking-wide pointer-events-none shadow-md border border-white/20">
+                {recommendedRatio}
+              </div>
+            )}
             {/* Hover Actions Overlay */}
             <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-xl flex items-center justify-center space-x-3">
               <button
@@ -167,7 +187,7 @@ export default function ImageUploadFrame({
             </div>
           </div>
         ) : (
-          <div className="text-center p-4 space-y-2 select-none">
+          <div className="text-center p-4 space-y-2 select-none flex flex-col items-center">
             <div className="w-12 h-12 mx-auto rounded-full bg-[#064C23]/10 text-[#064C23] flex items-center justify-center text-lg mb-1">
               <FontAwesomeIcon icon={faCloudArrowUp} />
             </div>
@@ -177,6 +197,12 @@ export default function ImageUploadFrame({
               </p>
               {description && <p className="text-xs text-slate-400 mt-1">{description}</p>}
             </div>
+            {recommendedRatio && (
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-[11px] font-semibold border border-slate-200 mt-1 shadow-2xs">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                <span>Expected Ratio: <strong className="text-slate-900">{recommendedRatio}</strong></span>
+              </div>
+            )}
           </div>
         )}
       </div>

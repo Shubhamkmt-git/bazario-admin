@@ -138,7 +138,8 @@ export default function AddHeroBannerView({ onBack, onSave, bannersCount = 0 }) 
               </div>
               <ImageUploadFrame
                 aspectRatio="5:1"
-                description="Upload wide banner for desktop/laptop displays (Recommended 2500x500px, 5:1 ratio, max 5MB)"
+                recommendedRatio="5:1 (1500 × 300 px)"
+                description="Upload wide banner for desktop/laptop displays (Recommended 1500x300px or 2500x500px, 5:1 ratio, max 5MB)"
                 value={formData.webImage}
                 onChange={(url) => setFormData({ ...formData, webImage: url })}
               />
@@ -154,7 +155,8 @@ export default function AddHeroBannerView({ onBack, onSave, bannersCount = 0 }) 
               </div>
               <ImageUploadFrame
                 aspectRatio="1.5:1"
-                description="Upload banner for mobile app & mobile web (Recommended 750x500px, 1.5:1 ratio, max 5MB)"
+                recommendedRatio="1.5:1 (1264 × 848 px)"
+                description="Upload banner for mobile app & mobile web (Recommended 750x500px or 1264x848px, 1.5:1 ratio, max 5MB)"
                 value={formData.mobileImage}
                 onChange={(url) => setFormData({ ...formData, mobileImage: url })}
               />
