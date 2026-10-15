@@ -434,6 +434,40 @@ export const deleteAdminCareerApi = async (id) => {
   });
 };
 
+export const getAdminJobApplicationsApi = async () => {
+  return await adminApi('/admin/careers/applications');
+};
+
+export const updateJobApplicationStatusApi = async (id, status) => {
+  return await adminApi(`/admin/careers/applications/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status })
+  });
+};
+
+export const deleteJobApplicationApi = async (id) => {
+  return await adminApi(`/admin/careers/applications/${id}`, {
+    method: 'DELETE'
+  });
+};
+
+export const getAdminBusinessInquiriesApi = async () => {
+  return await adminApi('/admin/careers/business-inquiries');
+};
+
+export const updateBusinessInquiryStatusApi = async (id, status) => {
+  return await adminApi(`/admin/careers/business-inquiries/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status })
+  });
+};
+
+export const deleteBusinessInquiryApi = async (id) => {
+  return await adminApi(`/admin/careers/business-inquiries/${id}`, {
+    method: 'DELETE'
+  });
+};
+
 export const getAdminAboutApi = async () => {
   return await adminApi('/admin/web-manager/about');
 };

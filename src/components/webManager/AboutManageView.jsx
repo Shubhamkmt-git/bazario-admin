@@ -289,9 +289,9 @@ export default function AboutManageView() {
       await updateAdminAboutApi(formData)
       setSaving(false)
       toast.success('About Form Saved', 'All section configurations updated successfully.')
-    } catch {
+    } catch (err) {
       setSaving(false)
-      toast.success('About Form Saved', 'All section configurations updated successfully.')
+      toast.error('Save Failed', err?.message || 'Failed to save to database.')
     }
   }
 
@@ -516,10 +516,13 @@ export default function AboutManageView() {
                     
                     <div className="grid grid-cols-2 gap-2">
                       <InputField
-                        label="PREFIX"
-                        placeholder="e.g. +"
-                        value={card.prefix}
-                        onChange={(e) => updateCard('prefix', e.target.value)}
+                        label="NUMBER / VALUE"
+                        placeholder="e.g. 50"
+                        value={card.value || card.prefix || ''}
+                        onChange={(e) => {
+                          updateCard('value', e.target.value)
+                          updateCard('prefix', e.target.value)
+                        }}
                       />
                       <InputField
                         label="SUFFIX"

@@ -27,7 +27,13 @@ import {
   getAdminCareersApi,
   createAdminCareerApi,
   updateAdminCareerApi,
-  deleteAdminCareerApi
+  deleteAdminCareerApi,
+  getAdminJobApplicationsApi,
+  updateJobApplicationStatusApi,
+  deleteJobApplicationApi,
+  getAdminBusinessInquiriesApi,
+  updateBusinessInquiryStatusApi,
+  deleteBusinessInquiryApi
 } from '../../utils/adminApi'
 
 
@@ -36,6 +42,67 @@ export default function CareerManageView() {
 
   // State: Careers list
   const [jobs, setJobs] = useState([])
+  const [activeTab, setActiveTab] = useState('openings') // 'openings' | 'applications' | 'inquiries'
+  const [applications, setApplications] = useState([])
+  const [inquiries, setInquiries] = useState([])
+
+  const fetchApplications = async () => {
+    try {
+      const res = await getAdminJobApplicationsApi()
+      setApplications(res.applications || res.data || [])
+    } catch (err) {
+      console.warn('Error fetching applications:', err)
+    }
+  }
+
+  const fetchInquiries = async () => {
+    try {
+      const res = await getAdminBusinessInquiriesApi()
+      setInquiries(res.inquiries || res.data || [])
+    } catch (err) {
+      console.warn('Error fetching inquiries:', err)
+    }
+  }
+
+  const handleUpdateAppStatus = async (id, nextStatus) => {
+    try {
+      await updateJobApplicationStatusApi(id, nextStatus)
+      setApplications((prev) => prev.map((a) => (a.id === id ? { ...a, status: nextStatus } : a)))
+      toast.success('Status Updated', `Application marked as ${nextStatus}`)
+    } catch (err) {
+      toast.error('Update Failed', err.message)
+    }
+  }
+
+  const handleDeleteApp = async (id) => {
+    try {
+      await deleteJobApplicationApi(id)
+      setApplications((prev) => prev.filter((a) => a.id !== id))
+      toast.success('Deleted', 'Candidate application removed')
+    } catch (err) {
+      toast.error('Delete Failed', err.message)
+    }
+  }
+
+  const handleUpdateInquiryStatus = async (id, nextStatus) => {
+    try {
+      await updateBusinessInquiryStatusApi(id, nextStatus)
+      setInquiries((prev) => prev.map((i) => (i.id === id ? { ...i, status: nextStatus } : i)))
+      toast.success('Status Updated', `Inquiry marked as ${nextStatus}`)
+    } catch (err) {
+      toast.error('Update Failed', err.message)
+    }
+  }
+
+  const handleDeleteInquiry = async (id) => {
+    try {
+      await deleteBusinessInquiryApi(id)
+      setInquiries((prev) => prev.filter((i) => i.id !== id))
+      toast.success('Deleted', 'Business inquiry removed')
+    } catch (err) {
+      toast.error('Delete Failed', err.message)
+    }
+  }
 
   // Load live careers from backend API
   useEffect(() => {
@@ -62,6 +129,8 @@ export default function CareerManageView() {
       }
     }
     fetchCareers()
+    fetchApplications()
+    fetchInquiries()
   }, [])
 
   // Page Routing Mode: 'index' | 'add' | 'edit' | 'view' (No popups!)
@@ -228,7 +297,7 @@ export default function CareerManageView() {
     const updated = jobs.filter((j) => String(j.id || j._id) !== String(jobToDelete.id || jobToDelete._id))
     saveToStorage(updated)
     setDeleteModalOpen(false)
-    setItemToDelete(null)
+    setJobToDelete(null)
     toast.success('Career Deleted', 'The job vacancy has been permanently removed.')
     if (pageMode === 'view' || pageMode === 'edit') {
       setPageMode('index')
@@ -279,31 +348,80 @@ export default function CareerManageView() {
               </div>
             </div>
 
-            <Button
-              variant="primary"
-              onClick={handleOpenAdd}
-              icon={<FontAwesomeIcon icon={faPlus} className="text-xs" />}
-            >
-              Post New Vacancy
-            </Button>
+            {activeTab === 'openings' && (
+              <Button
+                variant="primary"
+                onClick={handleOpenAdd}
+                icon={<FontAwesomeIcon icon={faPlus} className="text-xs" />}
+              >
+                Post New Vacancy
+              </Button>
+            )}
           </div>
 
-          {/* Search Bar */}
-          <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="relative w-full md:w-96">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search job title, subtitle, location, experience..."
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 placeholder-slate-400 focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 outline-none transition-all"
-              />
-              <FontAwesomeIcon
-                icon={faMagnifyingGlass}
-                className="absolute left-3.5 top-3.5 text-slate-400 text-xs"
-              />
-            </div>
+          {/* Sub Navigation Tabs */}
+          <div className="flex items-center space-x-2 border-b border-slate-200 pb-2">
+            <button
+              onClick={() => setActiveTab('openings')}
+              className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                activeTab === 'openings'
+                  ? 'bg-[#064C23] text-white shadow-xs'
+                  : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+              }`}
+            >
+              Job Vacancies ({jobs.length})
+            </button>
+            <button
+              onClick={() => { setActiveTab('applications'); fetchApplications(); }}
+              className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer flex items-center space-x-2 ${
+                activeTab === 'applications'
+                  ? 'bg-[#064C23] text-white shadow-xs'
+                  : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+              }`}
+            >
+              <span>Candidate Applications ({applications.length})</span>
+              {applications.filter((a) => a.status === 'Pending').length > 0 && (
+                <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-amber-400 text-stone-900 animate-pulse">
+                  {applications.filter((a) => a.status === 'Pending').length}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => { setActiveTab('inquiries'); fetchInquiries(); }}
+              className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all cursor-pointer flex items-center space-x-2 ${
+                activeTab === 'inquiries'
+                  ? 'bg-[#064C23] text-white shadow-xs'
+                  : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+              }`}
+            >
+              <span>Franchise & Business Inquiries ({inquiries.length})</span>
+              {inquiries.filter((i) => i.status === 'New').length > 0 && (
+                <span className="px-1.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-400 text-stone-900 animate-pulse">
+                  {inquiries.filter((i) => i.status === 'New').length}
+                </span>
+              )}
+            </button>
           </div>
+
+          {/* TAB 1: OPENINGS LIST */}
+          {activeTab === 'openings' && (
+            <>
+              {/* Search Bar */}
+              <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="relative w-full md:w-96">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search job title, subtitle, location, experience..."
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 placeholder-slate-400 focus:bg-white focus:border-[#064C23] focus:ring-4 focus:ring-[#064C23]/10 outline-none transition-all"
+                  />
+                  <FontAwesomeIcon
+                    icon={faMagnifyingGlass}
+                    className="absolute left-3.5 top-3.5 text-slate-400 text-xs"
+                  />
+                </div>
+              </div>
 
           {/* Jobs Table */}
           <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
@@ -411,6 +529,188 @@ export default function CareerManageView() {
               </table>
             </div>
           </div>
+          </>
+          )}
+
+          {/* TAB 2: CANDIDATE APPLICATIONS */}
+          {activeTab === 'applications' && (
+            <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm text-slate-600">
+                  <thead className="bg-slate-50/80 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
+                    <tr>
+                      <th className="px-6 py-4">Applicant</th>
+                      <th className="px-6 py-4">Applied Role</th>
+                      <th className="px-6 py-4">Contact</th>
+                      <th className="px-6 py-4">Experience & City</th>
+                      <th className="px-6 py-4">Date</th>
+                      <th className="px-6 py-4 w-32">Status</th>
+                      <th className="px-6 py-4 text-right w-24">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 font-semibold text-xs">
+                    {applications.length > 0 ? (
+                      applications.map((app) => (
+                        <tr key={app.id} className="hover:bg-slate-50/60 transition-colors">
+                          <td className="px-6 py-4">
+                            <span className="font-bold text-slate-900 text-sm block">{app.fullName}</span>
+                            <span className="text-[11px] text-slate-400">{app.id}</span>
+                          </td>
+                          <td className="px-6 py-4 font-bold text-[#064C23]">
+                            {app.jobTitle}
+                          </td>
+                          <td className="px-6 py-4">
+                            <a href={`tel:${app.phone}`} className="text-slate-800 hover:underline block">
+                              📞 {app.phone}
+                            </a>
+                            <a href={`mailto:${app.email}`} className="text-slate-500 hover:underline text-[11px]">
+                              ✉️ {app.email}
+                            </a>
+                          </td>
+                          <td className="px-6 py-4 text-slate-600">
+                            <div>{app.experience}</div>
+                            <div className="text-[11px] text-slate-400">📍 {app.currentLocation}</div>
+                          </td>
+                          <td className="px-6 py-4 text-slate-500 text-[11px]">
+                            {new Date(app.appliedAt).toLocaleDateString()}
+                          </td>
+                          <td className="px-6 py-4">
+                            <select
+                              value={app.status}
+                              onChange={(e) => handleUpdateAppStatus(app.id, e.target.value)}
+                              className={`px-2.5 py-1 rounded-lg text-xs font-bold border outline-none cursor-pointer ${
+                                app.status === 'Shortlisted'
+                                  ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                                  : app.status === 'Hired'
+                                  ? 'bg-blue-50 text-blue-800 border-blue-300'
+                                  : app.status === 'Rejected'
+                                  ? 'bg-red-50 text-red-800 border-red-300'
+                                  : 'bg-amber-50 text-amber-800 border-amber-300'
+                              }`}
+                            >
+                              <option value="Pending">Pending</option>
+                              <option value="Shortlisted">Shortlisted</option>
+                              <option value="In Review">In Review</option>
+                              <option value="Rejected">Rejected</option>
+                              <option value="Hired">Hired</option>
+                            </select>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <ActionButton
+                              icon={faTrashCan}
+                              variant="danger"
+                              tooltip="Delete Application"
+                              onClick={() => handleDeleteApp(app.id)}
+                            />
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={7} className="px-6 py-12 text-center text-slate-400">
+                          No candidate job applications received yet.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: FRANCHISE & BUSINESS INQUIRIES */}
+          {activeTab === 'inquiries' && (
+            <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm text-slate-600">
+                  <thead className="bg-slate-50/80 text-[11px] font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200">
+                    <tr>
+                      <th className="px-6 py-4">Lead Name</th>
+                      <th className="px-6 py-4">City</th>
+                      <th className="px-6 py-4">Sector & Investment</th>
+                      <th className="px-6 py-4">Contact</th>
+                      <th className="px-6 py-4">Details / Notes</th>
+                      <th className="px-6 py-4 w-32">Status</th>
+                      <th className="px-6 py-4 text-right w-24">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 font-semibold text-xs">
+                    {inquiries.length > 0 ? (
+                      inquiries.map((inq) => (
+                        <tr key={inq.id} className="hover:bg-slate-50/60 transition-colors">
+                          <td className="px-6 py-4">
+                            <span className="font-bold text-slate-900 text-sm block">{inq.fullName}</span>
+                            <span className="text-[11px] text-slate-400">{inq.id}</span>
+                          </td>
+                          <td className="px-6 py-4 font-bold text-slate-800">
+                            📍 {inq.city}
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className="px-2 py-0.5 rounded-md bg-[#064C23]/10 text-[#064C23] text-[11px] font-bold block w-fit mb-1">
+                              {inq.businessCategory}
+                            </span>
+                            <span className="text-[11px] text-slate-600">
+                              💰 {inq.investmentRange}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <a
+                              href={`https://wa.me/${(inq.phone || '').replace(/[^0-9]/g, '')}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-emerald-700 hover:underline font-bold block"
+                            >
+                              💬 WhatsApp: {inq.phone}
+                            </a>
+                            {inq.email && (
+                              <span className="text-slate-500 text-[11px] block">{inq.email}</span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 text-slate-600 max-w-xs">
+                            <p className="line-clamp-2">{inq.notes || 'No extra notes provided'}</p>
+                          </td>
+                          <td className="px-6 py-4">
+                            <select
+                              value={inq.status}
+                              onChange={(e) => handleUpdateInquiryStatus(inq.id, e.target.value)}
+                              className={`px-2.5 py-1 rounded-lg text-xs font-bold border outline-none cursor-pointer ${
+                                inq.status === 'Contacted'
+                                  ? 'bg-blue-50 text-blue-800 border-blue-300'
+                                  : inq.status === 'In Discussion'
+                                  ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                                  : inq.status === 'Closed'
+                                  ? 'bg-slate-100 text-slate-700 border-slate-300'
+                                  : 'bg-amber-50 text-amber-800 border-amber-300'
+                              }`}
+                            >
+                              <option value="New">New</option>
+                              <option value="Contacted">Contacted</option>
+                              <option value="In Discussion">In Discussion</option>
+                              <option value="Closed">Closed</option>
+                            </select>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <ActionButton
+                              icon={faTrashCan}
+                              variant="danger"
+                              tooltip="Delete Inquiry"
+                              onClick={() => handleDeleteInquiry(inq.id)}
+                            />
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={7} className="px-6 py-12 text-center text-slate-400">
+                          No franchise or business partnership inquiries received yet.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </>
       )}
 
