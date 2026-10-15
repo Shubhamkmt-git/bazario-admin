@@ -228,12 +228,12 @@ const INITIAL_FORM = {
 
 const STEPS = [
   { id: 1, name: 'Hero Banner', short: 'Hero' },
-  { id: 2, name: 'States (4)', short: 'States' },
-  { id: 3, name: 'Section One', short: 'Sec 1' },
-  { id: 4, name: 'Section 2', short: 'Sec 2' },
-  { id: 5, name: 'Section 3', short: 'Sec 3' },
-  { id: 6, name: 'Section 4', short: 'Sec 4' },
-  { id: 7, name: 'About CTA', short: 'CTA' }
+  { id: 2, name: 'Key Stats (4)', short: 'Stats' },
+  { id: 3, name: 'Mission & Vision', short: 'Mission' },
+  { id: 4, name: 'Why Choose Us', short: 'Why Us' },
+  { id: 5, name: 'Store Tour & Gallery', short: 'Tour' },
+  { id: 6, name: 'Our Commitments', short: 'Pillars' },
+  { id: 7, name: 'Bottom CTA', short: 'CTA' }
 ]
 
 export default function AboutManageView() {
@@ -483,8 +483,8 @@ export default function AboutManageView() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
               <div>
                 <span className="text-[11px] font-bold text-[#064C23] uppercase tracking-wider">Step 2 of 7</span>
-                <h2 className="text-lg font-black text-slate-900">States (4 Cards)</h2>
-                <p className="text-xs text-slate-500">Configure numerical highlights, prefixes, suffixes, labels, and descriptions.</p>
+                <h2 className="text-lg font-black text-slate-900">Key Stats (4 Metric Counters)</h2>
+                <p className="text-xs text-slate-500">Configure numerical stats, prefix/suffix (e.g. K+, %), labels, and subtext.</p>
               </div>
               <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold">
                 <span className="text-slate-700">Section Status:</span>
@@ -567,8 +567,8 @@ export default function AboutManageView() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
               <div>
                 <span className="text-[11px] font-bold text-[#064C23] uppercase tracking-wider">Step 3 of 7</span>
-                <h2 className="text-lg font-black text-slate-900">Section One</h2>
-                <p className="text-xs text-slate-500">Label, title, mission card, and vision card.</p>
+                <h2 className="text-lg font-black text-slate-900">Mission & Vision (Core Purpose)</h2>
+                <p className="text-xs text-slate-500">Manage 'Who We Are' section title, Our Mission card, and Our Vision card.</p>
               </div>
               <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold">
                 <span className="text-slate-700">Section Status:</span>
@@ -699,8 +699,8 @@ export default function AboutManageView() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
               <div>
                 <span className="text-[11px] font-bold text-[#064C23] uppercase tracking-wider">Step 4 of 7</span>
-                <h2 className="text-lg font-black text-slate-900">Section 2</h2>
-                <p className="text-xs text-slate-500">Label, title, and 4 cards with visual FontAwesome icon selection.</p>
+                <h2 className="text-lg font-black text-slate-900">Why Choose Us (4 Advantage Cards)</h2>
+                <p className="text-xs text-slate-500">Manage 'Why Choose Us / Bazario Advantage' section and 4 value cards with icons.</p>
               </div>
               <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold">
                 <span className="text-slate-700">Section Status:</span>
@@ -804,8 +804,8 @@ export default function AboutManageView() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
               <div>
                 <span className="text-[11px] font-bold text-[#064C23] uppercase tracking-wider">Step 5 of 7</span>
-                <h2 className="text-lg font-black text-slate-900">Section 3</h2>
-                <p className="text-xs text-slate-500">Label, title, description, and dynamic gallery images.</p>
+                <h2 className="text-lg font-black text-slate-900">Store Tour & Gallery (Storefront Photos)</h2>
+                <p className="text-xs text-slate-500">Manage store tour heading, overview description, and supermarket photo gallery.</p>
               </div>
               <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold">
                 <span className="text-slate-700">Section Status:</span>
@@ -910,8 +910,8 @@ export default function AboutManageView() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
               <div>
                 <span className="text-[11px] font-bold text-[#064C23] uppercase tracking-wider">Step 6 of 7</span>
-                <h2 className="text-lg font-black text-slate-900">Section 4</h2>
-                <p className="text-xs text-slate-500">Label, title, and 3 cards manage (title, subtitle, icon, label, baseline).</p>
+                <h2 className="text-lg font-black text-slate-900">Our Commitments (3 Trust Pillars)</h2>
+                <p className="text-xs text-slate-500">Manage 'Built on Trust' section heading and 3 commitment pillar cards with icons.</p>
               </div>
               <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold">
                 <span className="text-slate-700">Section Status:</span>
@@ -1015,8 +1015,8 @@ export default function AboutManageView() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-3">
               <div>
                 <span className="text-[11px] font-bold text-[#064C23] uppercase tracking-wider">Step 7 of 7</span>
-                <h2 className="text-lg font-black text-slate-900">About CTA Manage</h2>
-                <p className="text-xs text-slate-500">Label, title, subtitle, primary and secondary button links.</p>
+                <h2 className="text-lg font-black text-slate-900">Bottom CTA Banner (Visit Us Today)</h2>
+                <p className="text-xs text-slate-500">Manage bottom call-to-action banner label, heading, subtitle, and action buttons.</p>
               </div>
               <div className="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-bold">
                 <span className="text-slate-700">Section Status:</span>
