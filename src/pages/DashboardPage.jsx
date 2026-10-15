@@ -23,6 +23,7 @@ import {
   AdminRolesView,
   AdminPermissionsView,
   AboutManageView,
+  TeamManageView,
   TopBarManageView,
   CtaManageView,
   CareerManageView,
@@ -198,6 +199,7 @@ export default function DashboardPage({ onLogout }) {
       'admin-roles',
       'admin-permissions',
       'web-about',
+      'web-team',
       'web-topbar',
       'web-cta',
       'web-career',
@@ -238,6 +240,7 @@ export default function DashboardPage({ onLogout }) {
         'admin-roles',
         'admin-permissions',
         'web-about',
+        'web-team',
         'web-topbar',
         'web-cta',
         'web-career',
@@ -321,6 +324,7 @@ export default function DashboardPage({ onLogout }) {
           icon: faGlobe,
           children: [
             { id: 'web-about', name: 'About Manage', icon: faCircleInfo },
+            { id: 'web-team', name: 'Our Team Manage', icon: faUsers },
             { id: 'web-topbar', name: 'Top-Bar Manage', icon: faWindowMaximize },
             { id: 'web-cta', name: 'CTA Manage', icon: faBullhorn },
             { id: 'web-career', name: 'Career Manage', icon: faBriefcase },
@@ -473,6 +477,8 @@ export default function DashboardPage({ onLogout }) {
               ? 'System Permissions Matrix'
               : activeTab === 'web-about'
               ? 'About Manage'
+              : activeTab === 'web-team'
+              ? 'Our Team Manage'
               : activeTab === 'web-topbar'
               ? 'Top-Bar Manage'
               : activeTab === 'web-cta'
@@ -514,6 +520,7 @@ export default function DashboardPage({ onLogout }) {
             {activeTab === 'admin-roles' && <AdminRolesView />}
             {activeTab === 'admin-permissions' && <AdminPermissionsView />}
             {activeTab === 'web-about' && <AboutManageView />}
+            {activeTab === 'web-team' && <TeamManageView />}
             {activeTab === 'web-topbar' && <TopBarManageView />}
             {activeTab === 'web-cta' && <CtaManageView />}
             {activeTab === 'web-career' && <CareerManageView />}

@@ -479,6 +479,17 @@ export const updateAdminAboutApi = async (data) => {
   });
 };
 
+export const getAdminTeamApi = async () => {
+  return await adminApi('/admin/web-manager/team');
+};
+
+export const updateAdminTeamApi = async (data) => {
+  return await adminApi('/admin/web-manager/team', {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+};
+
 export const getAdminCtaApi = async () => {
   return await adminApi('/admin/web-manager/cta');
 };

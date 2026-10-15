@@ -42,6 +42,7 @@ export { default as AdminPermissionsView } from './adminManager/AdminPermissions
 
 // Web Manager Views
 export { default as AboutManageView } from './webManager/AboutManageView'
+export { default as TeamManageView } from './webManager/TeamManageView'
 export { default as TopBarManageView } from './webManager/TopBarManageView'
 export { default as CtaManageView } from './webManager/CtaManageView'
 export { default as CareerManageView } from './webManager/CareerManageView'
